@@ -64,6 +64,11 @@ export default function DashboardPage() {
         }
         setOrgId(userData.org_id);
 
+        if (!userData.org_id) {
+          setLoading(false);
+          return; // stop here—don't fetch forecasts, don't set error
+        }
+
         // Build forecast query
         let query = supabase
           .from("lead_time_forecast_ai")
@@ -118,6 +123,22 @@ export default function DashboardPage() {
   if (authLoading || loading) {
     return <div className="text-center py-10">Loading...</div>;
   }
+
+    // Block users who are not yet assigned to any organization
+if (orgId === null) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
+        <h1 className="text-2xl font-bold mb-4 text-gray-700">Waiting for Admin Approval</h1>
+        <p className="text-lg text-gray-500">
+          Your account has been created but is not yet linked to an organization.<br />
+          Please wait for your organization admin to assign you or contact support if you believe this is an error.
+        </p>
+      </div>
+    </div>
+  );
+}
+
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -128,6 +149,9 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+
+
 
   return (
     <div className="min-h-screen flex bg-gray-50">
