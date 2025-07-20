@@ -34,7 +34,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Unauthorized: Invalid token.' }, { status: 401 });
     }
 
-    console.log(`[Vercel Log] Authenticated admin user ID: ${user.id}`);
 
     if (user.app_metadata.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden: You must be an admin to invite users.' }, { status: 403 });
@@ -46,8 +45,7 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single();
     
-    console.log('[Vercel Log] Fetched admin profile:', adminProfile);
-    console.log('[Vercel Log] Profile fetch error (if any):', profileError);
+
 
     if (profileError || !adminProfile || !adminProfile.org_id) {
       console.error('Admin profile fetching error:', profileError);
@@ -64,12 +62,12 @@ export async function POST(req: Request) {
 
     // This is the data we are about to send to Supabase for the invite
     const inviteDataPayload = {
-      org_id: adminProfile.org_id,
-      org_name: adminProfile.org_name,
-      name: name,
-      role: role,
-  };
-    console.log('[Vercel Log] Final data payload for invite:', inviteDataPayload);
+        org_id: adminProfile.org_id,
+        org_name: adminProfile.org_name,
+        name: name,
+        role: role,
+    };
+    
 
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       email,
