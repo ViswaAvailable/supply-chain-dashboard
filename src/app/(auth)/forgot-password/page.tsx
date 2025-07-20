@@ -1,6 +1,5 @@
-// src/app/(auth)/forgot-password/page.tsx
 
-"use client"; // <--- THIS IS THE CRITICAL LINE
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -18,8 +17,7 @@ export default function ForgotPasswordPage() {
     setError(null);
     setSuccess(null);
 
-    // This is where the user will be redirected to after clicking the email link
-    // Ensure this path matches the file you created: /update-password
+    // FIX: Moved from component scope into the client-side handler
     const redirectTo = `${window.location.origin}/update-password`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
