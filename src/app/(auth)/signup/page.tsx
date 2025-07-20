@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/client";
+import { useSupabase } from "@/components/SupabaseProvider"; // CHANGE 1: Import the context hook
 
 export default function SignupPage() {
-  const router = useRouter();
+  const supabase = useSupabase(); // CHANGE 2: Get the client from context
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -18,11 +18,15 @@ export default function SignupPage() {
     setError(null);
     setSuccess(null);
     setLoading(true);
+
+    // This logic works perfectly with the new client instance
     const { error } = await supabase.auth.signUp({ email, password });
+
     setLoading(false);
     if (error) {
       setError(error.message);
     } else {
+      // You can keep this success message or redirect the user
       setSuccess("Check your email to confirm your account.");
     }
   };
@@ -81,4 +85,4 @@ export default function SignupPage() {
       </div>
     </div>
   );
-} 
+}
