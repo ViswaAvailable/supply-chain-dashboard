@@ -52,6 +52,18 @@ export default function DashboardPage() {
   const [orgUsers, setOrgUsers] = useState<OrgUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
+  const [orgName, setOrgName] = useState<string>("");
+  const [orgNameLoading, setOrgNameLoading] = useState(false);
+  const [orgNameError, setOrgNameError] = useState<string | null>(null);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteAdmin, setInviteAdmin] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+  const [inviteNameError, setInviteNameError] = useState<string | null>(null);
+  const [inviteEmailError, setInviteEmailError] = useState<string | null>(null);
+  const [pendingInvites, setPendingInvites] = useState<{ name: string; email: string; role: string }[]>([]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -140,6 +152,31 @@ export default function DashboardPage() {
     }
   }, [userRole, orgId, showAdminModal]);
 
+  // Fetch org_name for display and invite metadata
+  useEffect(() => {
+    if (orgId) {
+      setOrgNameLoading(true);
+      setOrgNameError(null);
+      supabase
+        .from("organizations")
+        .select("name")
+        .eq("id", orgId)
+        .single()
+        .then(({ data, error }) => {
+          if (error || !data || !data.name) {
+            setOrgNameError("Could not load organization name. Please contact support.");
+            setOrgName("");
+          } else {
+            setOrgName(data.name);
+            console.log("Loaded org_name:", data.name);
+          }
+          setOrgNameLoading(false);
+        });
+    } else {
+      setOrgName("");
+    }
+  }, [orgId]);
+
   // Unique suppliers and categories for dropdowns
   const supplierOptions = useMemo(() => {
     const set = new Set(forecasts.map(f => f.supplier_name));
@@ -219,6 +256,11 @@ if (orgId === null) {
             orgUsers={orgUsers}
             setOrgUsers={setOrgUsers}
             onClose={() => setShowAdminModal(false)}
+            user={user}
+            userRole={userRole}
+            orgName={orgName}
+            orgNameLoading={orgNameLoading}
+            orgNameError={orgNameError}
           />
         )}
       </aside>
@@ -499,12 +541,17 @@ function ProfileDropdownAvatar({ nameOrEmail, role, onAdminClick, onLogout }: {
   );
 }
 
-function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, onClose }: {
+function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, onClose, user, userRole, orgName, orgNameLoading, orgNameError }: {
   orgId: string;
   currentUserId: string;
   orgUsers: OrgUser[];
   setOrgUsers: (users: OrgUser[]) => void;
   onClose: () => void;
+  user: any;
+  userRole: string | null;
+  orgName: string;
+  orgNameLoading: boolean;
+  orgNameError: string | null;
 }) {
   // Invite form state
   const [inviteName, setInviteName] = useState("");
@@ -515,6 +562,7 @@ function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, 
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
   const [inviteNameError, setInviteNameError] = useState<string | null>(null);
   const [inviteEmailError, setInviteEmailError] = useState<string | null>(null);
+  const [pendingInvites, setPendingInvites] = useState<{ name: string; email: string; role: string }[]>([]);
 
   // Email validation regex (simple standard)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -547,40 +595,63 @@ function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, 
       setInviteLoading(false);
       return;
     }
-    // Check for duplicate email
-    if (orgUsers.some(u => u.email.toLowerCase() === inviteEmail.toLowerCase())) {
-      setInviteError("A user with this email already exists in your organization.");
+    // Check for duplicate email or pending invite
+    if (
+      orgUsers.some(u => u.email.toLowerCase() === inviteEmail.toLowerCase()) ||
+      pendingInvites.some(i => i.email.toLowerCase() === inviteEmail.toLowerCase())
+    ) {
+      setInviteError("A user with this email already exists or is already invited.");
       setInviteLoading(false);
       return;
     }
-    // Call backend or Supabase invite logic
-    const { error, data } = await supabase.from("users").insert([
-      {
-        name: inviteName || null,
-        email: inviteEmail,
-        role: inviteAdmin ? "admin" : "viewer",
-        org_id: orgId,
-      },
-    ]);
-    if (error) {
-      setInviteError(error.message || "Failed to send invitation.");
+    // Check for org_name
+    if (!orgName || orgName.trim() === "") {
+      setInviteError("Organization name is missing. Please reload or contact support.");
       setInviteLoading(false);
       return;
     }
-    setInviteSuccess("Invitation sent!");
-    setInviteName("");
-    setInviteEmail("");
-    setInviteAdmin(false);
-    setInviteLoading(false);
-    // Optionally, refresh orgUsers
-    if (data && data[0]) {
-      const newUser: OrgUser = {
-        id: (data[0] as any).id,
-        name: inviteName,
-        email: inviteEmail,
-        role: inviteAdmin ? "admin" : "viewer"
-      };
-      setOrgUsers([...orgUsers, newUser]);
+    // Only allow admins
+    if (userRole !== "admin") {
+      setInviteError("You are not authorized to invite users. Only admins can invite.");
+      setInviteLoading(false);
+      return;
+    }
+    try {
+      // Get the current user's Supabase access token
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || '';
+      const res = await fetch("/api/admin-invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          name: inviteName,
+          email: inviteEmail,
+          org_id: orgId,
+          org_name: orgName,
+          role: inviteAdmin ? "admin" : "viewer"
+        })
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setInviteError(result.error || "Failed to send invitation.");
+        setInviteLoading(false);
+        return;
+      }
+      setInviteSuccess("Invitation sent!");
+      setPendingInvites([
+        ...pendingInvites,
+        { name: inviteName, email: inviteEmail, role: inviteAdmin ? "admin" : "viewer" },
+      ]);
+      setInviteName("");
+      setInviteEmail("");
+      setInviteAdmin(false);
+      setInviteLoading(false);
+    } catch (err: any) {
+      setInviteError(err?.message || "Failed to send invitation.");
+      setInviteLoading(false);
     }
   }
 
@@ -614,8 +685,16 @@ function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, 
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
         <h2 className="text-2xl font-bold mb-6 text-center">Admin Profile/Invite</h2>
+        {orgName && (
+          <div className="mb-4 text-center text-sm text-gray-500">Organization: <span className="font-semibold text-gray-700">{orgName}</span></div>
+        )}
         {/* Invite User Section */}
-        <form onSubmit={handleInvite} className="mb-6">
+        {/* Only show invite form if user is admin and orgName is loaded */}
+        {userRole !== "admin" && (
+          <div className="mb-6 text-center text-red-600 font-semibold">You are not authorized to invite users. Only admins can invite.</div>
+        )}
+        {userRole === "admin" && orgName && !orgNameLoading && !orgNameError && (
+          <form onSubmit={handleInvite} className="mb-6">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="flex-1">
               <label className="block text-xs font-semibold mb-1">
@@ -677,11 +756,18 @@ function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, 
           {inviteError && <div className="mt-2 text-red-600 text-center text-sm">{inviteError}</div>}
           {inviteSuccess && <div className="mt-2 text-green-600 text-center text-sm">{inviteSuccess}</div>}
         </form>
+         )}
+         {orgNameLoading && (
+           <div className="mb-6 text-center text-gray-500">Loading organization name...</div>
+         )}
+         {orgNameError && (
+           <div className="mb-6 text-center text-red-600">{orgNameError}</div>
+         )}
         {/* Current Users List */}
         <div className="mb-6">
           <h3 className="font-semibold mb-2">Team Members</h3>
           <div className="max-h-48 overflow-y-auto border rounded-md">
-            {orgUsers.length <= 1 ? (
+            {orgUsers.length <= 1 && pendingInvites.length === 0 ? (
               <div className="p-4 text-gray-500 text-center">No other team members yet.</div>
             ) : (
               <table className="min-w-full text-sm">
@@ -694,6 +780,19 @@ function AdminProfileInviteModal({ orgId, currentUserId, orgUsers, setOrgUsers, 
                   </tr>
                 </thead>
                 <tbody>
+                  {/* Pending invites visually distinct */}
+                  {pendingInvites.map((invite, idx) => (
+                    <tr key={invite.email} className="bg-yellow-50 text-yellow-700 italic">
+                      <td className="px-3 py-2 flex items-center gap-2">
+                        {invite.name}
+                        <span className="text-xs bg-yellow-200 text-yellow-800 rounded px-2 py-0.5 ml-2">Pending</span>
+                      </td>
+                      <td className="px-3 py-2">{invite.email}</td>
+                      <td className="px-3 py-2">{invite.role}</td>
+                      <td className="px-3 py-2"></td>
+                    </tr>
+                  ))}
+                  {/* Existing users */}
                   {orgUsers.filter(u => u.id !== currentUserId).map(user => (
                     <tr key={user.id} className="even:bg-gray-50">
                       <td className="px-3 py-2">{user.name || <span className="text-gray-400">—</span>}</td>
