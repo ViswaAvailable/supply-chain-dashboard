@@ -33,17 +33,16 @@ interface OrgUser {
 
 // --- Main Dashboard Component ---
 export default function DashboardPage() {
+  // --- 1. ALL HOOKS AT THE TOP ---
+  // Core Hooks
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
-  const supabase = useSupabase(); // Get client from context
+  const supabase = useSupabase();
 
-  // --- State Declarations ---
-  // Filter state
+  // State Declarations
   const [selectedSupplier, setSelectedSupplier] = useState("All");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [dateRange, setDateRange] = useState<{ start?: string; end?: string }>({});
-
-  // Data state
   const [forecasts, setForecasts] = useState<Forecast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,22 +51,33 @@ export default function DashboardPage() {
   const [userNameOrEmail, setUserNameOrEmail] = useState<string | null>(null);
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [orgUsers, setOrgUsers] = useState<OrgUser[]>([]);
-
-  // ADDED BACK: The missing state declarations
   const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string>("");
   const [orgNameLoading, setOrgNameLoading] = useState(false);
   const [orgNameError, setOrgNameError] = useState<string | null>(null);
 
-  // Redirect if not logged in
+  // Memoized Values
+  const supplierOptions = useMemo(() => {
+    const set = new Set(forecasts.map(f => f.supplier_name));
+    return ["All", ...Array.from(set)];
+  }, [forecasts]);
+  const categoryOptions = useMemo(() => {
+    const set = new Set(forecasts.map(f => f.part_category));
+    return ["All", ...Array.from(set)];
+  }, [forecasts]);
+  const kpiActionRequired = useMemo(() => forecasts.filter(f => f.recommendation === "Action Required").length, [forecasts]);
+  const kpiOnTrack = useMemo(() => forecasts.filter(f => f.recommendation === "On Track").length, [forecasts]);
+  const kpiMonitor = useMemo(() => forecasts.filter(f => f.recommendation === "Monitor").length, [forecasts]);
+  const kpiHighRiskCost = useMemo(() => forecasts.filter(f => f.risk_level === "High").reduce((sum, f) => sum + (f.cost_impact_pred_usd || 0), 0), [forecasts]);
+
+  // Side Effects
   useEffect(() => {
     if (!authLoading && !user) {
-      router.replace("/login");
+      router.push('/login');
     }
-  }, [authLoading, user, router]);
+  }, [user, authLoading, router]);
 
-  // Fetch org_id and forecasts
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
@@ -103,7 +113,6 @@ export default function DashboardPage() {
         if (selectedCategory !== "All") {
           query = query.eq("part_category", selectedCategory);
         }
-        
         const { data: forecastData, error: forecastError } = await query;
         if (forecastError) {
           setError("Failed to fetch forecasts.");
@@ -121,7 +130,6 @@ export default function DashboardPage() {
     }
   }, [user, selectedSupplier, selectedCategory, supabase]);
 
-  // Fetch org users for admin modal
   useEffect(() => {
     if (userRole === "admin" && orgId) {
       setUsersLoading(true);
@@ -138,7 +146,6 @@ export default function DashboardPage() {
     }
   }, [userRole, orgId, showAdminModal, supabase]);
 
-  // Fetch org_name for display and invite metadata
   useEffect(() => {
     if (orgId) {
       setOrgNameLoading(true);
@@ -161,18 +168,115 @@ export default function DashboardPage() {
     }
   }, [orgId, supabase]);
 
-  // The rest of the component (memoized values, conditional rendering, JSX) remains the same.
-  // I've included it all below to ensure you have the complete, correct file.
-  const supplierOptions = useMemo(() => { const set = new Set(forecasts.map(f => f.supplier_name)); return ["All", ...Array.from(set)]; }, [forecasts]);
-  const categoryOptions = useMemo(() => { const set = new Set(forecasts.map(f => f.part_category)); return ["All", ...Array.from(set)]; }, [forecasts]);
-  const kpiActionRequired = forecasts.filter(f => f.recommendation === "Action Required").length;
-  const kpiOnTrack = forecasts.filter(f => f.recommendation === "On Track").length;
-  const kpiMonitor = forecasts.filter(f => f.recommendation === "Monitor").length;
-  const kpiHighRiskCost = forecasts.filter(f => f.risk_level === "High").reduce((sum, f) => sum + (f.cost_impact_pred_usd || 0), 0);
-  if (authLoading || loading) { return <div className="text-center py-10">Loading...</div>; }
-  if (orgId === null) { return ( <div className="flex min-h-screen items-center justify-center bg-gray-50"> <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center"> <h1 className="text-2xl font-bold mb-4 text-gray-700">Waiting for Admin Approval</h1> <p className="text-lg text-gray-500"> Your account has been created but is not yet linked to an organization.<br /> Please wait for your organization admin to assign you or contact support if you believe this is an error. </p> </div> </div> ); }
-  if (error) { return ( <div className="flex min-h-screen items-center justify-center bg-gray-50"> <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center"> <h1 className="text-2xl font-bold mb-4 text-red-600">Error</h1> <p className="text-lg text-red-500">{error}</p> </div> </div> ); }
-  return ( <div className="min-h-screen flex bg-gray-50"> <aside className="w-20 sm:w-56 bg-white shadow-lg flex flex-col items-center py-8 relative"> <nav className="flex flex-col gap-8 w-full items-center"> <SidebarItem icon={<ChartPieIcon className="h-7 w-7" />} label="Overview" active /> <SidebarItem icon={<ChartBarIcon className="h-7 w-7" />} label="Analytics" /> <SidebarItem icon={<PresentationChartLineIcon className="h-7 w-7" />} label="Forecasting" /> </nav> <div className="flex-1" /> <ProfileDropdownAvatar nameOrEmail={userNameOrEmail} role={userRole} onAdminClick={() => setShowAdminModal(true)} onLogout={async () => { await signOut(); router.replace("/login"); }} /> {showAdminModal && userRole === "admin" && ( <AdminProfileInviteModal orgId={orgId || ""} currentUserId={user?.id || ""} orgUsers={orgUsers} setOrgUsers={setOrgUsers} onClose={() => setShowAdminModal(false)} user={user} userRole={userRole} orgName={orgName} orgNameLoading={orgNameLoading} orgNameError={orgNameError} /> )} </aside> <main className="flex-1 p-6 sm:p-10"> <h1 className="text-2xl sm:text-3xl font-bold mb-4">Lead Time Performance Overview</h1> <section className="flex flex-col sm:flex-row gap-4 mb-8 items-center"> <div className="flex gap-4 w-full sm:w-auto"> <div> <label className="block text-xs font-semibold mb-1">Supplier</label> <select className="border rounded-md px-3 py-2 w-36 bg-white" value={selectedSupplier} onChange={e => setSelectedSupplier(e.target.value)}> {supplierOptions.map(s => ( <option key={s} value={s}>{s}</option> ))} </select> </div> <div> <label className="block text-xs font-semibold mb-1">Part Category</label> <select className="border rounded-md px-3 py-2 w-36 bg-white" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}> {categoryOptions.map(c => ( <option key={c} value={c}>{c}</option>))} </select> </div> </div> <div className="flex gap-2 items-end w-full sm:w-auto"> <div> <label className="block text-xs font-semibold mb-1">Start Date</label> <input type="date" className="border rounded-md px-3 py-2 w-36 bg-white" value={dateRange.start || ""} onChange={e => setDateRange(r => ({ ...r, start: e.target.value }))} /> </div> <div> <label className="block text-xs font-semibold mb-1">End Date</label> <input type="date" className="border rounded-md px-3 py-2 w-36 bg-white" value={dateRange.end || ""} onChange={e => setDateRange(r => ({ ...r, end: e.target.value }))} /> </div> </div> </section> <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"> <KpiCard color="bg-yellow-200" value={kpiActionRequired.toString()} title="Action Required" subtitle="Recommendations" /> <KpiCard color="bg-green-200" value={kpiOnTrack.toString()} title="On Track" subtitle="Recommendations" /> <KpiCard color="bg-pink-200" value={kpiMonitor.toString()} title="Monitor" subtitle="Recommendations" /> <KpiCard color="bg-red-300" value={`$${kpiHighRiskCost.toLocaleString()}`} title="High Risk Cost" subtitle="Total Cost Impact" /> </section> <section className="bg-white rounded-xl shadow p-6"> <h2 className="text-lg font-semibold mb-4">Monthly Lead Time Performance</h2> <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg"> <svg width="90%" height="80%" viewBox="0 0 300 120"> <rect x="0" y="0" width="300" height="120" fill="#f3f4f6" /> <polyline fill="none" stroke="#6366f1" strokeWidth="3" points="0,100 40,80 80,90 120,60 160,70 200,40 240,60 280,30" /> <circle cx="0" cy="100" r="4" fill="#6366f1" /> <circle cx="40" cy="80" r="4" fill="#6366f1" /> <circle cx="80" cy="90" r="4" fill="#6366f1" /> <circle cx="120" cy="60" r="4" fill="#6366f1" /> <circle cx="160" cy="70" r="4" fill="#6366f1" /> <circle cx="200" cy="40" r="4" fill="#6366f1" /> <circle cx="240" cy="60" r="4" fill="#6366f1" /> <circle cx="280" cy="30" r="4" fill="#6366f1" /> </svg> </div> </section> </main> </div> );
+  // --- 2. CONDITIONAL RETURNS AFTER HOOKS ---
+  if (authLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading session...</div>;
+  }
+  if (!user) {
+    // This is a fallback while the redirect is happening.
+    return null;
+  }
+  if (loading) {
+    return <div className="text-center py-10">Loading data...</div>;
+  }
+  if (orgId === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
+          <h1 className="text-2xl font-bold mb-4 text-gray-700">Waiting for Admin Approval</h1>
+          <p className="text-lg text-gray-500">
+            Your account has been created but is not yet linked to an organization.<br />
+            Please wait for your organization admin to assign you or contact support if you believe this is an error.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md text-center">
+          <h1 className="text-2xl font-bold mb-4 text-red-600">Error</h1>
+          <p className="text-lg text-red-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- 3. FINAL COMPONENT RENDER ---
+  return (
+    <div className="min-h-screen flex bg-gray-50">
+      {/* Full component JSX (unchanged) */}
+      <aside className="w-20 sm:w-56 bg-white shadow-lg flex flex-col items-center py-8 relative">
+        <nav className="flex flex-col gap-8 w-full items-center">
+          <SidebarItem icon={<ChartPieIcon className="h-7 w-7" />} label="Overview" active />
+          <SidebarItem icon={<ChartBarIcon className="h-7 w-7" />} label="Analytics" />
+          <SidebarItem icon={<PresentationChartLineIcon className="h-7 w-7" />} label="Forecasting" />
+        </nav>
+        <div className="flex-1" />
+        <ProfileDropdownAvatar nameOrEmail={userNameOrEmail} role={userRole} onAdminClick={() => setShowAdminModal(true)} onLogout={signOut} />
+        {showAdminModal && userRole === "admin" && (
+          <AdminProfileInviteModal orgId={orgId || ""} currentUserId={user?.id || ""} orgUsers={orgUsers} setOrgUsers={setOrgUsers} onClose={() => setShowAdminModal(false)} user={user} userRole={userRole} orgName={orgName} orgNameLoading={orgNameLoading} orgNameError={orgNameError} />
+        )}
+      </aside>
+      <main className="flex-1 p-6 sm:p-10">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4">Lead Time Performance Overview</h1>
+        <section className="flex flex-col sm:flex-row gap-4 mb-8 items-center">
+          <div className="flex gap-4 w-full sm:w-auto">
+            <div>
+              <label className="block text-xs font-semibold mb-1">Supplier</label>
+              <select className="border rounded-md px-3 py-2 w-36 bg-white" value={selectedSupplier} onChange={e => setSelectedSupplier(e.target.value)}>
+                {supplierOptions.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1">Part Category</label>
+              <select className="border rounded-md px-3 py-2 w-36 bg-white" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)}>
+                {categoryOptions.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex gap-2 items-end w-full sm:w-auto">
+            <div>
+              <label className="block text-xs font-semibold mb-1">Start Date</label>
+              <input type="date" className="border rounded-md px-3 py-2 w-36 bg-white" value={dateRange.start || ""} onChange={e => setDateRange(r => ({ ...r, start: e.target.value }))} />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1">End Date</label>
+              <input type="date" className="border rounded-md px-3 py-2 w-36 bg-white" value={dateRange.end || ""} onChange={e => setDateRange(r => ({ ...r, end: e.target.value }))} />
+            </div>
+          </div>
+        </section>
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <KpiCard color="bg-yellow-200" value={kpiActionRequired.toString()} title="Action Required" subtitle="Recommendations" />
+          <KpiCard color="bg-green-200" value={kpiOnTrack.toString()} title="On Track" subtitle="Recommendations" />
+          <KpiCard color="bg-pink-200" value={kpiMonitor.toString()} title="Monitor" subtitle="Recommendations" />
+          <KpiCard color="bg-red-300" value={`$${kpiHighRiskCost.toLocaleString()}`} title="High Risk Cost" subtitle="Total Cost Impact" />
+        </section>
+        <section className="bg-white rounded-xl shadow p-6">
+          <h2 className="text-lg font-semibold mb-4">Monthly Lead Time Performance</h2>
+          <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-lg">
+            <svg width="90%" height="80%" viewBox="0 0 300 120">
+              <rect x="0" y="0" width="300" height="120" fill="#f3f4f6" />
+              <polyline fill="none" stroke="#6366f1" strokeWidth="3" points="0,100 40,80 80,90 120,60 160,70 200,40 240,60 280,30" />
+              <circle cx="0" cy="100" r="4" fill="#6366f1" />
+              <circle cx="40" cy="80" r="4" fill="#6366f1" />
+              <circle cx="80" cy="90" r="4" fill="#6366f1" />
+              <circle cx="120" cy="60" r="4" fill="#6366f1" />
+              <circle cx="160" cy="70" r="4" fill="#6366f1" />
+              <circle cx="200" cy="40" r="4" fill="#6366f1" />
+              <circle cx="240" cy="60" r="4" fill="#6366f1" />
+              <circle cx="280" cy="30" r="4" fill="#6366f1" />
+            </svg>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
 }
 
 

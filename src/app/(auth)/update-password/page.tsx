@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSupabase } from "@/components/SupabaseProvider"; // CHANGE 1: Import the context hook
+import { useAuth } from "@/lib/supabase/useAuth";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
   const supabase = useSupabase(); // CHANGE 2: Get the client from context
+  const { user, loading: authLoading } = useAuth();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,6 +20,10 @@ export default function UpdatePasswordPage() {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+    if (!user) {
+      setError("No session found. Please log in again.");
       return;
     }
     setLoading(true);
@@ -39,6 +45,10 @@ export default function UpdatePasswordPage() {
       }, 2000); // Redirect to login after 2 seconds
     }
   };
+
+  if (authLoading) {
+    return <div className="flex h-screen items-center justify-center">Verifying session...</div>;
+  }
 
   return (
     <div>

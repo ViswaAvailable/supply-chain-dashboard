@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     // ==================== THE FIX IS HERE ====================
     // 1. Construct the full redirect URL using your environment variable.
-    const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/onboard`;
+    const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`;
 
     // 2. Pass this URL to the inviteUserByEmail function.
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(
