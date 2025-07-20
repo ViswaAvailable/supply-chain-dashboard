@@ -1,11 +1,12 @@
-
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/client";
+import { useSupabase } from "@/components/SupabaseProvider"; // Use context hook
 
 export default function ForgotPasswordPage() {
+  const supabase = useSupabase(); // Get client from context
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -17,7 +18,6 @@ export default function ForgotPasswordPage() {
     setError(null);
     setSuccess(null);
 
-    // FIX: Moved from component scope into the client-side handler
     const redirectTo = `${window.location.origin}/update-password`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -28,7 +28,9 @@ export default function ForgotPasswordPage() {
     if (error) {
       setError(error.message);
     } else {
-      setSuccess("If an account with that email exists, a password reset link has been sent.");
+      setSuccess(
+        "If an account with that email exists, a password reset link has been sent."
+      );
     }
   };
 
@@ -70,7 +72,7 @@ export default function ForgotPasswordPage() {
         </button>
       </form>
       <div className="mt-6 text-center text-sm">
-        Remembered your password?{' '}
+        Remembered your password?{" "}
         <Link href="/login" className="text-blue-600 hover:underline">
           Back to Login
         </Link>
