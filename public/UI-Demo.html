@@ -525,13 +525,14 @@
 
         .modal-content {
             background: white;
-            margin: 5% auto;
-            padding: 24px;
+            padding: 20px;
             border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            width: clamp(320px, 90vw, 800px); /* Responsive width */
             max-height: 80vh;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-header {
@@ -620,7 +621,7 @@
         button.primary,button.ghost{border:none;}
         button.primary {background:#3b82f6;color:#fff;padding:8px 16px;border-radius:6px;}
         button.secondary {background:#f1f5f9;color:#374151;padding:8px 16px;border:1px solid #d1d5db;}
-        button.ghost {background:none;color:#475569;padding:8px 16px;}
+        button.ghost {background:none;color:#475569;padding:8px 16px;border:none;}
         /* --- new modal action buttons (matches old colour scheme) --- */
         .btn-primary{
           background:#3b82f6;
@@ -755,6 +756,105 @@
             font-size: 22px;
             color: #64748b;
             cursor: pointer;
+        }
+
+        /* --- Parts Planning Table Enhancements --- */
+        .parts-table-container th .sort-icon {
+            opacity: 0.4;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+        .parts-table-container th:hover .sort-icon {
+            opacity: 1;
+        }
+        .parts-table-container .actions-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px; /* Prevent layout shift */
+        }
+        .parts-table-container .btn-icon-sm {
+            background: none;
+            border: 1px solid transparent;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .parts-table-container .btn-icon-sm:hover {
+            border-color: #d1d5db;
+        }
+        /* --- Parts Planning Table Enhancements --- */
+        .parts-table-container {
+            overflow: auto; /* Enable x/y scrolling */
+            max-height: calc(100vh - 320px); /* Fit table in viewport */
+            outline: none; /* Hide focus ring on container itself */
+        }
+        .parts-table-container table {
+            border-collapse: separate; /* Required for sticky styles */
+            border-spacing: 0;
+        }
+        .parts-table-container thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #f8fafc; /* Match original header bg */
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        /* --- Sticky First Two Columns --- */
+        .parts-table-container th:nth-child(1), .parts-table-container td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 5;
+            background: #f8fafc;
+            width: 50px;
+            min-width: 50px;
+        }
+        .parts-table-container td:nth-child(1) {
+            background: white;
+        }
+        .parts-table-container tr:hover td:nth-child(1) {
+            background: #f8fafc;
+        }
+        .parts-table-container th:nth-child(2), .parts-table-container td:nth-child(2) {
+            position: sticky;
+            left: 50px; /* Width of first column */
+            z-index: 5;
+            background: #f8fafc;
+        }
+        .parts-table-container td:nth-child(2) {
+            background: white;
+        }
+        .parts-table-container tr:hover td:nth-child(2) {
+            background: #f8fafc;
+        }
+        /* Corner cells need highest z-index */
+        .parts-table-container thead th:nth-child(1), .parts-table-container thead th:nth-child(2) {
+            z-index: 15;
+        }
+
+        .parts-table-container th .sort-icon {
+            opacity: 0.4;
+            display: inline-block;
+            transition: opacity 0.2s;
+        }
+        .parts-table-container th:hover .sort-icon {
+            opacity: 1;
+        }
+        .parts-table-container .actions-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 150px; /* Prevent layout shift */
+        }
+        .parts-table-container .btn-icon-sm {
+            background: none;
+            border: 1px solid transparent;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .parts-table-container .btn-icon-sm:hover {
+            border-color: #d1d5db;
         }
 
         @media (max-width: 768px) {
@@ -934,7 +1034,7 @@
                         <button class="btn-primary" id="viewPO">View PO</button>
                         <button class="btn-secondary" id="contactSupplier">Contact Supplier</button>
                         <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
-                      </div>
+                </div>
                     </header>
                     <div class="modal-body"><!-- root-cause table injected here --></div>
                   </div>
@@ -986,28 +1086,34 @@
                         <h3 class="table-title">Parts Inventory & PO Recommendations</h3>
                         <div class="table-actions">
                             <button class="btn btn-secondary">Export</button>
-                            <button class="btn btn-primary">Bulk PO Generation</button>
+                            <button class="btn btn-primary" id="bulkPOBtn" disabled>Bulk PO Generation</button>
                         </div>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Part Number</th>
-                                <th>Description</th>
-                                <th>Current Stock</th>
-                                <th>Safety Stock</th>
-                                <th>Lead Time</th>
-                                <th>MOQ</th>
-                                <th>Supplier</th>
-                                <th>PO Recommendation</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="partsTable">
-                            <!-- Generated dynamically -->
-                        </tbody>
-                    </table>
+                    <div class="parts-table-container" tabindex="0">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllPartsCheckbox" aria-label="Select all parts"></th>
+                                    <th>Part Number</th>
+                                    <th>Description</th>
+                                    <th>Current Stock</th>
+                                    <th>Safety Stock</th>
+                                    <th>Lead Time</th>
+                                    <th>MOQ</th>
+                                    <th>Supplier</th>
+                                    <th>Recommended Order Qty</th>
+                                    <th>Status</th>
+                                    <th data-sort="weeksOfStock">Weeks of Stock <span class="sort-icon"></span></th>
+                                    <th data-sort="onOrderQty">On Order Qty <span class="sort-icon"></span></th>
+                                    <th data-sort="nextArrival">Next Arrival <span class="sort-icon"></span></th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="partsTable">
+                                <!-- Generated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -1130,83 +1236,63 @@
         </main>
     </div>
 
-    <!-- Part Detail Modal -->
-    <!--
-    <div class="modal" id="partModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="partModalTitle">Part Details</h3>
-                <button class="close" onclick="closeModal('partModal')">&times;</button>
-            </div>
-            <div id="partModalContent">
-                
+    <!-- Part Detail Modal Template -->
+    <template id="partDetailModalTemplate">
+        <div id="partDetailModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="partDetailModalTitle">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h3 id="partDetailModalTitle">Part Details</h3>
+                    <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
+                </header>
+                <div class="modal-body" id="partDetailModalBody">
+                    <!-- Part details injected here -->
+                </div>
             </div>
         </div>
-    </div>
-    -->
+    </template>
+
+    <!-- Modal template for Bulk PO Confirmation -->
+    <template id="bulkPOModalTemplate">
+      <div id="bulkPOModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="bulkPOModalTitle">
+        <div class="modal-content">
+          <header class="modal-header">
+            <h3 id="bulkPOModalTitle">Confirm Bulk Purchase Order</h3>
+            <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
+          </header>
+          <div class="modal-body">
+            <p>Please review the following parts for PO generation:</p>
+            <table class="root-cause" id="bulkPOTable">
+              <thead>
+                <tr><th>Part ID</th><th>Supplier</th><th>Required Qty</th><th>Current Stock</th><th>Weeks of Stock</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <footer>
+              <button class="btn-primary" id="confirmBulkPO">Confirm & Create POs</button>
+              <button class="btn-secondary" data-dismiss="modal">Cancel</button>
+            </footer>
+          </div>
+        </div>
+      </div>
+    </template>
 
     <script>
         // Mock Data
         const mockParts = [
             {
-                partNumber: "PCB-001",
-                description: "Main Circuit Board",
-                currentStock: 45,
-                safetyStock: 20,
-                leadTime: "12 days",
-                moq: 100,
-                supplier: "TechCorp Industries",
-                poRecommendation: "Order 100 units by Feb 15",
-                status: "PO Required",
-                price: 25.50
+                partNumber: "PCB-001", description: "Main Circuit Board", currentStock: 45, safetyStock: 20, leadTime: "12 days", moq: 100, supplier: "TechCorp Industries", recommendedQty: 100, status: "PO Required", price: 25.50, avgWeeklyConsumption: 10, onOrderQty: 100, nextArrival: '2024-03-15'
             },
             {
-                partNumber: "MTR-205",
-                description: "AC Motor 5HP",
-                currentStock: 8,
-                safetyStock: 15,
-                leadTime: "21 days",
-                moq: 25,
-                supplier: "MechParts Ltd",
-                poRecommendation: "Critical: Order 25 units ASAP",
-                status: "Critical",
-                price: 340.00
+                partNumber: "MTR-205", description: "AC Motor 5HP", currentStock: 8, safetyStock: 15, leadTime: "21 days", moq: 25, supplier: "MechParts Ltd", recommendedQty: 25, status: "Critical", price: 340.00, avgWeeklyConsumption: 5, onOrderQty: 25, nextArrival: '2024-03-22'
             },
             {
-                partNumber: "BRG-034",
-                description: "Ball Bearing 34mm",
-                currentStock: 150,
-                safetyStock: 50,
-                leadTime: "7 days",
-                moq: 200,
-                supplier: "GlobalSupply Co",
-                poRecommendation: "Stock sufficient for 6 weeks",
-                status: "Good",
-                price: 12.75
+                partNumber: "BRG-034", description: "Ball Bearing 34mm", currentStock: 150, safetyStock: 50, leadTime: "7 days", moq: 200, supplier: "GlobalSupply Co", recommendedQty: 0, status: "Good", price: 12.75, avgWeeklyConsumption: 20, onOrderQty: 0, nextArrival: null
             },
             {
-                partNumber: "SCR-M5-20",
-                description: "M5 Hex Screw 20mm",
-                currentStock: 2340,
-                safetyStock: 1000,
-                leadTime: "3 days",
-                moq: 5000,
-                supplier: "FastenAll Inc",
-                poRecommendation: "Order 5000 units by March 1",
-                status: "PO Required",
-                price: 0.15
+                partNumber: "SCR-M5-20", description: "M5 Hex Screw 20mm", currentStock: 2340, safetyStock: 1000, leadTime: "3 days", moq: 5000, supplier: "FastenAll Inc", recommendedQty: 5000, status: "PO Required", price: 0.15, avgWeeklyConsumption: 250, onOrderQty: 0, nextArrival: null
             },
             {
-                partNumber: "WIR-022",
-                description: "Electrical Wire 22AWG",
-                currentStock: 890,
-                safetyStock: 500,
-                leadTime: "5 days",
-                moq: 1000,
-                supplier: "ElectroWire Corp",
-                poRecommendation: "Stock adequate for 4 weeks",
-                status: "Good",
-                price: 0.45
+                partNumber: "WIR-022", description: "Electrical Wire 22AWG", currentStock: 890, safetyStock: 500, leadTime: "5 days", moq: 1000, supplier: "ElectroWire Corp", recommendedQty: 0, status: "Good", price: 0.45, avgWeeklyConsumption: 150, onOrderQty: 1000, nextArrival: '2024-03-10'
             }
         ];
 
@@ -1298,6 +1384,7 @@
             generateCalendarGrid();
             populatePartsTable();
             populateSupplierCards();
+            updateBulkPOButton(); // Set initial button state after first render
         });
 
         // Calendar Functions
@@ -1519,13 +1606,12 @@
                     <td>${part.leadTime}</td>
                     <td>${part.moq}</td>
                     <td>${part.supplier}</td>
-                    <td>${part.poRecommendation}</td>
+                    <td>${part.status !== 'Good' ? part.recommendedQty : '—'}</td>
                     <td><span class="status-badge ${statusClass}">${part.status}</span></td>
-                    <td>
-                        <button class="btn btn-secondary" onclick="viewPartDetails('${part.partNumber}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </td>
+                    <td>${part.weeksOfStock.toFixed(1)}</td>
+                    <td>${part.onOrderQty}</td>
+                    <td>${part.nextArrival ? formatDate(part.nextArrival) : '—'}</td>
+                    <td>${renderPartActions(part)}</td>
                 `;
                 tbody.appendChild(row);
             });
@@ -1710,6 +1796,234 @@
             });
         }
         */
+
+        // --- Parts Planning State ---
+        let selectedPartIds = new Set();
+        let partsSortConfig = { key: 'weeksOfStock', dir: 1 }; // 1 for asc, -1 for desc
+
+        // --- Parts Planning Functions ---
+        function renderPartActions(part) {
+            const actions = [];
+            if (part.status === 'Critical' || part.status === 'PO Required') {
+                actions.push(`<button class="btn btn-primary btn-sm">Create PO</button>`);
+            }
+            actions.push(`<button class="btn-icon-sm" title="View details" aria-label="View details for ${part.partNumber}" data-part-id="${part.partNumber}"><i class="fas fa-eye"></i></button>`);
+            return `<div class="actions-cell">${actions.join('')}</div>`;
+        }
+
+        function updateBulkPOButton() {
+            const btn = document.getElementById('bulkPOBtn');
+            btn.disabled = selectedPartIds.size === 0;
+        }
+
+        function populatePartsTable() {
+            const tbody = document.getElementById('partsTable');
+            tbody.innerHTML = '';
+
+            // Calculate weeks of stock
+            mockParts.forEach(p => {
+                p.weeksOfStock = p.avgWeeklyConsumption > 0 ? (p.currentStock / p.avgWeeklyConsumption) : 99;
+            });
+
+            // Sorting
+            const sortedParts = [...mockParts].sort((a, b) => {
+                const aVal = a[partsSortConfig.key];
+                const bVal = b[partsSortConfig.key];
+                if (aVal === null) return 1;
+                if (bVal === null) return -1;
+                if (aVal < bVal) return -1 * partsSortConfig.dir;
+                if (aVal > bVal) return 1 * partsSortConfig.dir;
+                return 0;
+            });
+
+            sortedParts.forEach(part => {
+                const row = document.createElement('tr');
+                const statusClass = part.status === 'Critical' ? 'badge-danger' : 
+                                  part.status === 'PO Required' ? 'badge-warning' : 'badge-success';
+                
+                row.innerHTML = `
+                    <td><input type="checkbox" class="part-select-checkbox" data-part-id="${part.partNumber}" ${selectedPartIds.has(part.partNumber) ? 'checked' : ''}></td>
+                    <td><strong>${part.partNumber}</strong></td>
+                    <td>${part.description}</td>
+                    <td>${part.currentStock}</td>
+                    <td>${part.safetyStock}</td>
+                    <td>${part.leadTime}</td>
+                    <td>${part.moq}</td>
+                    <td>${part.supplier}</td>
+                    <td>${part.status !== 'Good' ? part.recommendedQty : '—'}</td>
+                    <td><span class="status-badge ${statusClass}">${part.status}</span></td>
+                    <td>${part.weeksOfStock.toFixed(1)}</td>
+                    <td>${part.onOrderQty}</td>
+                    <td>${part.nextArrival ? formatDate(part.nextArrival) : '—'}</td>
+                    <td>${renderPartActions(part)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Add event listeners after rows are in the DOM
+            tbody.querySelectorAll('.part-select-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const partId = e.target.dataset.partId;
+                    if (e.target.checked) {
+                        selectedPartIds.add(partId);
+                    } else {
+                        selectedPartIds.delete(partId);
+                    }
+                    updateBulkPOButton();
+                    updateSelectAllCheckboxState();
+                });
+            });
+
+            tbody.querySelectorAll('.btn-icon-sm').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const partId = e.currentTarget.dataset.partId;
+                    openPartDetailModal(partId);
+                });
+            });
+        }
+        
+        function updateSelectAllCheckboxState() {
+            const masterCheckbox = document.getElementById('selectAllPartsCheckbox');
+            const visibleCheckboxes = [...document.querySelectorAll('#partsTable .part-select-checkbox')];
+            const allVisibleSelected = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
+            const someVisibleSelected = visibleCheckboxes.some(cb => cb.checked);
+
+            masterCheckbox.checked = allVisibleSelected;
+            masterCheckbox.indeterminate = !allVisibleSelected && someVisibleSelected;
+        }
+
+        document.getElementById('selectAllPartsCheckbox')?.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            document.querySelectorAll('#partsTable .part-select-checkbox').forEach(cb => {
+                cb.checked = isChecked;
+                const partId = cb.dataset.partId;
+                if (isChecked) {
+                    selectedPartIds.add(partId);
+                } else {
+                    selectedPartIds.delete(partId);
+                }
+            });
+            updateBulkPOButton();
+        });
+
+        document.querySelectorAll('.parts-table-container th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                if (partsSortConfig.key === key) {
+                    partsSortConfig.dir *= -1;
+                } else {
+                    partsSortConfig.key = key;
+                    partsSortConfig.dir = 1;
+                }
+                populatePartsTable();
+            });
+        });
+        
+        document.getElementById('bulkPOBtn')?.addEventListener('click', () => {
+            if (selectedPartIds.size === 0) return;
+            openBulkPOModal();
+        });
+
+        function openBulkPOModal() {
+            if (!document.getElementById('bulkPOModal')) {
+                 const tpl = document.getElementById('bulkPOModalTemplate');
+                 document.body.appendChild(tpl.content.cloneNode(true));
+            }
+            const modal = document.getElementById('bulkPOModal');
+            const tableBody = modal.querySelector('#bulkPOTable tbody');
+            tableBody.innerHTML = '';
+
+            const partsToOrder = mockParts.filter(p => selectedPartIds.has(p.partNumber));
+            partsToOrder.forEach(part => {
+                const row = `<tr>
+                    <td>${part.partNumber}</td>
+                    <td>${part.supplier}</td>
+                    <td>${part.moq}</td>
+                    <td>${part.currentStock}</td>
+                    <td>${part.weeksOfStock.toFixed(1)}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+            
+            modal.style.display = 'flex';
+            
+            // Prevent re-binding listeners
+            if (modal.dataset.bound !== "true") {
+                modal.querySelector('#confirmBulkPO').onclick = () => {
+                    // TODO: Actual API call here
+                    alert(`${selectedPartIds.size} Purchase Orders created successfully!`);
+                    selectedPartIds.clear();
+                    populatePartsTable();
+                    updateBulkPOButton();
+                    updateSelectAllCheckboxState();
+                    closeModalById('bulkPOModal');
+                };
+
+                modal.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+                    btn.onclick = () => closeModalById('bulkPOModal');
+                });
+                modal.dataset.bound = "true";
+            }
+        }
+        
+        function openPartDetailModal(partNumber) {
+            const part = mockParts.find(p => p.partNumber === partNumber);
+            if (!part) return;
+
+            if (!document.getElementById('partDetailModal')) {
+                 const tpl = document.getElementById('partDetailModalTemplate');
+                 document.body.appendChild(tpl.content.cloneNode(true));
+            }
+            const modal = document.getElementById('partDetailModal');
+            
+            modal.querySelector('#partDetailModalTitle').textContent = `${part.partNumber} - ${part.description}`;
+            
+            const recommendationText = part.status !== 'Good'
+                ? `${part.status}: Order ${part.recommendedQty} units`
+                : 'Stock sufficient. No order required.';
+            const statusClass = part.status === 'Critical' ? 'badge-danger' :
+                              part.status === 'PO Required' ? 'badge-warning' :
+                              'badge-success';
+
+            modal.querySelector('#partDetailModalBody').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div>
+                        <h4 style="margin-bottom: 12px; color: #374151;">Current Inventory</h4>
+                        <p><strong>Current Stock:</strong> ${part.currentStock} units</p>
+                        <p><strong>Safety Stock:</strong> ${part.safetyStock} units</p>
+                        <p><strong>Avg Weekly Consumption:</strong> ${part.avgWeeklyConsumption} units</p>
+                        <p><strong>Weeks of Stock:</strong> ${part.weeksOfStock.toFixed(1)}</p>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 12px; color: #374151;">Supplier Information</h4>
+                        <p><strong>Supplier:</strong> ${part.supplier}</p>
+                        <p><strong>Lead Time:</strong> ${part.leadTime}</p>
+                        <p><strong>MOQ:</strong> ${part.moq} units</p>
+                        <p><strong>On Order:</strong> ${part.onOrderQty} units (ETA: ${part.nextArrival ? formatDate(part.nextArrival) : 'N/A'})</p>
+                    </div>
+                </div>
+                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <h4 style="margin-bottom: 8px; color: #374151;">Recommendation</h4>
+                    <p><span class="status-badge ${statusClass}">${recommendationText}</span></p>
+                </div>
+            `;
+            modal.style.display = 'flex';
+
+            // Prevent re-binding listeners
+            if (modal.dataset.bound !== "true") {
+                modal.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+                    btn.onclick = () => closeModalById('partDetailModal');
+                });
+                modal.dataset.bound = "true";
+            }
+        }
+        
+        function closeModalById(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
