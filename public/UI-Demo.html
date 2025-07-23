@@ -563,6 +563,200 @@
             margin: 20px 0;
         }
 
+        /* --- KPI Trend Colors --- */
+        .trend-up { color: #28a745; }
+        .trend-down { color: #d9534f; }
+        .trend-neutral { color: #ffc107; }
+        .kpi-sublabel {
+            display: block;
+            color: #94a3b8;
+            font-size: 80%;
+            margin-top: 2px;
+            font-weight: 400;
+        }
+        /* --- Week Tile Grid --- */
+        .week-tile{all:unset;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+        border:1px solid #e2e8f0;border-radius:10px;padding:18px 12px;width:100%;height:110px;
+        cursor:pointer;background:#fff;transition:transform .15s,box-shadow .15s;}
+        .week-tile:hover,.week-tile:focus{transform:scale(1.02);box-shadow:0 4px 14px rgba(0,0,0,.1);}
+        .week-tile.on-track {background:#eafae4;}
+        .week-tile.at-risk {background:#fff4e5;}
+        .week-tile.critical {background:#fde8e8;}
+        .status-pill{padding:4px 12px;border-radius:12px;font-size:13px;color:#fff;font-weight:600;}
+        .week-tile.on-track .status-pill{background:#059669;}
+        .week-tile.at-risk .status-pill{background:#d97706;}
+        .week-tile.critical .status-pill{background:#dc2626;}
+        .issue-icon{font-size:20px;margin-top:4px;}
+        /* Weekly grid container rule (spec: after .week-tile) */
+        .weekly-status-grid{
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+          gap:16px;
+          margin-top:24px;
+        }
+        .week-label      {display:flex;flex-direction:column;line-height:1.2;}
+        .week-num        {font-weight:600;font-size:.95rem;}
+        .week-date       {font-size:.70rem;color:#6b7280;margin-top:2px;}
+        @media(max-width:640px){
+          .week-label{flex-direction:row;gap:4px;}
+        }
+        /* Critical tiles pull attention */
+        .week-tile.critical{box-shadow:0 0 0 2px #ef4444;}
+        /* Modal specific */
+        .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+        background:rgba(0,0,0,.45);z-index:2000;}
+        .modal-header{
+          display:flex;justify-content:space-between;align-items:center;
+          position:sticky;top:0;background:#fff;z-index:2;padding:12px 16px;
+          border-bottom:1px solid #e5e7eb;
+        }
+        .modal-actions button{margin-left:8px;}
+        .btn-icon{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#475569;}
+        .modal-body{max-height:70vh;overflow:auto;padding:0 16px 16px;}
+        .modal .root-cause{width:100%;border-collapse:collapse;font-size:14px;}
+        .modal .root-cause th,.modal .root-cause td{padding:8px 10px;border-bottom:1px solid #e2e8f0;}
+        .modal .root-cause tr.critical{background:#ffe6e6;}
+        td.shortfall.negative{color:#b91c1c;font-weight:600;}
+        button.primary,button.ghost{border:none;}
+        button.primary {background:#3b82f6;color:#fff;padding:8px 16px;border-radius:6px;}
+        button.secondary {background:#f1f5f9;color:#374151;padding:8px 16px;border:1px solid #d1d5db;}
+        button.ghost {background:none;color:#475569;padding:8px 16px;}
+        /* --- new modal action buttons (matches old colour scheme) --- */
+        .btn-primary{
+          background:#3b82f6;
+          color:#fff;
+          padding:8px 16px;
+          border-radius:6px;
+          border:none;
+        }
+        .btn-secondary{
+          background:#f1f5f9;
+          color:#374151;
+          padding:8px 16px;
+          border:1px solid #d1d5db;
+        }
+        .btn-icon{
+          background:none;
+          border:none;
+          font-size:1.1rem;
+          color:#475569;
+          cursor:pointer;
+        }
+        /* legacy aliases – keep for other pages */
+        button.primary{
+          background:#3b82f6;
+          color:#fff;
+          padding:8px 16px;
+          border-radius:6px;
+          border:none;
+        }
+        button.secondary{
+          background:#f1f5f9;
+          color:#374151;
+          padding:8px 16px;
+          border:1px solid #d1d5db;
+        }
+        button.ghost{
+          background:none;
+          color:#475569;
+          padding:8px 16px;
+          border:none;
+        }
+        /* --- Weekly Status Grid --- */
+        .weekly-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+            margin-bottom: 24px;
+        }
+        .weekly-status-cell {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 18px 12px 12px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: box-shadow 0.2s, transform 0.2s;
+            position: relative;
+        }
+        .weekly-status-cell:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+            transform: translateY(-2px);
+        }
+        .weekly-status-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .weekly-status-indicator {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+        .weekly-status-good { background: #059669; }
+        .weekly-status-warning { background: #d97706; }
+        .weekly-status-critical { background: #dc2626; }
+        .weekly-status-details {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+        /* Modal for Weekly Details */
+        .weekly-modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+        .weekly-modal-table th, .weekly-modal-table td {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 10px;
+            font-size: 14px;
+            text-align: left;
+        }
+        .weekly-modal-table th {
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .weekly-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .weekly-modal-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        .weekly-modal-btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .weekly-modal-btn-secondary {
+            background: #f1f5f9;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        .weekly-modal-btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .weekly-modal-close-x {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #64748b;
+            cursor: pointer;
+        }
+
         @media (max-width: 768px) {
             .app-container {
                 flex-direction: column;
@@ -580,6 +774,10 @@
             .supplier-cards {
                 grid-template-columns: 1fr;
             }
+        }
+        @media(max-width:720px){
+          .weekly-status-grid{grid-template-columns:1fr;}
+          .calendar-header .legend{display:none;}
         }
     </style>
 </head>
@@ -659,46 +857,54 @@
                 <div class="status-cards">
                     <div class="status-card">
                         <div class="status-card-header">
-                            <span class="status-card-title">Weeks at Risk</span>
+                            <span class="status-card-title">Weeks at Risk
+                                <small class="kpi-sublabel">(Next 12 weeks)</small>
+                            </span>
                             <i class="fas fa-exclamation-triangle" style="color: #d97706;"></i>
                         </div>
                         <div class="status-card-value">3</div>
-                        <div class="status-card-change negative">↑ 2 from last month</div>
+                        <div class="status-card-change trend-down">↑ 2 from last month</div>
                     </div>
                     <div class="status-card">
                         <div class="status-card-header">
-                            <span class="status-card-title">Parts Requiring PO</span>
+                            <span class="status-card-title">Parts Requiring PO
+                                <small class="kpi-sublabel">(All open POs)</small>
+                            </span>
                             <i class="fas fa-shopping-cart" style="color: #3b82f6;"></i>
                         </div>
                         <div class="status-card-value">12</div>
-                        <div class="status-card-change positive">↓ 5 from last week</div>
+                        <div class="status-card-change trend-up">↓ 5 from last week</div>
                     </div>
                     <div class="status-card">
                         <div class="status-card-header">
-                            <span class="status-card-title">Avg. Lead Time</span>
+                            <span class="status-card-title">Avg. Lead Time
+                                <small class="kpi-sublabel">(All active parts)</small>
+                            </span>
                             <i class="fas fa-clock" style="color: #059669;"></i>
                         </div>
                         <div class="status-card-value">8.4<span style="font-size: 14px; color: #64748b;"> days</span></div>
-                        <div class="status-card-change positive">↓ 0.6 days</div>
+                        <div class="status-card-change trend-up">↓ 0.6 days</div>
                     </div>
                     <div class="status-card">
                         <div class="status-card-header">
-                            <span class="status-card-title">Supplier Performance</span>
+                            <span class="status-card-title">Supplier Performance
+                                <small class="kpi-sublabel">(Last 30 days)</small>
+                            </span>
                             <i class="fas fa-star" style="color: #fbbf24;"></i>
                         </div>
                         <div class="status-card-value">87%</div>
-                        <div class="status-card-change positive">↑ 3% this month</div>
+                        <div class="status-card-change trend-up">↑ 3% this month</div>
                     </div>
                 </div>
 
                 <div class="calendar-grid">
                     <div class="calendar-header">
                         <div class="calendar-nav">
-                            <button onclick="changeMonth(-1)">
+                            <button aria-label="Previous month" onclick="changeMonth(-1)">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
                             <h2 class="calendar-title" id="currentMonth">January 2024</h2>
-                            <button onclick="changeMonth(1)">
+                            <button aria-label="Next month" onclick="changeMonth(1)">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
                         </div>
@@ -717,18 +923,23 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="weeks-grid" id="weeksGrid">
-                        <div class="week-day">Week</div>
-                        <div class="week-day">Mon</div>
-                        <div class="week-day">Tue</div>
-                        <div class="week-day">Wed</div>
-                        <div class="week-day">Thu</div>
-                        <div class="week-day">Fri</div>
-                        <div class="week-day">Status</div>
-                        <!-- Generated dynamically -->
+                    <div class="weekly-status-grid" id="weeklyStatusGrid"></div>
                     </div>
-                </div>
+                <!-- Modal template for Week Details (lazy-injected) -->
+                <template id="weekModalTemplate">
+                  <div id="weekModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                    <header class="modal-header">
+                      <h3 id="modalTitle">Week X – Status</h3>
+                      <div class="modal-actions">
+                        <button class="btn-primary" id="viewPO">View PO</button>
+                        <button class="btn-secondary" id="contactSupplier">Contact Supplier</button>
+                        <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
+                      </div>
+                    </header>
+                    <div class="modal-body"><!-- root-cause table injected here --></div>
+                  </div>
+                </template>
+                <!-- Modal for Weekly Details -->
             </div>
 
             <!-- Parts Planning Page -->
@@ -920,6 +1131,7 @@
     </div>
 
     <!-- Part Detail Modal -->
+    <!--
     <div class="modal" id="partModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -927,10 +1139,11 @@
                 <button class="close" onclick="closeModal('partModal')">&times;</button>
             </div>
             <div id="partModalContent">
-                <!-- Generated dynamically -->
+                
             </div>
         </div>
     </div>
+    -->
 
     <script>
         // Mock Data
@@ -1094,59 +1307,198 @@
             "May 2024", "June 2024", "July 2024", "August 2024"
         ];
 
-        function changeMonth(direction) {
-            currentMonthIndex += direction;
-            if (currentMonthIndex < 0) currentMonthIndex = 0;
-            if (currentMonthIndex >= months.length) currentMonthIndex = months.length - 1;
-            
-            document.getElementById('currentMonth').textContent = months[currentMonthIndex];
-            generateCalendarGrid();
-        }
-
+        // --- Replace calendar grid with Weekly Status Grid ---
         function generateCalendarGrid() {
-            const grid = document.getElementById('weeksGrid');
-            const header = grid.querySelector('.week-day');
-            
-            // Clear existing content except header row
-            const headers = grid.querySelectorAll('.week-day');
+            // Remove old weeks table if present
+            const grid = document.getElementById('weeklyStatusGrid');
             grid.innerHTML = '';
-            headers.forEach(h => grid.appendChild(h));
-            
-            // Generate weeks data
+            // Example stub data for 12 weeks
             const weeks = [
-                { week: 1, status: 'good', details: '3 POs pending' },
-                { week: 2, status: 'good', details: 'All on track' },
-                { week: 3, status: 'warning', details: '2 parts at risk' },
-                { week: 4, status: 'good', details: 'All on track' },
-                { week: 5, status: 'critical', details: 'Motor shortage' },
-                { week: 6, status: 'warning', details: '1 PO delayed' },
-                { week: 7, status: 'good', details: 'All on track' },
-                { week: 8, status: 'good', details: '2 POs placed' },
-                { week: 9, status: 'warning', details: 'PCB low stock' },
-                { week: 10, status: 'good', details: 'All on track' },
-                { week: 11, status: 'good', details: 'All on track' },
-                { week: 12, status: 'warning', details: '3 POs needed' }
+                { week: 1, status: 'on-track', details: '3 POs pending', date: '2024-01-01' },
+                { week: 2, status: 'on-track', details: 'All on track', date: '2024-01-08' },
+                { week: 3, status: 'at-risk', details: '2 parts at risk', date: '2024-01-15', issue: '2 parts at risk' },
+                { week: 4, status: 'on-track', details: 'All on track', date: '2024-01-22' },
+                { week: 5, status: 'critical', details: 'Motor shortage', date: '2024-01-29', issue: 'Motor shortage' },
+                { week: 6, status: 'at-risk', details: '1 PO delayed', date: '2024-02-05', issue: '1 PO delayed' },
+                { week: 7, status: 'on-track', details: 'All on track', date: '2024-02-12' },
+                { week: 8, status: 'on-track', details: '2 POs placed', date: '2024-02-19' },
+                { week: 9, status: 'at-risk', details: 'PCB low stock', date: '2024-02-26', issue: 'PCB low stock' },
+                { week: 10, status: 'on-track', details: 'All on track', date: '2024-03-04' },
+                { week: 11, status: 'on-track', details: 'All on track', date: '2024-03-11' },
+                { week: 12, status: 'at-risk', details: '3 POs needed', date: '2024-03-18', issue: '3 POs needed' }
             ];
-
             weeks.forEach(week => {
-                const weekCell = document.createElement('div');
-                weekCell.className = 'week-cell';
-                weekCell.onclick = () => showWeekDetails(week);
-                
-                weekCell.innerHTML = `
-                    <div class="week-number">Week ${week.week}</div>
-                    <div class="week-status status-${week.status}">
-                        ${week.status === 'good' ? '✓' : week.status === 'warning' ? '!' : '⚠'}
-                    </div>
-                    <div class="week-details">${week.details}</div>
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `week-tile ${week.status}`;
+                btn.setAttribute('data-week', week.week);
+                btn.setAttribute('data-week-start', week.date);
+                btn.setAttribute('aria-haspopup', 'dialog');
+                btn.tabIndex = 0;
+                btn.setAttribute('aria-label',
+                  `Open details for Week ${week.week} – ${week.status === 'critical' ? 'Critical Risk' : week.status === 'at-risk' ? 'At Risk' : 'On Track'}`);
+                btn.innerHTML = `
+                  <span class="week-label">
+                    <span class="week-num">Week ${week.week}</span>
+                    <span class="week-date">${formatDate(week.date)}</span>
+                  </span>
+                  <span class="status-pill">${week.status === 'on-track' ? 'On Track' : week.status === 'at-risk' ? 'At Risk' : 'Critical'}</span>
+                  ${week.status !== 'on-track' ? `<span class="issue-icon" title="${week.issue || week.details}" aria-label="${week.issue || week.details}">🛠</span>` : ''}
                 `;
-                
-                grid.appendChild(weekCell);
+                if (week.status !== 'on-track') {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // <-- Add this line
+                        openModal(btn, week);
+                    });
+                    btn.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openModal(btn, week);
+                        }
+                    });
+                }
+                grid.appendChild(btn);
             });
         }
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        // Debounce utility
+        const debounce = (fn, wait=150) => {
+            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+        };
+        window.addEventListener('resize', debounce(() => {
+            // Scaffold: recalc grid cols if needed in future
+        }, 150));
+        // --- Modal logic ---
+        let modalInjected = false, originBtn = null;
+        function openModal(btn, week) {
+            // --- GUARD CLAUSE ---
+            // If the function is not called with a valid button element and a week object,
+            // it means it was triggered by a rogue listener. Stop immediately.
+            if (!btn || !week || typeof week.week === 'undefined') {
+                console.warn("Ignoring invalid call to openModal().", { btn, week });
+                return;
+            }
+            // --- END GUARD CLAUSE ---
 
-        function showWeekDetails(week) {
-            alert(`Week ${week.week} Details:\nStatus: ${week.status.toUpperCase()}\n${week.details}\n\nClick OK to view detailed breakdown.`);
+            originBtn = btn;
+            if (!modalInjected) {
+                const tpl = document.getElementById('weekModalTemplate');
+                const node = tpl.content.cloneNode(true);
+                document.body.appendChild(node);
+                modalInjected = true;
+            }
+            const modal = document.getElementById('weekModal');
+            // Fill modal title
+            document.getElementById('modalTitle').textContent = `Week ${week.week} – ${week.status === 'critical' ? 'Critical Risk' : 'At Risk'}`;
+            // Root-cause table with sort, highlight, deep links
+            const stubRows = [
+                { partId: 'PCB-001', supplier: 'TechCorp Industries', reqQty: 120, onHand: 45, shortfall: 75, eta: '2024-02-10', po: 'PO-1001' },
+                { partId: 'MTR-205', supplier: 'MechParts Ltd', reqQty: 30, onHand: 8, shortfall: 22, eta: '2024-02-12', po: 'PO-1002' },
+                { partId: 'BRG-034', supplier: 'GlobalSupply Co', reqQty: 200, onHand: 150, shortfall: 50, eta: '2024-02-15', po: 'PO-1003' }
+            ];
+            let sortKey = 'shortfall', sortDir = -1;
+            const buffer = 20;
+            function renderTable() {
+                const table = document.createElement('table');
+                table.className = 'root-cause';
+                const thead = document.createElement('thead');
+                thead.innerHTML = `<tr>
+                  <th data-sort="partId">Part ID <span class="sort">${sortKey==='partId'?(sortDir>0?'▲':'▼'):''}</span></th>
+                  <th data-sort="supplier">Supplier <span class="sort">${sortKey==='supplier'?(sortDir>0?'▲':'▼'):''}</span></th>
+                  <th data-sort="reqQty">Req Qty <span class="sort">${sortKey==='reqQty'?(sortDir>0?'▲':'▼'):''}</span></th>
+                  <th data-sort="onHand">On-Hand <span class="sort">${sortKey==='onHand'?(sortDir>0?'▲':'▼'):''}</span></th>
+                  <th data-sort="shortfall">Shortfall <span class="sort">${sortKey==='shortfall'?(sortDir>0?'▲':'▼'):''}</span></th>
+                  <th data-sort="eta">ETA <span class="sort">${sortKey==='eta'?(sortDir>0?'▲':'▼'):''}</span></th>
+                  <th data-sort="po">PO# <span class="sort">${sortKey==='po'?(sortDir>0?'▲':'▼'):''}</span></th>
+                </tr>`;
+                table.appendChild(thead);
+                const tbody = document.createElement('tbody');
+                let rows = stubRows.slice().sort((a,b)=>{
+                  if(a[sortKey]<b[sortKey])return -1*sortDir;
+                  if(a[sortKey]>b[sortKey])return 1*sortDir;
+                  return 0;
+            });
+                rows.forEach(row => {
+                  const tr = document.createElement('tr');
+                  if (row.shortfall > 0) tr.className = 'critical';
+                  // Deep links
+                  const tdPart = document.createElement('td');
+                  tdPart.innerHTML = `<a href="/parts?part=${row.partId}">${row.partId}</a>`;
+                  const tdSupp = document.createElement('td');
+                  tdSupp.innerHTML = `<a href="/suppliers?id=${encodeURIComponent(row.supplier)}">${row.supplier}</a>`;
+                  const tdReq = document.createElement('td'); tdReq.textContent = row.reqQty;
+                  const tdOnHand = document.createElement('td'); tdOnHand.textContent = row.onHand;
+                  const tdShort = document.createElement('td'); tdShort.textContent = row.shortfall; tdShort.className = 'shortfall';
+                  if(row.shortfall>buffer){tdShort.classList.add('negative');}
+                  const tdEta = document.createElement('td'); tdEta.textContent = formatDate(row.eta);
+                  const tdPO = document.createElement('td'); tdPO.textContent = row.po;
+                  tr.append(tdPart,tdSupp,tdReq,tdOnHand,tdShort,tdEta,tdPO);
+                  tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+                // Sort listeners
+                thead.querySelectorAll('th[data-sort]').forEach(th=>{
+                  th.style.cursor='pointer';
+                  th.onclick=()=>{
+                    const k=th.getAttribute('data-sort');
+                    if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}
+                    renderTable();
+                  };
+                });
+                const modalBody = modal.querySelector('.modal-body');
+                modalBody.innerHTML = '';
+                modalBody.appendChild(table);
+            }
+            renderTable();
+            // Action buttons
+            modal.querySelector('#viewPO').onclick = () => {
+                // TODO: replace placeholder link with real PO routing once backend is ready
+            };
+            modal.querySelector('#contactSupplier').onclick = () => {
+                // TODO: replace with real supplier contact logic once backend is ready
+                window.open('mailto:sales@techcorp.com');
+            };
+            // Dismiss logic (header close-X)
+            modal.querySelectorAll('[data-dismiss="modal"]').forEach(el=>el.onclick=closeModal);
+            // ESC key
+            document.addEventListener('keydown', escListener);
+            // Show modal
+            modal.style.display = 'flex';
+            modal.addEventListener('click', closeOnOverlayClick); // <-- Add this line
+            // Focus first action
+            setTimeout(() => { modal.querySelector('#viewPO').focus(); }, 0);
+            // Minimal focus trap
+            const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            const first = focusable[0], last = focusable[focusable.length-1];
+            function trap(e){
+              if(e.key!=="Tab")return;
+              if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+              if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+            }
+            modal.addEventListener('keydown', trap);
+            modal._focusTrap = trap;
+        }
+        function closeModal() {
+            const modal = document.getElementById('weekModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.removeEventListener('click', closeOnOverlayClick); // <-- Add this line
+                if (modal._focusTrap) modal.removeEventListener('keydown', modal._focusTrap);
+            }
+            if (originBtn) originBtn.focus();
+            document.removeEventListener('keydown', escListener);
+        }
+        function escListener(e) {
+            if (e.key === 'Escape') closeModal();
+        }
+        function closeOnOverlayClick(event) {
+            // If the clicked element is the modal background itself, close the modal
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
         }
 
         // Parts Table Functions
@@ -1179,6 +1531,7 @@
             });
         }
 
+        /*
         function viewPartDetails(partNumber) {
             const part = mockParts.find(p => p.partNumber === partNumber);
             if (!part) return;
@@ -1215,6 +1568,7 @@
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
+        */
 
         // Supplier Cards Functions
         function populateSupplierCards() {
@@ -1345,6 +1699,7 @@
             }
         }
 
+        /*
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
@@ -1354,6 +1709,7 @@
                 }
             });
         }
+        */
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
