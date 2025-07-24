@@ -1665,7 +1665,7 @@
             
             // Dynamic content refresh
             const riskLevel = week.status.charAt(0).toUpperCase() + week.status.slice(1).replace('-', ' ');
-            weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel} Risk`;
+            weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel}`;
 
             // Root-cause table with sort, highlight, deep links
             const stubRows = [
