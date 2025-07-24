@@ -904,6 +904,113 @@
             padding-top: 16px;
             margin-top: 16px;
         }
+
+        /* --- Analytics Page Enhancements --- */
+        .chart-header-filter {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-header-filter label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+        @media (max-width: 1024px) {
+            .data-table .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* --- Supplier Card Enhancements --- */
+        .supplier-card {
+            border-left: 4px solid #6b7280; /* Default border */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .supplier-card.border-success { border-left-color: #28a745; }
+        .supplier-card.border-primary { border-left-color: #3b82f6; }
+        .supplier-card.border-danger { border-left-color: #d9534f; }
+
+        .rating-trend {
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        .rating-trend.trend-up { color: #28a745; }
+        .rating-trend.trend-down { color: #d9534f; }
+        .rating-trend.trend-neutral { color: #6b7280; }
+
+        .supplier-card-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        .action-popover {
+            position: absolute;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 20;
+            padding: 8px 0;
+            min-width: 200px;
+            list-style: none;
+            margin: 4px 0 0 0;
+        }
+        .action-popover li {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .action-popover li:hover {
+            background: #f1f5f9;
+        }
+
+        .actions-menu {
+            position: absolute; /* detach from table flow */
+            top: calc(100% + 4px); /* 4px gap below the button */
+            right: 0; /* align on the button's right edge */
+            min-width: 160px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.08);
+            z-index: 1000; /* higher than table / modals */
+            padding: 4px 0;
+            list-style: none;
+            margin: 0;
+        }
+        .actions-menu button { /* individual menu items */
+            width: 100%;
+            padding: 8px 12px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .actions-menu button:hover {
+            background: #f1f5f9;
+        }
     </style>
 </head>
 <body>
@@ -1112,6 +1219,12 @@
                         <div class="table-actions">
                             <button class="btn btn-secondary">Export</button>
                             <button class="btn btn-primary" id="bulkPOBtn" disabled>Bulk PO Generation</button>
+                            <div id="bulkActionsContainer" style="position: relative; display: none;">
+                                <button class="btn btn-secondary" id="bulkActionsBtn" aria-haspopup="true" aria-expanded="false">Actions (0)</button>
+                                <ul id="bulkActionsMenu" class="actions-menu" style="display: none;" role="menu">
+                                    <li><button id="assignCategoryBtn" role="menuitem">Assign Category…</button></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="parts-table-container" tabindex="0">
@@ -1211,30 +1324,28 @@
                         <div class="status-card-value">96.7%</div>
                         <div class="status-card-change positive">↑ 2.1% this quarter</div>
                     </div>
-                    <div class="status-card">
-                        <div class="status-card-header">
-                            <span class="status-card-title">Cost Savings</span>
-                            <i class="fas fa-dollar-sign" style="color: #059669;"></i>
-                        </div>
-                        <div class="status-card-value">$47K</div>
-                        <div class="status-card-change positive">vs manual process</div>
-                    </div>
-                    <div class="status-card">
-                        <div class="status-card-header">
-                            <span class="status-card-title">PO Processing Time</span>
-                            <i class="fas fa-stopwatch" style="color: #d97706;"></i>
-                        </div>
-                        <div class="status-card-value">2.3 hrs</div>
-                        <div class="status-card-change positive">↓ 75% reduction</div>
-                    </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
                     <div class="data-table">
                         <div class="table-header">
                             <h3 class="table-title">Lead Time Trends</h3>
+                            <div class="chart-header-filter">
+                                <div class="filter-group">
+                                    <label for="leadTimePrimary">View by:</label>
+                                    <select id="leadTimePrimary" class="filter-select" aria-label="Select lead-time grouping dimension">
+                                        <option value="partCategory">Part Category</option>
+                                        <option value="finalProduct">Final Product</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="leadTimeSecondary" id="leadTimeSecondaryLabel">Select Category:</label>
+                                    <select id="leadTimeSecondary" class="filter-select" aria-label="Select lead-time filter value"></select>
+                                </div>
+                            </div>
                         </div>
                         <div class="chart-container">
+                            <div id="leadTimeAnnouncer" aria-live="polite" class="sr-only"></div>
                             <canvas id="leadTimeChart"></canvas>
                         </div>
                     </div>
@@ -1301,23 +1412,45 @@
       </div>
     </template>
 
+    <!-- Modal template for Bulk Category Assignment -->
+    <template id="assignCategoryModalTemplate">
+      <div id="assignCategoryModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="assignCategoryModalTitle">
+        <div class="modal-content">
+          <header class="modal-header">
+            <h3 id="assignCategoryModalTitle">Assign Category</h3>
+            <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
+          </header>
+          <div class="modal-body" style="padding: 16px;">
+              <div class="filter-group">
+                  <label for="bulkCategorySelector" style="font-weight: 500;">Select a category to assign:</label>
+                  <select id="bulkCategorySelector" class="filter-select" aria-label="Part Category selector"></select>
+              </div>
+          </div>
+          <footer style="padding: 16px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0;">
+              <button class="btn-secondary" data-dismiss="modal">Cancel</button>
+              <button class="btn-primary" id="applyCategoryBtn">Apply</button>
+          </footer>
+        </div>
+      </div>
+    </template>
+
     <script>
         // Mock Data
         const mockParts = [
             {
-                partNumber: "PCB-001", description: "Main Circuit Board", currentStock: 45, safetyStock: 20, leadTime: "12 days", moq: 100, supplier: "TechCorp Industries", recommendedQty: 100, status: "PO Required", price: 25.50, avgWeeklyConsumption: 10, onOrderQty: 100, nextArrival: '2024-03-15'
+                partNumber: "PCB-001", description: "Main Circuit Board", currentStock: 45, safetyStock: 20, leadTime: "12 days", moq: 100, supplier: "TechCorp Industries", recommendedQty: 100, status: "PO Required", price: 25.50, avgWeeklyConsumption: 10, onOrderQty: 100, nextArrival: '2024-03-15', partCategory: "Processors", finalProduct: "Widget Assembly A", monthlyLeadTimes: [12, 13, 12, 11, 12, 11]
             },
             {
-                partNumber: "MTR-205", description: "AC Motor 5HP", currentStock: 8, safetyStock: 15, leadTime: "21 days", moq: 25, supplier: "MechParts Ltd", recommendedQty: 25, status: "Critical", price: 340.00, avgWeeklyConsumption: 5, onOrderQty: 25, nextArrival: '2024-03-22'
+                partNumber: "MTR-205", description: "AC Motor 5HP", currentStock: 8, safetyStock: 15, leadTime: "21 days", moq: 25, supplier: "MechParts Ltd", recommendedQty: 25, status: "Critical", price: 340.00, avgWeeklyConsumption: 5, onOrderQty: 25, nextArrival: '2024-03-22', partCategory: "Motors", finalProduct: "Motor Unit X", monthlyLeadTimes: [21, 22, 20, 21, 22, 21]
             },
             {
-                partNumber: "BRG-034", description: "Ball Bearing 34mm", currentStock: 150, safetyStock: 50, leadTime: "7 days", moq: 200, supplier: "GlobalSupply Co", recommendedQty: 0, status: "Good", price: 12.75, avgWeeklyConsumption: 20, onOrderQty: 0, nextArrival: null
+                partNumber: "BRG-034", description: "Ball Bearing 34mm", currentStock: 150, safetyStock: 50, leadTime: "7 days", moq: 200, supplier: "GlobalSupply Co", recommendedQty: 0, status: "Good", price: 12.75, avgWeeklyConsumption: 20, onOrderQty: 0, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [7, 8, 7, 6, 7, 8]
             },
             {
-                partNumber: "SCR-M5-20", description: "M5 Hex Screw 20mm", currentStock: 2340, safetyStock: 1000, leadTime: "3 days", moq: 5000, supplier: "FastenAll Inc", recommendedQty: 5000, status: "PO Required", price: 0.15, avgWeeklyConsumption: 250, onOrderQty: 0, nextArrival: null
+                partNumber: "SCR-M5-20", description: "M5 Hex Screw 20mm", currentStock: 2340, safetyStock: 1000, leadTime: "3 days", moq: 5000, supplier: "FastenAll Inc", recommendedQty: 5000, status: "PO Required", price: 0.15, avgWeeklyConsumption: 250, onOrderQty: 0, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [7, 8, 7, 6, 7, 8]
             },
             {
-                partNumber: "WIR-022", description: "Electrical Wire 22AWG", currentStock: 890, safetyStock: 500, leadTime: "5 days", moq: 1000, supplier: "ElectroWire Corp", recommendedQty: 0, status: "Good", price: 0.45, avgWeeklyConsumption: 150, onOrderQty: 1000, nextArrival: '2024-03-10'
+                partNumber: "WIR-022", description: "Electrical Wire 22AWG", currentStock: 890, safetyStock: 500, leadTime: "5 days", moq: 1000, supplier: "ElectroWire Corp", recommendedQty: 0, status: "Good", price: 0.45, avgWeeklyConsumption: 150, onOrderQty: 1000, nextArrival: '2024-03-10', partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [5, 5, 6, 5, 4, 5]
             }
         ];
 
@@ -1339,6 +1472,13 @@
             }
         ];
 
+        const mockLeadTimeData = {
+          "Critical A-Grade Parts": [8.5, 8.2, 8.0, 7.9, 7.5, 7.2],
+          "Processors": [14.1, 14.5, 14.2, 13.8, 13.5, 13.9],
+          "Motors": [21.0, 20.5, 21.2, 21.5, 20.8, 20.4],
+          "Mechanical Housings": [5.2, 5.0, 5.1, 5.3, 5.5, 5.4]
+        };
+
         // Navigation
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize navigation
@@ -1348,27 +1488,28 @@
             const updateActivePage = () => {
                 const hash = window.location.hash || '#overview';
                 const targetPageId = hash.substring(1);
-
-                // Update active nav link
+                    
+                    // Update active nav link
                 navLinks.forEach(nav => {
                     nav.classList.toggle('active', nav.getAttribute('href') === hash);
                 });
-                
-                // Show target page
+                    
+                    // Show target page
                 pages.forEach(page => {
                     page.classList.toggle('active', page.id === targetPageId);
                 });
-
-                // Initialize page-specific content
+                    
+                    // Initialize page-specific content
                 if (targetPageId === 'overview') {
-                    generateCalendarGrid();
+                        generateCalendarGrid();
                 } else if (targetPageId === 'parts') {
-                    populatePartsTable();
+                        populatePartsTable();
                 } else if (targetPageId === 'suppliers') {
-                    populateSupplierCards();
+                        populateSupplierCards();
                 } else if (targetPageId === 'analytics') {
-                    setTimeout(() => initializeCharts(), 100);
-                }
+                        setTimeout(() => initializeCharts(), 100);
+                        initLeadTimeFilters();
+                    }
             };
 
             navLinks.forEach(link => {
@@ -1688,45 +1829,45 @@
                 const formattedSpend = totalSpend > 1000000
                     ? `$${(totalSpend / 1000000).toFixed(1)}M`
                     : `$${(totalSpend / 1000).toFixed(0)}K`;
-
+                
                 card.innerHTML = `
                     <div>
-                        <div class="supplier-header">
-                            <div class="supplier-info">
-                                <h3>${supplier.name}</h3>
-                                <p><i class="fas fa-map-marker-alt"></i> ${supplier.country}</p>
-                            </div>
-                            <div class="supplier-rating">
-                                <div class="rating-score">${supplier.rating.toFixed(1)}</div>
-                                <div class="rating-stars">${stars}</div>
-                                <div class="rating-trend ${trendClass}" aria-label="Rating change">${trendArrow}</div>
-                            </div>
+                    <div class="supplier-header">
+                        <div class="supplier-info">
+                            <h3>${supplier.name}</h3>
+                            <p><i class="fas fa-map-marker-alt"></i> ${supplier.country}</p>
                         </div>
-                        
-                        <div class="supplier-metrics">
-                            <div class="metric">
-                                <div class="metric-value">${supplier.onTimeDelivery}%</div>
-                                <div class="metric-label">On-Time Delivery</div>
-                            </div>
+                        <div class="supplier-rating">
+                                <div class="rating-score">${supplier.rating.toFixed(1)}</div>
+                            <div class="rating-stars">${stars}</div>
+                                <div class="rating-trend ${trendClass}" aria-label="Rating change">${trendArrow}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="supplier-metrics">
+                        <div class="metric">
+                            <div class="metric-value">${supplier.onTimeDelivery}%</div>
+                            <div class="metric-label">On-Time Delivery</div>
+                        </div>
                              <div class="metric">
                                 <div class="metric-value">${supplier.partAcceptanceRate}%</div>
                                 <div class="metric-label">Quality Score</div>
                             </div>
-                            <div class="metric">
-                                <div class="metric-value">${supplier.avgLeadTime}</div>
-                                <div class="metric-label">Avg Lead Time (days)</div>
-                            </div>
+                        <div class="metric">
+                            <div class="metric-value">${supplier.avgLeadTime}</div>
+                            <div class="metric-label">Avg Lead Time (days)</div>
+                        </div>
                             <div class="metric">
                                 <div class="metric-value">${totalSpend > 0 ? formattedSpend : 'N/A'}</div>
                                 <div class="metric-label">Total Spend (${timePeriodKey})</div>
                             </div>
-                            <div class="metric">
-                                <div class="metric-value">${supplier.totalOrders}</div>
-                                <div class="metric-label">Total Orders</div>
-                            </div>
-                            <div class="metric">
-                                <div class="metric-value">${supplier.lateDeliveries}</div>
-                                <div class="metric-label">Late Deliveries</div>
+                        <div class="metric">
+                            <div class="metric-value">${supplier.totalOrders}</div>
+                            <div class="metric-label">Total Orders</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value">${supplier.lateDeliveries}</div>
+                            <div class="metric-label">Late Deliveries</div>
                             </div>
                         </div>
                     </div>
@@ -1741,17 +1882,23 @@
         }
 
         // Charts Functions
+        let leadTimeChartInstance, supplierChartInstance, inventoryChartInstance;
         function initializeCharts() {
+            // Destroy existing charts to prevent memory leaks
+            if(leadTimeChartInstance) leadTimeChartInstance.destroy();
+            if(supplierChartInstance) supplierChartInstance.destroy();
+            if(inventoryChartInstance) inventoryChartInstance.destroy();
+
             // Lead Time Trends Chart
             const leadTimeCtx = document.getElementById('leadTimeChart');
             if (leadTimeCtx) {
-                new Chart(leadTimeCtx, {
+                leadTimeChartInstance = new Chart(leadTimeCtx, {
                     type: 'line',
                     data: {
                         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
                         datasets: [{
                             label: 'Average Lead Time (days)',
-                            data: [9.2, 8.8, 9.1, 8.4, 8.7, 8.4],
+                            data: [], // Initially empty
                             borderColor: '#3b82f6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
                             tension: 0.3
@@ -1760,11 +1907,7 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: false
-                            }
-                        }
+                        scales: { y: { beginAtZero: false } }
                     }
                 });
             }
@@ -1772,7 +1915,7 @@
             // Supplier Performance Chart
             const supplierCtx = document.getElementById('supplierChart');
             if (supplierCtx) {
-                new Chart(supplierCtx, {
+                supplierChartInstance = new Chart(supplierCtx, {
                     type: 'doughnut',
                     data: {
                         labels: ['Excellent (90%+)', 'Good (80-89%)', 'Needs Improvement (<80%)'],
@@ -1791,7 +1934,7 @@
             // Inventory Value Chart
             const inventoryCtx = document.getElementById('inventoryChart');
             if (inventoryCtx) {
-                new Chart(inventoryCtx, {
+                inventoryChartInstance = new Chart(inventoryCtx, {
                     type: 'bar',
                     data: {
                         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -1843,6 +1986,19 @@
         function updateBulkPOButton() {
             const btn = document.getElementById('bulkPOBtn');
             btn.disabled = selectedPartIds.size === 0;
+        }
+
+        function updateBulkActionsButton() {
+            const container = document.getElementById('bulkActionsContainer');
+            const btn = document.getElementById('bulkActionsBtn');
+            if (!container || !btn) return;
+
+            if (selectedPartIds.size > 0) {
+                container.style.display = 'inline-block';
+                btn.textContent = `Actions (${selectedPartIds.size})`;
+            } else {
+                container.style.display = 'none';
+            }
         }
 
         function populatePartsTable() {
@@ -1899,6 +2055,7 @@
                         selectedPartIds.delete(partId);
                     }
                     updateBulkPOButton();
+                    updateBulkActionsButton();
                     updateSelectAllCheckboxState();
                 });
             });
@@ -1933,6 +2090,7 @@
                 }
             });
             updateBulkPOButton();
+            updateBulkActionsButton();
         });
 
         document.querySelectorAll('.parts-table-container th[data-sort]').forEach(th => {
@@ -1984,6 +2142,7 @@
                     selectedPartIds.clear();
                     populatePartsTable();
                     updateBulkPOButton();
+                    updateBulkActionsButton();
                     updateSelectAllCheckboxState();
                     closeModalById('bulkPOModal');
                 };
@@ -2032,11 +2191,31 @@
                     </div>
                 </div>
                 <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <h4 style="margin-bottom: 8px; color: #374151;">Configuration</h4>
+                    <div style="display:flex; align-items:center; gap: 8px;">
+                        <label for="partCategorySelector" style="font-weight: 500;">Part Category:</label>
+                        <select id="partCategorySelector" class="filter-select" aria-label="Part Category selector">
+                            <option value="unassigned">— unassigned —</option>
+                            ${partCategories.map(cat => `<option value="${cat}" ${part.partCategory === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
                     <h4 style="margin-bottom: 8px; color: #374151;">Recommendation</h4>
                     <p><span class="status-badge ${statusClass}">${recommendationText}</span></p>
                 </div>
             `;
             modal.style.display = 'flex';
+
+            // Add listener for category change
+            const categorySelector = modal.querySelector('#partCategorySelector');
+            if (categorySelector) {
+                categorySelector.addEventListener('change', function(e) {
+                    const newCategory = e.target.value;
+                    part.partCategory = newCategory === "unassigned" ? null : newCategory;
+                    refreshPartDependentViews();
+                });
+            }
 
             // Prevent re-binding listeners
             if (modal.dataset.bound !== "true") {
@@ -2054,10 +2233,162 @@
             }
         }
 
+        function refreshPartDependentViews() {
+            // Re-render the parts table to reflect any changes.
+            populatePartsTable();
+
+            // In a more complex app, this might emit a custom event
+            // that other components (like the analytics dashboard) could listen for.
+            // For now, the analytics page will re-init its filters when it becomes active.
+            console.log('Part data changed. Dependent views refreshed.');
+        }
+
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             console.log('ManufacturingOS Demo Application Loaded');
         });
+
+        // --- Lead Time Chart Functions ---
+        const partCategories = [...new Set(mockParts.map(p => p.partCategory))].sort();
+        const finalProducts = [...new Set(mockParts.map(p => p.finalProduct))].sort();
+
+        function updateLeadTimeChart(groupType, groupValue) {
+            const filteredParts = mockParts.filter(p => p[groupType] === groupValue);
+            let aggregatedData = [0, 0, 0, 0, 0, 0];
+
+            if (filteredParts.length > 0) {
+                const monthlySums = [0, 0, 0, 0, 0, 0];
+                filteredParts.forEach(part => {
+                    part.monthlyLeadTimes.forEach((leadTime, monthIndex) => {
+                        monthlySums[monthIndex] += leadTime;
+                    });
+                });
+                aggregatedData = monthlySums.map(sum => sum / filteredParts.length);
+            }
+
+            leadTimeChartInstance.data.datasets[0].data = aggregatedData;
+            leadTimeChartInstance.data.datasets[0].label = `Avg Lead Time for ${groupValue}`;
+            leadTimeChartInstance.update();
+
+            const announcer = document.getElementById('leadTimeAnnouncer');
+            if (announcer) {
+                announcer.textContent = `Lead-time trend updated for ${groupValue}.`;
+            }
+        }
+
+        function initLeadTimeFilters() {
+            const primarySelect = document.getElementById('leadTimePrimary');
+            const secondarySelect = document.getElementById('leadTimeSecondary');
+            const secondaryLabel = document.getElementById('leadTimeSecondaryLabel');
+
+            function populateSecondary(dataSource, label, defaultValue) {
+                secondarySelect.innerHTML = '';
+                dataSource.forEach(item => {
+                    const option = new Option(item, item);
+                    secondarySelect.add(option);
+                });
+                secondarySelect.value = defaultValue;
+                secondaryLabel.textContent = `Select ${label}:`;
+            }
+
+            primarySelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                if (selectedType === 'partCategory') {
+                    populateSecondary(partCategories, 'Category', partCategories[0]);
+                } else {
+                    populateSecondary(finalProducts, 'Product', finalProducts[0]);
+                }
+                updateLeadTimeChart(selectedType, secondarySelect.value);
+            });
+
+            secondarySelect.addEventListener('change', function() {
+                updateLeadTimeChart(primarySelect.value, this.value);
+            });
+
+            // Initial population
+            populateSecondary(partCategories, 'Category', 'Critical A-Grade Parts');
+            updateLeadTimeChart('partCategory', 'Critical A-Grade Parts');
+        }
+
+        document.getElementById('bulkActionsBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const menu = document.getElementById('bulkActionsMenu');
+            const btn = e.currentTarget;
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+            if (isExpanded) {
+                menu.style.display = 'none';
+                btn.setAttribute('aria-expanded', 'false');
+            } else {
+                menu.style.display = 'block';
+                btn.setAttribute('aria-expanded', 'true');
+                // Optional: edge collision safeguard would go here
+                menu.querySelector('button')?.focus(); // Focus first item
+            }
+        });
+
+        function closeBulkActionsMenu() {
+            const menu = document.getElementById('bulkActionsMenu');
+            if (menu && menu.style.display !== 'none') {
+                menu.style.display = 'none';
+                document.getElementById('bulkActionsBtn')?.setAttribute('aria-expanded', 'false');
+            }
+        }
+
+        document.addEventListener('click', closeBulkActionsMenu);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeBulkActionsMenu();
+            }
+        });
+
+        document.getElementById('assignCategoryBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeBulkActionsMenu();
+            openAssignCategoryModal();
+        });
+
+        function openAssignCategoryModal() {
+            if (!document.getElementById('assignCategoryModal')) {
+                 const tpl = document.getElementById('assignCategoryModalTemplate');
+                 document.body.appendChild(tpl.content.cloneNode(true));
+            }
+            const modal = document.getElementById('assignCategoryModal');
+
+            modal.querySelector('#assignCategoryModalTitle').textContent = `Assign Category to ${selectedPartIds.size} Parts`;
+            const categorySelector = modal.querySelector('#bulkCategorySelector');
+            categorySelector.innerHTML = partCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
+            modal.style.display = 'flex';
+
+            if (modal.dataset.bound !== "true") {
+                modal.querySelector('#applyCategoryBtn').onclick = () => {
+                    const selectedCategory = categorySelector.value;
+                    if (!partCategories.includes(selectedCategory)) {
+                        alert("Error: The selected category no longer exists. Please refresh and try again.");
+                        return;
+                    }
+                    
+                    selectedPartIds.forEach(partId => {
+                        const part = mockParts.find(p => p.partNumber === partId);
+                        if (part) part.partCategory = selectedCategory;
+                    });
+
+                    selectedPartIds.clear();
+                    refreshPartDependentViews();
+                    updateBulkPOButton();
+                    updateBulkActionsButton();
+                    updateSelectAllCheckboxState();
+                    closeModalById('assignCategoryModal');
+                };
+
+                modal.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+                    btn.onclick = () => closeModalById('assignCategoryModal');
+                });
+                modal.dataset.bound = "true";
+            }
+        }
     </script>
 </body>
 </html>
