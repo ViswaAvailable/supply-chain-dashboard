@@ -879,6 +879,31 @@
           .weekly-status-grid{grid-template-columns:1fr;}
           .calendar-header .legend{display:none;}
         }
+        /* --- Supplier Card Enhancements --- */
+        .supplier-card {
+            border-left: 4px solid #6b7280; /* Default border */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .supplier-card.border-success { border-left-color: #28a745; }
+        .supplier-card.border-primary { border-left-color: #3b82f6; }
+        .supplier-card.border-danger { border-left-color: #d9534f; }
+
+        .rating-trend {
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        .rating-trend.trend-up { color: #28a745; }
+        .rating-trend.trend-down { color: #d9534f; }
+        .rating-trend.trend-neutral { color: #6b7280; }
+
+        .supplier-card-footer {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
     </style>
 </head>
 <body>
@@ -890,25 +915,25 @@
             </div>
             <ul class="nav-menu">
                 <li class="nav-item">
-                    <a class="nav-link active" data-page="overview">
+                    <a class="nav-link active" data-page="overview" href="#overview">
                         <i class="fas fa-calendar-alt"></i>
                         Assembly Overview
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-page="parts">
+                    <a class="nav-link" data-page="parts" href="#parts">
                         <i class="fas fa-cogs"></i>
                         Parts Planning
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-page="suppliers">
+                    <a class="nav-link" data-page="suppliers" href="#suppliers">
                         <i class="fas fa-truck"></i>
                         Supplier Performance
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-page="analytics">
+                    <a class="nav-link" data-page="analytics" href="#analytics">
                         <i class="fas fa-chart-line"></i>
                         Analytics & KPIs
                     </a>
@@ -1090,29 +1115,29 @@
                         </div>
                     </div>
                     <div class="parts-table-container" tabindex="0">
-                        <table>
-                            <thead>
-                                <tr>
+                    <table>
+                        <thead>
+                            <tr>
                                     <th><input type="checkbox" id="selectAllPartsCheckbox" aria-label="Select all parts"></th>
-                                    <th>Part Number</th>
-                                    <th>Description</th>
-                                    <th>Current Stock</th>
-                                    <th>Safety Stock</th>
-                                    <th>Lead Time</th>
-                                    <th>MOQ</th>
-                                    <th>Supplier</th>
+                                <th>Part Number</th>
+                                <th>Description</th>
+                                <th>Current Stock</th>
+                                <th>Safety Stock</th>
+                                <th>Lead Time</th>
+                                <th>MOQ</th>
+                                <th>Supplier</th>
                                     <th>Recommended Order Qty</th>
-                                    <th>Status</th>
+                                <th>Status</th>
                                     <th data-sort="weeksOfStock">Weeks of Stock <span class="sort-icon"></span></th>
                                     <th data-sort="onOrderQty">On Order Qty <span class="sort-icon"></span></th>
                                     <th data-sort="nextArrival">Next Arrival <span class="sort-icon"></span></th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="partsTable">
-                                <!-- Generated dynamically -->
-                            </tbody>
-                        </table>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="partsTable">
+                            <!-- Generated dynamically -->
+                        </tbody>
+                    </table>
                     </div>
                 </div>
             </div>
@@ -1239,14 +1264,14 @@
     <!-- Part Detail Modal Template -->
     <template id="partDetailModalTemplate">
         <div id="partDetailModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="partDetailModalTitle">
-            <div class="modal-content">
+        <div class="modal-content">
                 <header class="modal-header">
                     <h3 id="partDetailModalTitle">Part Details</h3>
                     <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
                 </header>
                 <div class="modal-body" id="partDetailModalBody">
                     <!-- Part details injected here -->
-                </div>
+            </div>
             </div>
         </div>
     </template>
@@ -1271,7 +1296,7 @@
               <button class="btn-primary" id="confirmBulkPO">Confirm & Create POs</button>
               <button class="btn-secondary" data-dismiss="modal">Cancel</button>
             </footer>
-          </div>
+    </div>
         </div>
       </div>
     </template>
@@ -1298,54 +1323,19 @@
 
         const mockSuppliers = [
             {
-                name: "TechCorp Industries",
-                country: "Taiwan",
-                onTimeDelivery: 94,
-                avgLeadTime: 11.2,
-                totalOrders: 48,
-                lateDeliveries: 3,
-                parts: ["PCB-001", "PCB-002", "LCD-15", "SEN-004"],
-                rating: 4.7
+                id: "techcorp-industries", name: "TechCorp Industries", country: "Taiwan", onTimeDelivery: 94, avgLeadTime: 11.2, totalOrders: 48, lateDeliveries: 3, parts: ["PCB-001", "PCB-002", "LCD-15", "SEN-004"], rating: 4.7, ratingChange: 0.2, totalSpend: { '3m': 250000, '6m': 520000, '12m': 1100000 }, partAcceptanceRate: 99.8
             },
             {
-                name: "MechParts Ltd",
-                country: "Germany",
-                onTimeDelivery: 87,
-                avgLeadTime: 18.5,
-                totalOrders: 32,
-                lateDeliveries: 4,
-                parts: ["MTR-205", "GBX-101", "SHF-034"],
-                rating: 4.2
+                id: "mechparts-ltd", name: "MechParts Ltd", country: "Germany", onTimeDelivery: 87, avgLeadTime: 18.5, totalOrders: 32, lateDeliveries: 4, parts: ["MTR-205", "GBX-101", "SHF-034"], rating: 4.2, ratingChange: -0.1, totalSpend: { '3m': 480000, '6m': 950000, '12m': 1800000 }, partAcceptanceRate: 98.5
             },
             {
-                name: "GlobalSupply Co",
-                country: "China",
-                onTimeDelivery: 91,
-                avgLeadTime: 8.3,
-                totalOrders: 67,
-                lateDeliveries: 6,
-                parts: ["BRG-034", "BRG-025", "WSH-012", "SPR-008"],
-                rating: 4.5
+                id: "globalsupply-co", name: "GlobalSupply Co", country: "China", onTimeDelivery: 91, avgLeadTime: 8.3, totalOrders: 67, lateDeliveries: 6, parts: ["BRG-034", "BRG-025", "WSH-012", "SPR-008"], rating: 3.8, ratingChange: -0.4, totalSpend: { '3m': 120000, '6m': 260000, '12m': 550000 }, partAcceptanceRate: 99.1
             },
             {
-                name: "FastenAll Inc",
-                country: "USA",
-                onTimeDelivery: 98,
-                avgLeadTime: 2.1,
-                totalOrders: 24,
-                lateDeliveries: 1,
-                parts: ["SCR-M5-20", "SCR-M6-25", "NUT-M5", "WSH-M5"],
-                rating: 4.9
+                id: "fastenall-inc", name: "FastenAll Inc", country: "USA", onTimeDelivery: 98, avgLeadTime: 2.1, totalOrders: 24, lateDeliveries: 1, parts: ["SCR-M5-20", "SCR-M6-25", "NUT-M5", "WSH-M5"], rating: 4.9, ratingChange: 0.1, totalSpend: { '3m': 80000, '6m': 150000, '12m': 320000 }, partAcceptanceRate: 99.9
             },
             {
-                name: "ElectroWire Corp",
-                country: "Malaysia",
-                onTimeDelivery: 89,
-                avgLeadTime: 6.7,
-                totalOrders: 19,
-                lateDeliveries: 2,
-                parts: ["WIR-022", "WIR-018", "CBL-USB", "CON-024"],
-                rating: 4.3
+                id: "electrowire-corp", name: "ElectroWire Corp", country: "Malaysia", onTimeDelivery: 89, avgLeadTime: 6.7, totalOrders: 19, lateDeliveries: 2, parts: ["WIR-022", "WIR-018", "CBL-USB", "CON-024"], rating: 4.4, ratingChange: 0.0, totalSpend: { '3m': 65000, '6m': 140000, '12m': 290000 }, partAcceptanceRate: 99.3
             }
         ];
 
@@ -1355,36 +1345,45 @@
             const navLinks = document.querySelectorAll('.nav-link');
             const pages = document.querySelectorAll('.page');
 
+            const updateActivePage = () => {
+                const hash = window.location.hash || '#overview';
+                const targetPageId = hash.substring(1);
+
+                // Update active nav link
+                navLinks.forEach(nav => {
+                    nav.classList.toggle('active', nav.getAttribute('href') === hash);
+                });
+                
+                // Show target page
+                pages.forEach(page => {
+                    page.classList.toggle('active', page.id === targetPageId);
+                });
+
+                // Initialize page-specific content
+                if (targetPageId === 'overview') {
+                    generateCalendarGrid();
+                } else if (targetPageId === 'parts') {
+                    populatePartsTable();
+                } else if (targetPageId === 'suppliers') {
+                    populateSupplierCards();
+                } else if (targetPageId === 'analytics') {
+                    setTimeout(() => initializeCharts(), 100);
+                }
+            };
+
             navLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    const targetPage = this.dataset.page;
-                    
-                    // Update active nav link
-                    navLinks.forEach(nav => nav.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Show target page
-                    pages.forEach(page => page.classList.remove('active'));
-                    document.getElementById(targetPage).classList.add('active');
-                    
-                    // Initialize page-specific content
-                    if (targetPage === 'overview') {
-                        generateCalendarGrid();
-                    } else if (targetPage === 'parts') {
-                        populatePartsTable();
-                    } else if (targetPage === 'suppliers') {
-                        populateSupplierCards();
-                    } else if (targetPage === 'analytics') {
-                        setTimeout(() => initializeCharts(), 100);
-                    }
+                link.addEventListener('click', function(e) {
+                    // Let the default hash change handle the navigation
                 });
             });
 
-            // Initialize default page
-            generateCalendarGrid();
-            populatePartsTable();
-            populateSupplierCards();
-            updateBulkPOButton(); // Set initial button state after first render
+            window.addEventListener('hashchange', updateActivePage);
+
+            // Initial page load
+            updateActivePage();
+
+            // Hook up supplier page filters
+            document.querySelector('#suppliers .filters select[aria-label="Time Period"]')?.addEventListener('change', populateSupplierCards);
         });
 
         // Calendar Functions
@@ -1661,49 +1660,79 @@
             const container = document.getElementById('supplierCards');
             container.innerHTML = '';
 
+            const timePeriodFilter = document.querySelector('#suppliers .filters select[aria-label="Time Period"]');
+            const timePeriodKey = timePeriodFilter ? timePeriodFilter.value : '6m'; // e.g. '6m'
+
             mockSuppliers.forEach(supplier => {
                 const card = document.createElement('div');
-                card.className = 'supplier-card';
+                
+                let borderClass = 'border-primary';
+                if (supplier.rating >= 4.5) borderClass = 'border-success';
+                else if (supplier.rating < 4.0) borderClass = 'border-danger';
+                card.className = `supplier-card ${borderClass}`;
                 
                 const stars = '★'.repeat(Math.floor(supplier.rating)) + 
                             (supplier.rating % 1 >= 0.5 ? '☆' : '');
                 
+                let trendClass = 'trend-neutral';
+                let trendArrow = '';
+                if (supplier.ratingChange > 0) {
+                    trendClass = 'trend-up';
+                    trendArrow = `↑${supplier.ratingChange.toFixed(1)}`;
+                } else if (supplier.ratingChange < 0) {
+                    trendClass = 'trend-down';
+                    trendArrow = `↓${Math.abs(supplier.ratingChange).toFixed(1)}`;
+                }
+
+                const totalSpend = supplier.totalSpend[timePeriodKey] || 0;
+                const formattedSpend = totalSpend > 1000000
+                    ? `$${(totalSpend / 1000000).toFixed(1)}M`
+                    : `$${(totalSpend / 1000).toFixed(0)}K`;
+
                 card.innerHTML = `
-                    <div class="supplier-header">
-                        <div class="supplier-info">
-                            <h3>${supplier.name}</h3>
-                            <p><i class="fas fa-map-marker-alt"></i> ${supplier.country}</p>
+                    <div>
+                        <div class="supplier-header">
+                            <div class="supplier-info">
+                                <h3>${supplier.name}</h3>
+                                <p><i class="fas fa-map-marker-alt"></i> ${supplier.country}</p>
+                            </div>
+                            <div class="supplier-rating">
+                                <div class="rating-score">${supplier.rating.toFixed(1)}</div>
+                                <div class="rating-stars">${stars}</div>
+                                <div class="rating-trend ${trendClass}" aria-label="Rating change">${trendArrow}</div>
+                            </div>
                         </div>
-                        <div class="supplier-rating">
-                            <div class="rating-score">${supplier.rating}</div>
-                            <div class="rating-stars">${stars}</div>
+                        
+                        <div class="supplier-metrics">
+                            <div class="metric">
+                                <div class="metric-value">${supplier.onTimeDelivery}%</div>
+                                <div class="metric-label">On-Time Delivery</div>
+                            </div>
+                             <div class="metric">
+                                <div class="metric-value">${supplier.partAcceptanceRate}%</div>
+                                <div class="metric-label">Quality Score</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${supplier.avgLeadTime}</div>
+                                <div class="metric-label">Avg Lead Time (days)</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${totalSpend > 0 ? formattedSpend : 'N/A'}</div>
+                                <div class="metric-label">Total Spend (${timePeriodKey})</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${supplier.totalOrders}</div>
+                                <div class="metric-label">Total Orders</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">${supplier.lateDeliveries}</div>
+                                <div class="metric-label">Late Deliveries</div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="supplier-metrics">
-                        <div class="metric">
-                            <div class="metric-value">${supplier.onTimeDelivery}%</div>
-                            <div class="metric-label">On-Time Delivery</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">${supplier.avgLeadTime}</div>
-                            <div class="metric-label">Avg Lead Time (days)</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">${supplier.totalOrders}</div>
-                            <div class="metric-label">Total Orders</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-value">${supplier.lateDeliveries}</div>
-                            <div class="metric-label">Late Deliveries</div>
-                        </div>
-                    </div>
-                    
-                    <div class="parts-list">
-                        <h4>Parts Supplied (${supplier.parts.length})</h4>
-                        <div class="parts-tags">
-                            ${supplier.parts.map(part => `<span class="part-tag">${part}</span>`).join('')}
-                        </div>
+                    <div class="supplier-card-footer">
+                         <a href="supplier-detail.html?id=${supplier.id}" class="btn btn-primary" style="width: 100%;">View Details</a>
                     </div>
                 `;
                 
