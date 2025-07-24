@@ -523,14 +523,15 @@
             z-index: 1000;
         }
 
+        /* --- Modal overlay and content panel --- */
         .modal-content {
             background: white;
-            padding: 20px;
+            padding: 0; /* Let header/body control padding */
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             width: clamp(320px, 90vw, 800px); /* Responsive width */
-            max-height: 80vh;
-            overflow-y: auto;
+            max-height: 85vh; /* Increased max-height */
+            overflow: hidden; /* Hide scrollbars on content, body will handle it */
             display: flex;
             flex-direction: column;
         }
@@ -610,10 +611,15 @@
           display:flex;justify-content:space-between;align-items:center;
           position:sticky;top:0;background:#fff;z-index:2;padding:12px 16px;
           border-bottom:1px solid #e5e7eb;
+          flex-shrink: 0; /* Prevent header from shrinking */
         }
         .modal-actions button{margin-left:8px;}
         .btn-icon{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#475569;}
-        .modal-body{max-height:70vh;overflow:auto;padding:0 16px 16px;}
+        .modal-body{
+            max-height:70vh;
+            overflow:auto;
+            padding: 16px; /* Restore padding for body */
+        }
         .modal .root-cause{width:100%;border-collapse:collapse;font-size:14px;}
         .modal .root-cause th,.modal .root-cause td{padding:8px 10px;border-bottom:1px solid #e2e8f0;}
         .modal .root-cause tr.critical{background:#ffe6e6;}
@@ -1011,6 +1017,11 @@
         .actions-menu button:hover {
             background: #f1f5f9;
         }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -1160,15 +1171,15 @@
                 <!-- Modal template for Week Details (lazy-injected) -->
                 <template id="weekModalTemplate">
                   <div id="weekModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-                    <header class="modal-header">
-                      <h3 id="modalTitle">Week X – Status</h3>
-                      <div class="modal-actions">
-                        <button class="btn-primary" id="viewPO">View PO</button>
-                        <button class="btn-secondary" id="contactSupplier">Contact Supplier</button>
-                        <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
-                </div>
-                    </header>
-                    <div class="modal-body"><!-- root-cause table injected here --></div>
+                    <div class="modal-content">
+                        <header class="modal-header">
+                          <h3 id="modalTitle">Week X Details: Status</h3>
+                          <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
+                        </header>
+                        <div class="modal-body">
+                            <!-- Table will go here -->
+                        </div>
+                    </div>
                   </div>
                 </template>
                 <!-- Modal for Weekly Details -->
@@ -1599,7 +1610,16 @@
             // Scaffold: recalc grid cols if needed in future
         }, 150));
         // --- Modal logic ---
-        let modalInjected = false, originBtn = null;
+        let weekModalEl = null, originBtn = null;
+
+        function hideWeekModal() {
+            if (weekModalEl) weekModalEl.style.display = 'none';
+            if (originBtn) {
+                originBtn.focus();
+                originBtn = null;
+            }
+        }
+
         function openModal(btn, week) {
             // --- GUARD CLAUSE ---
             // If the function is not called with a valid button element and a week object,
@@ -1609,123 +1629,88 @@
                 return;
             }
             // --- END GUARD CLAUSE ---
-
             originBtn = btn;
-            if (!modalInjected) {
+
+            // Singleton modal creation & one-time binding
+            if (!weekModalEl) {
                 const tpl = document.getElementById('weekModalTemplate');
-                const node = tpl.content.cloneNode(true);
-                document.body.appendChild(node);
-                modalInjected = true;
+                document.body.appendChild(tpl.content.cloneNode(true));
+                weekModalEl = document.getElementById('weekModal');
+
+                if (weekModalEl.dataset.bound !== 'true') {
+                    // Dismissal logic
+                    weekModalEl.querySelectorAll('[data-dismiss="modal"]').forEach(el => el.onclick = hideWeekModal);
+                    weekModalEl.addEventListener('click', (event) => {
+                        if (event.target === event.currentTarget) hideWeekModal();
+                    });
+
+                    // Focus trap & Esc key
+                    const focusable = [...weekModalEl.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')];
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+
+                    function trap(e) {
+                        if (e.key === 'Escape') {
+                            hideWeekModal();
+                            return;
+                        }
+                        if (e.key !== 'Tab' || !last) return; // a modal with no focusable elements
+                        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                        if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+                    }
+                    weekModalEl.addEventListener('keydown', trap);
+                    weekModalEl.dataset.bound = 'true';
+                }
             }
-            const modal = document.getElementById('weekModal');
-            // Fill modal title
-            document.getElementById('modalTitle').textContent = `Week ${week.week} – ${week.status === 'critical' ? 'Critical Risk' : 'At Risk'}`;
+            
+            // Dynamic content refresh
+            const riskLevel = week.status.charAt(0).toUpperCase() + week.status.slice(1).replace('-', ' ');
+            weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel} Risk`;
+
             // Root-cause table with sort, highlight, deep links
             const stubRows = [
-                { partId: 'PCB-001', supplier: 'TechCorp Industries', reqQty: 120, onHand: 45, shortfall: 75, eta: '2024-02-10', po: 'PO-1001' },
-                { partId: 'MTR-205', supplier: 'MechParts Ltd', reqQty: 30, onHand: 8, shortfall: 22, eta: '2024-02-12', po: 'PO-1002' },
-                { partId: 'BRG-034', supplier: 'GlobalSupply Co', reqQty: 200, onHand: 150, shortfall: 50, eta: '2024-02-15', po: 'PO-1003' }
+                { partId: 'PCB-001', supplier: 'TechCorp Industries', supplierEmail: 'sales@techcorp.com', shortfall: 75, po: 'PO-1001' },
+                { partId: 'MTR-205', supplier: 'MechParts Ltd', supplierEmail: 'orders@mechparts.de', shortfall: 22, po: 'PO-1002' },
+                { partId: 'BRG-034', supplier: 'GlobalSupply Co', supplierEmail: 'supply@globalsupply.cn', shortfall: 50, po: 'PO-1003' }
             ];
-            let sortKey = 'shortfall', sortDir = -1;
-            const buffer = 20;
-            function renderTable() {
-                const table = document.createElement('table');
-                table.className = 'root-cause';
-                const thead = document.createElement('thead');
-                thead.innerHTML = `<tr>
-                  <th data-sort="partId">Part ID <span class="sort">${sortKey==='partId'?(sortDir>0?'▲':'▼'):''}</span></th>
-                  <th data-sort="supplier">Supplier <span class="sort">${sortKey==='supplier'?(sortDir>0?'▲':'▼'):''}</span></th>
-                  <th data-sort="reqQty">Req Qty <span class="sort">${sortKey==='reqQty'?(sortDir>0?'▲':'▼'):''}</span></th>
-                  <th data-sort="onHand">On-Hand <span class="sort">${sortKey==='onHand'?(sortDir>0?'▲':'▼'):''}</span></th>
-                  <th data-sort="shortfall">Shortfall <span class="sort">${sortKey==='shortfall'?(sortDir>0?'▲':'▼'):''}</span></th>
-                  <th data-sort="eta">ETA <span class="sort">${sortKey==='eta'?(sortDir>0?'▲':'▼'):''}</span></th>
-                  <th data-sort="po">PO# <span class="sort">${sortKey==='po'?(sortDir>0?'▲':'▼'):''}</span></th>
-                </tr>`;
-                table.appendChild(thead);
-                const tbody = document.createElement('tbody');
-                let rows = stubRows.slice().sort((a,b)=>{
-                  if(a[sortKey]<b[sortKey])return -1*sortDir;
-                  if(a[sortKey]>b[sortKey])return 1*sortDir;
-                  return 0;
-            });
-                rows.forEach(row => {
-                  const tr = document.createElement('tr');
-                  if (row.shortfall > 0) tr.className = 'critical';
-                  // Deep links
-                  const tdPart = document.createElement('td');
-                  tdPart.innerHTML = `<a href="/parts?part=${row.partId}">${row.partId}</a>`;
-                  const tdSupp = document.createElement('td');
-                  tdSupp.innerHTML = `<a href="/suppliers?id=${encodeURIComponent(row.supplier)}">${row.supplier}</a>`;
-                  const tdReq = document.createElement('td'); tdReq.textContent = row.reqQty;
-                  const tdOnHand = document.createElement('td'); tdOnHand.textContent = row.onHand;
-                  const tdShort = document.createElement('td'); tdShort.textContent = row.shortfall; tdShort.className = 'shortfall';
-                  if(row.shortfall>buffer){tdShort.classList.add('negative');}
-                  const tdEta = document.createElement('td'); tdEta.textContent = formatDate(row.eta);
-                  const tdPO = document.createElement('td'); tdPO.textContent = row.po;
-                  tr.append(tdPart,tdSupp,tdReq,tdOnHand,tdShort,tdEta,tdPO);
-                  tbody.appendChild(tr);
-                });
-                table.appendChild(tbody);
-                // Sort listeners
-                thead.querySelectorAll('th[data-sort]').forEach(th=>{
-                  th.style.cursor='pointer';
-                  th.onclick=()=>{
-                    const k=th.getAttribute('data-sort');
-                    if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1;}
-                    renderTable();
-                  };
-                });
-                const modalBody = modal.querySelector('.modal-body');
-                modalBody.innerHTML = '';
-                modalBody.appendChild(table);
-            }
-            renderTable();
-            // Action buttons
-            modal.querySelector('#viewPO').onclick = () => {
-                // TODO: replace placeholder link with real PO routing once backend is ready
-            };
-            modal.querySelector('#contactSupplier').onclick = () => {
-                // TODO: replace with real supplier contact logic once backend is ready
-                window.open('mailto:sales@techcorp.com');
-            };
-            // Dismiss logic (header close-X)
-            modal.querySelectorAll('[data-dismiss="modal"]').forEach(el=>el.onclick=closeModal);
-            // ESC key
-            document.addEventListener('keydown', escListener);
-            // Show modal
-            modal.style.display = 'flex';
-            modal.addEventListener('click', closeOnOverlayClick); // <-- Add this line
-            // Focus first action
-            setTimeout(() => { modal.querySelector('#viewPO').focus(); }, 0);
-            // Minimal focus trap
-            const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-            const first = focusable[0], last = focusable[focusable.length-1];
-            function trap(e){
-              if(e.key!=="Tab")return;
-              if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
-              if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
-            }
-            modal.addEventListener('keydown', trap);
-            modal._focusTrap = trap;
-        }
-        function closeModal() {
-            const modal = document.getElementById('weekModal');
-            if (modal) {
-                modal.style.display = 'none';
-                modal.removeEventListener('click', closeOnOverlayClick); // <-- Add this line
-                if (modal._focusTrap) modal.removeEventListener('keydown', modal._focusTrap);
-            }
-            if (originBtn) originBtn.focus();
-            document.removeEventListener('keydown', escListener);
-        }
-        function escListener(e) {
-            if (e.key === 'Escape') closeModal();
-        }
-        function closeOnOverlayClick(event) {
-            // If the clicked element is the modal background itself, close the modal
-            if (event.target === event.currentTarget) {
-                closeModal();
-            }
+
+            const table = document.createElement('table');
+            table.className = 'root-cause';
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Part #</th>
+                        <th>Supplier</th>
+                        <th>Shortfall</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                ${stubRows.map(row => `
+                    <tr>
+                        <td><a href="#">${row.partId}</a></td>
+                        <td><a href="#">${row.supplier}</a></td>
+                        <td class="shortfall negative">${row.shortfall}</td>
+                        <td class="actions-cell">
+                            <a href="/po.html?id=${row.po}" class="btn btn-primary btn-sm" aria-label="View PO ${row.po}">View PO</a>
+                            <a href="mailto:${row.supplierEmail}" class="btn btn-secondary btn-sm" aria-label="Contact supplier ${row.supplier}">Contact</a>
+                        </td>
+                    </tr>
+                `).join('')}
+                </tbody>
+            `;
+            
+            const modalBody = weekModalEl.querySelector('.modal-body');
+            modalBody.innerHTML = '';
+            modalBody.appendChild(table);
+            
+            weekModalEl.style.display = 'flex';
+
+            // Focus first element
+            setTimeout(() => {
+                const firstFocusable = weekModalEl.querySelector('button, [href]');
+                if (firstFocusable) firstFocusable.focus();
+            }, 50);
         }
 
         // Parts Table Functions
@@ -1756,45 +1741,6 @@
                 tbody.appendChild(row);
             });
         }
-
-        /*
-        function viewPartDetails(partNumber) {
-            const part = mockParts.find(p => p.partNumber === partNumber);
-            if (!part) return;
-
-            document.getElementById('partModalTitle').textContent = `${part.partNumber} - ${part.description}`;
-            document.getElementById('partModalContent').innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <div>
-                        <h4 style="margin-bottom: 12px; color: #374151;">Current Inventory</h4>
-                        <p><strong>Current Stock:</strong> ${part.currentStock} units</p>
-                        <p><strong>Safety Stock:</strong> ${part.safetyStock} units</p>
-                        <p><strong>Unit Price:</strong> $${part.price}</p>
-                    </div>
-                    <div>
-                        <h4 style="margin-bottom: 12px; color: #374151;">Supplier Information</h4>
-                        <p><strong>Supplier:</strong> ${part.supplier}</p>
-                        <p><strong>Lead Time:</strong> ${part.leadTime}</p>
-                        <p><strong>MOQ:</strong> ${part.moq} units</p>
-                    </div>
-                </div>
-                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                    <h4 style="margin-bottom: 8px; color: #374151;">Recommendation</h4>
-                    <p>${part.poRecommendation}</p>
-                </div>
-                <div style="display: flex; gap: 12px;">
-                    <button class="btn btn-primary">Generate PO</button>
-                    <button class="btn btn-secondary">View Forecast</button>
-                    <button class="btn btn-secondary">Supplier History</button>
-                </div>
-            `;
-            document.getElementById('partModal').style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        */
 
         // Supplier Cards Functions
         function populateSupplierCards() {
@@ -1956,18 +1902,6 @@
                 });
             }
         }
-
-        /*
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-        */
 
         // --- Parts Planning State ---
         let selectedPartIds = new Set();
