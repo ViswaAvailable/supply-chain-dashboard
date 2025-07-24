@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier Performance Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        /* Reusing styles from UI-Demo.html for consistency */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .data-table { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 24px; }
+        .table-header { background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-title { font-size: 18px; font-weight: 600; color: #1e293b; }
+        .table-filters { display: flex; gap: 12px; }
+        .filter-input { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 24px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; color: #374151; font-size: 14px; }
+        td { font-size: 14px; color: #1e293b; }
+        tr:hover { background: #f8fafc; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .text-danger { color: #dc2626; font-weight: 600; }
+
+        /* Page Layout */
+        .detail-container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .breadcrumb { margin-bottom: 16px; }
+        .breadcrumb a { text-decoration: none; color: #3b82f6; }
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 28px; font-weight: 700; }
+        .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
+        .main-column { display: flex; flex-direction: column; gap: 24px; }
+        .side-column { display: flex; flex-direction: column; gap: 24px; }
+        .chart-wrapper { position: relative; height: 260px; }
+        @media (max-width: 1280px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .side-column { order: -1; } /* Move supplier info to top on mobile */
+        }
+    </style>
+</head>
+<body>
+    <div class="detail-container">
+        <header class="page-header">
+            <p class="breadcrumb"><a href="UI-Demo.html#suppliers">&larr; Back to Supplier Performance</a></p>
+            <h1 class="page-title" id="supplierName">Supplier Performance: Loading...</h1>
+        </header>
+
+        <div class="main-grid">
+            <div class="main-column">
+                <!-- Historical Performance Charts -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Historical Performance (12 Months)</h3></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px;">
+                        <div>
+                            <h4 style="text-align: center; margin-bottom: 12px;">On-Time Delivery %</h4>
+                            <div class="chart-wrapper"><canvas id="otdChart"></canvas></div>
+                        </div>
+                        <div>
+                            <h4 style="text-align: center; margin-bottom: 12px;">Quality Score %</h4>
+                            <div class="chart-wrapper"><canvas id="qualityChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent PO History -->
+                <div class="data-table">
+                    <div class="table-header">
+                        <h3 class="table-title">Recent Purchase Order History</h3>
+                        <div class="table-filters">
+                            <input type="text" placeholder="Search PO..." class="filter-input" id="poSearch">
+                            <select class="filter-input" id="poStatusFilter">
+                                <option value="">All Status</option>
+                                <option value="On-Time">On-Time</option>
+                                <option value="Delayed">Delayed</option>
+                                <option value="Partial">Partial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>PO #</th><th>Date</th><th>Status</th><th>Quantity</th><th>Value</th></tr>
+                        </thead>
+                        <tbody id="poHistoryTable"></tbody>
+                    </table>
+                </div>
+
+                <!-- Part Quality Breakdown -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Part Quality Breakdown</h3></div>
+                    <table>
+                        <thead>
+                            <tr><th>Part #</th><th>Description</th><th>Rejection Rate %</th><th>Defect Count</th></tr>
+                        </thead>
+                        <tbody id="partQualityTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="side-column">
+                <!-- Supplier Information -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Supplier Information</h3></div>
+                    <div id="supplierInfo" style="padding: 24px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data - In a real app, this would be fetched based on the supplierId
+        const mockSupplierDetails = {
+            "techcorp-industries": {
+                name: "TechCorp Industries",
+                address: "123 Tech Park, Hsinchu, Taiwan",
+                contact: { name: "Emily Wang", phone: "+886-3-5678-1234", email: "emily.wang@techcorp.com" },
+                terms: { incoterms: "FOB Hsinchu", payment: "Net 60" },
+                historicalOtd: [92, 95, 94, 96, 93, 94, 95, 97, 96, 94, 95, 94],
+                historicalQuality: [99.7, 99.8, 99.9, 99.7, 99.8, 99.9, 99.8, 99.9, 99.7, 99.8, 99.8, 99.9],
+                poHistory: [
+                    { po: "PO-1021", date: "2024-02-28", status: "On-Time", qty: 100, value: 2550 },
+                    { po: "PO-1001", date: "2024-01-15", status: "On-Time", qty: 100, value: 2550 },
+                ],
+                partQuality: [
+                    { partId: "PCB-001", desc: "Main Circuit Board", rejectionRate: 0.2, defectCount: 1 },
+                    { partId: "PCB-002", desc: "Secondary Board", rejectionRate: 0.1, defectCount: 0 },
+                ]
+            },
+            // Add other suppliers here...
+        };
+
+        let otdChartInstance, qualityChartInstance;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const supplierId = urlParams.get('id');
+            const supplier = mockSupplierDetails[supplierId];
+
+            if (!supplier) {
+                document.getElementById('supplierName').textContent = "Supplier Not Found";
+                return;
+            }
+
+            // Populate header
+            document.getElementById('supplierName').textContent = `Supplier Performance: ${supplier.name}`;
+
+            // Populate Supplier Info
+            const infoContainer = document.getElementById('supplierInfo');
+            infoContainer.innerHTML = `
+                <p><strong>HQ Address:</strong><br>${supplier.address}</p>
+                <hr style="margin: 16px 0;">
+                <p><strong>Primary Contact:</strong><br>${supplier.contact.name}</p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:${supplier.contact.email}">${supplier.contact.email}</a></p>
+                <p><i class="fas fa-phone"></i> ${supplier.contact.phone}</p>
+                <hr style="margin: 16px 0;">
+                <p><strong>Incoterms:</strong> ${supplier.terms.incoterms}</p>
+                <p><strong>Payment Terms:</strong> ${supplier.terms.payment}</p>
+            `;
+            
+            // Render Charts
+            renderCharts(supplier);
+            
+            // Render Tables
+            renderPoHistory(supplier.poHistory);
+            renderPartQuality(supplier.partQuality);
+
+            // Add event listeners for table filters
+            document.getElementById('poSearch').addEventListener('input', () => renderPoHistory(supplier.poHistory));
+            document.getElementById('poStatusFilter').addEventListener('change', () => renderPoHistory(supplier.poHistory));
+        });
+
+        function renderCharts(supplier) {
+            if (otdChartInstance) otdChartInstance.destroy();
+            if (qualityChartInstance) qualityChartInstance.destroy();
+
+            const months = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false, suggestedMin: 90, suggestedMax: 100 } },
+                plugins: { legend: { display: false } }
+            };
+
+            otdChartInstance = new Chart(document.getElementById('otdChart'), {
+                type: 'line',
+                data: { labels: months, datasets: [{ data: supplier.historicalOtd, borderColor: '#3b82f6', tension: 0.3 }] },
+                options: chartOptions
+            });
+
+            qualityChartInstance = new Chart(document.getElementById('qualityChart'), {
+                type: 'line',
+                data: { labels: months, datasets: [{ data: supplier.historicalQuality, borderColor: '#059669', tension: 0.3 }] },
+                options: chartOptions
+            });
+        }
+
+        function renderPoHistory(allPos) {
+            const tbody = document.getElementById('poHistoryTable');
+            const searchTerm = document.getElementById('poSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('poStatusFilter').value;
+            tbody.innerHTML = '';
+
+            const filteredPOs = allPos.filter(po => 
+                (po.po.toLowerCase().includes(searchTerm)) &&
+                (statusFilter === '' || po.status === statusFilter)
+            );
+
+            filteredPOs.forEach(po => {
+                let statusClass = '';
+                if (po.status === 'On-Time') statusClass = 'badge-success';
+                else if (po.status === 'Delayed') statusClass = 'badge-danger';
+                else if (po.status === 'Partial') statusClass = 'badge-warning';
+
+                const row = `<tr>
+                    <td><a href="#">${po.po}</a></td>
+                    <td>${po.date}</td>
+                    <td><span class="status-badge ${statusClass}">${po.status}</span></td>
+                    <td>${po.qty}</td>
+                    <td>$${po.value.toLocaleString()}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        function renderPartQuality(parts) {
+            const tbody = document.getElementById('partQualityTable');
+            tbody.innerHTML = '';
+            parts.forEach(part => {
+                const rejectionClass = part.rejectionRate > 2 ? 'text-danger' : '';
+                const row = `<tr>
+                    <td><a href="#">${part.partId}</a></td>
+                    <td>${part.desc}</td>
+                    <td class="${rejectionClass}">${part.rejectionRate}%</td>
+                    <td>${part.defectCount}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+    </script>
+</body>
+</html> 
