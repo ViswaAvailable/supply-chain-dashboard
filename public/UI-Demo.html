@@ -1315,11 +1315,28 @@
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label for="filterFinalProduct" class="filter-label">Final Product</label>
+                        <select id="filterFinalProduct" class="filter-select">
+                            <option value="">All Products</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="sortSuppliers" class="filter-label">Sort By</label>
+                        <select id="sortSuppliers" class="filter-select">
+                            <option value="rating_desc" selected>Rating High→Low</option>
+                            <option value="rating_asc">Rating Low→High</option>
+                            <option value="spend_desc">Total Spend High→Low</option>
+                            <option value="otd_desc">On-Time Delivery % High→Low</option>
+                            <option value="quality_desc">Quality Score High→Low</option>
+                            <option value="lead_time_asc">Avg Lead Time Low→High</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label class="filter-label">Time Period</label>
-                        <select class="filter-select">
-                            <option>Last 6 Months</option>
-                            <option>Last 3 Months</option>
-                            <option>Last 12 Months</option>
+                        <select class="filter-select" aria-label="Time Period">
+                            <option value="6m">Last 6 Months</option>
+                            <option value="3m">Last 3 Months</option>
+                            <option value="12m">Last 12 Months</option>
                         </select>
                     </div>
                 </div>
@@ -1485,21 +1502,23 @@
             }
         ];
 
+        const finalProductsList = ["Widget Assembly A", "Widget Assembly B", "Motor Unit X", "Sensor Array Z"];
+
         const mockSuppliers = [
             {
-                id: "techcorp-industries", name: "TechCorp Industries", country: "Taiwan", onTimeDelivery: 94, avgLeadTime: 11.2, totalOrders: 48, lateDeliveries: 3, parts: ["PCB-001", "PCB-002", "LCD-15", "SEN-004"], rating: 4.7, ratingChange: 0.2, totalSpend: { '3m': 250000, '6m': 520000, '12m': 1100000 }, partAcceptanceRate: 99.8
+                id: "techcorp-industries", name: "TechCorp Industries", country: "Taiwan", onTimeDelivery: 94, avgLeadTime: 11.2, totalOrders: 48, lateDeliveries: 3, parts: ["PCB-001", "PCB-002", "LCD-15", "SEN-004"], rating: 4.7, ratingChange: 0.2, totalSpend: { '3m': 250000, '6m': 520000, '12m': 1100000 }, partAcceptanceRate: 99.8, suppliesFor: ["Widget Assembly A", "Sensor Array Z"]
             },
             {
-                id: "mechparts-ltd", name: "MechParts Ltd", country: "Germany", onTimeDelivery: 87, avgLeadTime: 18.5, totalOrders: 32, lateDeliveries: 4, parts: ["MTR-205", "GBX-101", "SHF-034"], rating: 4.2, ratingChange: -0.1, totalSpend: { '3m': 480000, '6m': 950000, '12m': 1800000 }, partAcceptanceRate: 98.5
+                id: "mechparts-ltd", name: "MechParts Ltd", country: "Germany", onTimeDelivery: 87, avgLeadTime: 18.5, totalOrders: 32, lateDeliveries: 4, parts: ["MTR-205", "GBX-101", "SHF-034"], rating: 4.2, ratingChange: -0.1, totalSpend: { '3m': 480000, '6m': 950000, '12m': 1800000 }, partAcceptanceRate: 98.5, suppliesFor: ["Motor Unit X"]
             },
             {
-                id: "globalsupply-co", name: "GlobalSupply Co", country: "China", onTimeDelivery: 91, avgLeadTime: 8.3, totalOrders: 67, lateDeliveries: 6, parts: ["BRG-034", "BRG-025", "WSH-012", "SPR-008"], rating: 3.8, ratingChange: -0.4, totalSpend: { '3m': 120000, '6m': 260000, '12m': 550000 }, partAcceptanceRate: 99.1
+                id: "globalsupply-co", name: "GlobalSupply Co", country: "China", onTimeDelivery: 91, avgLeadTime: 8.3, totalOrders: 67, lateDeliveries: 6, parts: ["BRG-034", "BRG-025", "WSH-012", "SPR-008"], rating: 3.8, ratingChange: -0.4, totalSpend: { '3m': 120000, '6m': 260000, '12m': 550000 }, partAcceptanceRate: 99.1, suppliesFor: ["Widget Assembly A", "Widget Assembly B"]
             },
             {
-                id: "fastenall-inc", name: "FastenAll Inc", country: "USA", onTimeDelivery: 98, avgLeadTime: 2.1, totalOrders: 24, lateDeliveries: 1, parts: ["SCR-M5-20", "SCR-M6-25", "NUT-M5", "WSH-M5"], rating: 4.9, ratingChange: 0.1, totalSpend: { '3m': 80000, '6m': 150000, '12m': 320000 }, partAcceptanceRate: 99.9
+                id: "fastenall-inc", name: "FastenAll Inc", country: "USA", onTimeDelivery: 98, avgLeadTime: 2.1, totalOrders: 24, lateDeliveries: 1, parts: ["SCR-M5-20", "SCR-M6-25", "NUT-M5", "WSH-M5"], rating: 4.9, ratingChange: 0.1, totalSpend: { '3m': 80000, '6m': 150000, '12m': 320000 }, partAcceptanceRate: 99.9, suppliesFor: ["Widget Assembly A", "Widget Assembly B", "Motor Unit X"]
             },
             {
-                id: "electrowire-corp", name: "ElectroWire Corp", country: "Malaysia", onTimeDelivery: 89, avgLeadTime: 6.7, totalOrders: 19, lateDeliveries: 2, parts: ["WIR-022", "WIR-018", "CBL-USB", "CON-024"], rating: 4.4, ratingChange: 0.0, totalSpend: { '3m': 65000, '6m': 140000, '12m': 290000 }, partAcceptanceRate: 99.3
+                id: "electrowire-corp", name: "ElectroWire Corp", country: "Malaysia", onTimeDelivery: 89, avgLeadTime: 6.7, totalOrders: 19, lateDeliveries: 2, parts: ["WIR-022", "WIR-018", "CBL-USB", "CON-024"], rating: 4.4, ratingChange: 0.0, totalSpend: { '3m': 65000, '6m': 140000, '12m': 290000 }, partAcceptanceRate: 99.3, suppliesFor: ["Widget Assembly B", "Sensor Array Z"]
             }
         ];
 
@@ -1582,6 +1601,21 @@
                 });
             }
             setupPartsFilters();
+            // --- End one-time setup ---
+
+            // --- One-time setup for Supplier filters ---
+            function setupSupplierFilters() {
+                const finalProductFilter = document.querySelector('#suppliers #filterFinalProduct');
+                if (finalProductFilter) {
+                    finalProductsList.forEach(p => finalProductFilter.add(new Option(p, p)));
+                    finalProductFilter.addEventListener('change', () => populateSupplierCards());
+                }
+                const sortSelect = document.getElementById('sortSuppliers');
+                if(sortSelect) {
+                    sortSelect.addEventListener('change', () => populateSupplierCards());
+                }
+            }
+            setupSupplierFilters();
             // --- End one-time setup ---
 
             navLinks.forEach(link => {
@@ -1934,10 +1968,66 @@
             const container = document.getElementById('supplierCards');
             container.innerHTML = '';
 
-            const timePeriodFilter = document.querySelector('#suppliers .filters select[aria-label="Time Period"]');
-            const timePeriodKey = timePeriodFilter ? timePeriodFilter.value : '6m'; // e.g. '6m'
+            // --- Get filter and sort values ---
+            const productFilterSelect = document.querySelector('#suppliers #filterFinalProduct');
+            currentFinalProduct = productFilterSelect ? productFilterSelect.value : "";
 
-            mockSuppliers.forEach(supplier => {
+            const timePeriodFilter = document.querySelector('#suppliers .filters select[aria-label="Time Period"]');
+            const timePeriodKey = timePeriodFilter ? timePeriodFilter.value : '6m';
+            
+            const sortSelect = document.getElementById('sortSuppliers');
+            const sortValue = sortSelect ? sortSelect.value : 'rating_desc';
+            const sortMap = {
+                'rating_desc': { key: 'rating', dir: -1 },
+                'rating_asc': { key: 'rating', dir: 1 },
+                'spend_desc': { key: 'totalSpend', dir: -1 },
+                'otd_desc': { key: 'onTimeDelivery', dir: -1 },
+                'quality_desc': { key: 'partAcceptanceRate', dir: -1 },
+                'lead_time_asc': { key: 'avgLeadTime', dir: 1 }
+            };
+            supplierSortConfig = sortMap[sortValue];
+            
+            // --- Filter data before sorting/rendering ---
+            let visibleSuppliers = [...mockSuppliers];
+            if (currentFinalProduct) {
+                visibleSuppliers = mockSuppliers.filter(s => s.suppliesFor.includes(currentFinalProduct))
+                    .map(s => {
+                        // Simulate metric changes for the selected product context
+                        const contextSupplier = JSON.parse(JSON.stringify(s)); // Deep copy
+                        contextSupplier.onTimeDelivery = Math.max(80, s.onTimeDelivery - 5);
+                        contextSupplier.partAcceptanceRate = Math.max(98.0, s.partAcceptanceRate - 0.5);
+                        contextSupplier.rating = Math.max(3.5, s.rating - 0.3);
+                        Object.keys(contextSupplier.totalSpend).forEach(key => {
+                            contextSupplier.totalSpend[key] = Math.round(s.totalSpend[key] * 0.9);
+                        });
+                        return contextSupplier;
+                    });
+            }
+
+            if (visibleSuppliers.length === 0) {
+                container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No suppliers found for this product.</p>';
+                return;
+            }
+
+            // --- Sort data before rendering ---
+            const sortedSuppliers = visibleSuppliers.sort((a, b) => {
+                const { key, dir } = supplierSortConfig;
+                let aVal, bVal;
+
+                if (key === 'totalSpend') {
+                    aVal = a.totalSpend[timePeriodKey] || 0;
+                    bVal = b.totalSpend[timePeriodKey] || 0;
+                } else {
+                    aVal = a[key];
+                    bVal = b[key];
+                }
+
+                if (aVal < bVal) return -1 * dir;
+                if (aVal > bVal) return 1 * dir;
+                return 0;
+            });
+
+            sortedSuppliers.forEach(supplier => {
                 const card = document.createElement('div');
                 
                 let borderClass = 'border-primary';
