@@ -1297,27 +1297,27 @@
 
                 <div class="filters">
                     <div class="filter-group">
-                        <label class="filter-label">Region</label>
-                        <select class="filter-select">
-                            <option>All Regions</option>
+                        <label for="filterFinalProduct" class="filter-label">Final Product</label>
+                        <select id="filterFinalProduct" class="filter-select">
+                            <option value="">All Products</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterRegion" class="filter-label">Region</label>
+                        <select id="filterRegion" class="filter-select">
+                            <option value="">All Regions</option>
                             <option>Asia Pacific</option>
                             <option>Europe</option>
                             <option>North America</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Performance</label>
-                        <select class="filter-select">
-                            <option>All Performance</option>
-                            <option>Excellent (90%+)</option>
-                            <option>Good (80-89%)</option>
-                            <option>Needs Improvement (<80%)</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="filterFinalProduct" class="filter-label">Final Product</label>
-                        <select id="filterFinalProduct" class="filter-select">
-                            <option value="">All Products</option>
+                        <label for="filterPerformance" class="filter-label">Performance</label>
+                        <select id="filterPerformance" class="filter-select">
+                            <option value="">All Performance</option>
+                            <option value="excellent">Excellent (90%+)</option>
+                            <option value="good">Good (80-89%)</option>
+                            <option value="needs_improvement">Needs Improvement (<80%)</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -1599,9 +1599,18 @@
             // --- One-time setup for Supplier filters ---
             function setupSupplierFilters() {
                 const finalProductFilter = document.querySelector('#suppliers #filterFinalProduct');
+                const regionFilter = document.querySelector('#suppliers #filterRegion');
+                const performanceFilter = document.querySelector('#suppliers #filterPerformance');
+
                 if (finalProductFilter) {
                     finalProductsList.forEach(p => finalProductFilter.add(new Option(p, p)));
                     finalProductFilter.addEventListener('change', () => populateSupplierCards());
+                }
+                if (regionFilter) {
+                    regionFilter.addEventListener('change', () => populateSupplierCards());
+                }
+                if (performanceFilter) {
+                    performanceFilter.addEventListener('change', () => populateSupplierCards());
                 }
                 const sortSelect = document.getElementById('sortSuppliers');
                 if(sortSelect) {
@@ -1807,8 +1816,8 @@
                 ${stubRows.map(row => `
                     <tr>
                         <td><a href="UI-Demo.html#parts?part=${encodeURIComponent(row.partId)}" data-part="${row.partId}">${row.partId}</a></td>
-                        <td><a href="#">${row.supplier}</a></td>
-                        <td><a href="#">${row.finalProduct}</a></td>
+                        <td>${row.supplier}</td>
+                        <td>${row.finalProduct}</td>
                         <td class="shortfall negative">${row.shortfall}</td>
                         <td class="actions-cell">
                             <button class="btn btn-primary btn-sm" data-po-id="${row.po}" aria-label="View PO ${row.po}">View PO</button>
@@ -1986,6 +1995,10 @@
             // --- Get filter and sort values ---
             const productFilterSelect = document.querySelector('#suppliers #filterFinalProduct');
             currentFinalProduct = productFilterSelect ? productFilterSelect.value : "";
+            const regionFilterSelect = document.querySelector('#suppliers #filterRegion');
+            const currentRegion = regionFilterSelect ? regionFilterSelect.value : "";
+            const performanceFilterSelect = document.querySelector('#suppliers #filterPerformance');
+            const currentPerformance = performanceFilterSelect ? performanceFilterSelect.value : "";
 
             const timePeriodFilter = document.querySelector('#suppliers .filters select[aria-label="Time Period"]');
             const timePeriodKey = timePeriodFilter ? timePeriodFilter.value : '6m';
@@ -2003,9 +2016,35 @@
             supplierSortConfig = sortMap[sortValue];
             
             // --- Filter data before sorting/rendering ---
-            let visibleSuppliers = [...mockSuppliers];
+            const getRegion = (country) => {
+                const regions = {
+                    'Asia Pacific': ['Taiwan', 'China', 'Malaysia'],
+                    'Europe': ['Germany'],
+                    'North America': ['USA']
+                };
+                for (const region in regions) {
+                    if (regions[region].includes(country)) return region;
+                }
+                return 'Other';
+            };
+
+            let visibleSuppliers = mockSuppliers.filter(s => {
+                // Region Filter
+                const regionMatch = !currentRegion || getRegion(s.country) === currentRegion;
+                // Performance Filter (based on On-Time Delivery %)
+                let performanceMatch = true;
+                if (currentPerformance === 'excellent') {
+                    performanceMatch = s.onTimeDelivery >= 90;
+                } else if (currentPerformance === 'good') {
+                    performanceMatch = s.onTimeDelivery >= 80 && s.onTimeDelivery < 90;
+                } else if (currentPerformance === 'needs_improvement') {
+                    performanceMatch = s.onTimeDelivery < 80;
+                }
+                return regionMatch && performanceMatch;
+            });
+
             if (currentFinalProduct) {
-                visibleSuppliers = mockSuppliers.filter(s => s.suppliesFor.includes(currentFinalProduct))
+                visibleSuppliers = visibleSuppliers.filter(s => s.suppliesFor.includes(currentFinalProduct))
                     .map(s => {
                         // Simulate metric changes for the selected product context
                         const contextSupplier = JSON.parse(JSON.stringify(s)); // Deep copy
@@ -2020,7 +2059,7 @@
             }
 
             if (visibleSuppliers.length === 0) {
-                container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No suppliers found for this product.</p>';
+                container.innerHTML = '<p style="text-align: center; grid-column: 1 / -1;">No suppliers found matching the selected criteria.</p>';
                 return;
             }
 
