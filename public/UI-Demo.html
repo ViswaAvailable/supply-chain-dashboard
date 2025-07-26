@@ -1665,13 +1665,13 @@
             
             // Dynamic content refresh
             const riskLevel = week.status.charAt(0).toUpperCase() + week.status.slice(1).replace('-', ' ');
-            weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel}`;
+            weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel} Risk`;
 
             // Root-cause table with sort, highlight, deep links
             const stubRows = [
-                { partId: 'PCB-001', supplier: 'TechCorp Industries', supplierEmail: 'sales@techcorp.com', shortfall: 75, po: 'PO-1001' },
-                { partId: 'MTR-205', supplier: 'MechParts Ltd', supplierEmail: 'orders@mechparts.de', shortfall: 22, po: 'PO-1002' },
-                { partId: 'BRG-034', supplier: 'GlobalSupply Co', supplierEmail: 'supply@globalsupply.cn', shortfall: 50, po: 'PO-1003' }
+                { partId: 'PCB-001', supplier: 'TechCorp Industries', supplierEmail: 'sales@techcorp.com', shortfall: 75, po: 'PO-1001', finalProduct: 'Widget Assembly A' },
+                { partId: 'MTR-205', supplier: 'MechParts Ltd', supplierEmail: 'orders@mechparts.de', shortfall: 22, po: 'PO-1002', finalProduct: 'Motor Unit X' },
+                { partId: 'BRG-034', supplier: 'GlobalSupply Co', supplierEmail: 'supply@globalsupply.cn', shortfall: 50, po: 'PO-1003', finalProduct: 'Widget Assembly B' }
             ];
 
             const table = document.createElement('table');
@@ -1681,6 +1681,7 @@
                     <tr>
                         <th>Part #</th>
                         <th>Supplier</th>
+                        <th>Final Product</th>
                         <th>Shortfall</th>
                         <th>Actions</th>
                     </tr>
@@ -1690,6 +1691,7 @@
                     <tr>
                         <td><a href="#">${row.partId}</a></td>
                         <td><a href="#">${row.supplier}</a></td>
+                        <td><a href="#">${row.finalProduct}</a></td>
                         <td class="shortfall negative">${row.shortfall}</td>
                         <td class="actions-cell">
                             <a href="/po.html?id=${row.po}" class="btn btn-primary btn-sm" aria-label="View PO ${row.po}">View PO</a>
