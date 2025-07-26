@@ -1179,6 +1179,23 @@
                         <div class="modal-body">
                             <!-- Table will go here -->
                         </div>
+                        <footer style="padding: 16px; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0;">
+                            <button class="btn btn-primary" id="weekToPartsBtn">Take Action in Parts Planning</button>
+                        </footer>
+                    </div>
+                  </div>
+                </template>
+                <!-- Modal template for PO Summary -->
+                <template id="poSummaryModalTemplate">
+                  <div id="poSummaryModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="poSummaryModalTitle">
+                    <div class="modal-content">
+                      <header class="modal-header">
+                        <h3 id="poSummaryModalTitle">PO Summary</h3>
+                        <button class="btn-icon" data-dismiss="modal" aria-label="Close dialog">✕</button>
+                      </header>
+                      <div class="modal-body" id="poSummaryModalBody" style="padding: 24px;">
+                          <!-- PO details injected here -->
+                      </div>
                     </div>
                   </div>
                 </template>
@@ -1194,32 +1211,35 @@
                     </div>
                 </div>
 
+                <div id="preFilterBanner" class="filters" style="display: none; justify-content: space-between; align-items: center; background-color: #eef2ff; padding: 8px 12px; border-radius: 6px;">
+                    <span id="preFilterText"></span>
+                    <button id="clearPreFilterBtn" class="btn btn-secondary btn-sm">Clear</button>
+                </div>
+
                 <div class="filters">
                     <div class="filter-group">
-                        <label class="filter-label">Part Category</label>
-                        <select class="filter-select">
-                            <option>All Categories</option>
-                            <option>Electronic Components</option>
-                            <option>Mechanical Parts</option>
-                            <option>Raw Materials</option>
+                        <label for="filterFinalProduct" class="filter-label">Final Product</label>
+                        <select id="filterFinalProduct" class="filter-select">
+                            <option value="">All Products</option>
+                        </select>
+                    </div>
+                     <div class="filter-group">
+                        <label for="filterPartNumber" class="filter-label">Part Number</label>
+                        <input type="text" id="filterPartNumber" class="filter-select" placeholder="Search Part #" autocomplete="off">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterSupplier" class="filter-label">Supplier</label>
+                        <select id="filterSupplier" class="filter-select">
+                            <option value="">All Suppliers</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Supplier</label>
-                        <select class="filter-select">
-                            <option>All Suppliers</option>
-                            <option>TechCorp Industries</option>
-                            <option>MechParts Ltd</option>
-                            <option>GlobalSupply Co</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Status</label>
-                        <select class="filter-select">
-                            <option>All Status</option>
+                        <label for="filterStatus" class="filter-label">Status</label>
+                        <select id="filterStatus" class="filter-select">
+                            <option value="">All Status</option>
                             <option>PO Required</option>
-                            <option>Low Stock</option>
-                            <option>Overstocked</option>
+                            <option>Critical</option>
+                            <option>Good</option>
                         </select>
                     </div>
                 </div>
@@ -1498,30 +1518,71 @@
 
             const updateActivePage = () => {
                 const hash = window.location.hash || '#overview';
-                const targetPageId = hash.substring(1);
-                    
-                    // Update active nav link
+                const [pageId, queryString] = hash.substring(1).split('?');
+
+                // Update active nav link
                 navLinks.forEach(nav => {
-                    nav.classList.toggle('active', nav.getAttribute('href') === hash);
+                    nav.classList.toggle('active', nav.getAttribute('href') === `#${pageId}`);
                 });
-                    
-                    // Show target page
+                
+                // Show target page
                 pages.forEach(page => {
-                    page.classList.toggle('active', page.id === targetPageId);
+                    page.classList.toggle('active', page.id === pageId);
                 });
-                    
-                    // Initialize page-specific content
-                if (targetPageId === 'overview') {
-                        generateCalendarGrid();
-                } else if (targetPageId === 'parts') {
-                        populatePartsTable();
-                } else if (targetPageId === 'suppliers') {
-                        populateSupplierCards();
-                } else if (targetPageId === 'analytics') {
-                        setTimeout(() => initializeCharts(), 100);
-                        initLeadTimeFilters();
-                    }
+
+                // Initialize page-specific content
+                if (pageId === 'overview') {
+                    generateCalendarGrid();
+                } else if (pageId === 'parts') {
+                    initializePartsPage(queryString);
+                } else if (pageId === 'suppliers') {
+                    populateSupplierCards();
+                } else if (pageId === 'analytics') {
+                    setTimeout(() => initializeCharts(), 100);
+                    initLeadTimeFilters();
+                }
             };
+
+            // --- One-time setup for Parts Planning filters ---
+            function setupPartsFilters() {
+                const finalProductFilter = document.getElementById('filterFinalProduct');
+                const supplierFilter = document.getElementById('filterSupplier');
+                const partNumberFilter = document.getElementById('filterPartNumber');
+                const statusFilter = document.getElementById('filterStatus');
+                const clearPreFilterBtn = document.getElementById('clearPreFilterBtn');
+
+                // Populate dynamic filters from data
+                const uniqueProducts = [...new Set(mockParts.map(p => p.finalProduct))].sort();
+                const uniqueSuppliers = [...new Set(mockParts.map(p => p.supplier))].sort();
+
+                uniqueProducts.forEach(p => finalProductFilter.add(new Option(p, p)));
+                uniqueSuppliers.forEach(s => supplierFilter.add(new Option(s, s)));
+
+                // Add event listeners
+                const debouncedRender = debounce(() => populatePartsTable(), 300);
+                partNumberFilter.addEventListener('input', () => {
+                    preFilterParts = []; // Clear pre-filter when user types
+                    debouncedRender();
+                });
+                finalProductFilter.addEventListener('change', () => {
+                    preFilterParts = [];
+                    populatePartsTable()
+                });
+                supplierFilter.addEventListener('change', () => {
+                    preFilterParts = [];
+                    populatePartsTable()
+                });
+                statusFilter.addEventListener('change', () => {
+                    preFilterParts = [];
+                    populatePartsTable()
+                });
+                clearPreFilterBtn.addEventListener('click', () => {
+                    preFilterParts = [];
+                    populatePartsTable();
+                });
+            }
+            setupPartsFilters();
+            // --- End one-time setup ---
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -1610,7 +1671,8 @@
             // Scaffold: recalc grid cols if needed in future
         }, 150));
         // --- Modal logic ---
-        let weekModalEl = null, originBtn = null;
+        let weekModalEl = null, poSummaryModalEl = null, originBtn = null;
+        let currentWeekPartIds = [];
 
         function hideWeekModal() {
             if (weekModalEl) weekModalEl.style.display = 'none';
@@ -1618,6 +1680,11 @@
                 originBtn.focus();
                 originBtn = null;
             }
+        }
+
+        function hidePoSummaryModal() {
+            if (poSummaryModalEl) poSummaryModalEl.style.display = 'none';
+            // Note: We don't shift focus back here, as the underlying modal should retain focus
         }
 
         function openModal(btn, week) {
@@ -1673,6 +1740,7 @@
                 { partId: 'MTR-205', supplier: 'MechParts Ltd', supplierEmail: 'orders@mechparts.de', shortfall: 22, po: 'PO-1002', finalProduct: 'Motor Unit X' },
                 { partId: 'BRG-034', supplier: 'GlobalSupply Co', supplierEmail: 'supply@globalsupply.cn', shortfall: 50, po: 'PO-1003', finalProduct: 'Widget Assembly B' }
             ];
+            currentWeekPartIds = stubRows.map(r => r.partId); // Cache the part IDs
 
             const table = document.createElement('table');
             table.className = 'root-cause';
@@ -1689,12 +1757,12 @@
                 <tbody>
                 ${stubRows.map(row => `
                     <tr>
-                        <td><a href="#">${row.partId}</a></td>
+                        <td><a href="UI-Demo.html#parts?part=${encodeURIComponent(row.partId)}" data-part="${row.partId}">${row.partId}</a></td>
                         <td><a href="#">${row.supplier}</a></td>
                         <td><a href="#">${row.finalProduct}</a></td>
                         <td class="shortfall negative">${row.shortfall}</td>
                         <td class="actions-cell">
-                            <a href="/po.html?id=${row.po}" class="btn btn-primary btn-sm" aria-label="View PO ${row.po}">View PO</a>
+                            <button class="btn btn-primary btn-sm" data-po-id="${row.po}" aria-label="View PO ${row.po}">View PO</button>
                             <a href="mailto:${row.supplierEmail}" class="btn btn-secondary btn-sm" aria-label="Contact supplier ${row.supplier}">Contact</a>
                         </td>
                     </tr>
@@ -1706,6 +1774,14 @@
             modalBody.innerHTML = '';
             modalBody.appendChild(table);
             
+            // Add listeners to newly created "View PO" buttons
+            modalBody.querySelectorAll('[data-po-id]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const poId = e.currentTarget.dataset.poId;
+                    openPoModal(poId);
+                });
+            });
+            
             weekModalEl.style.display = 'flex';
 
             // Focus first element
@@ -1713,6 +1789,51 @@
                 const firstFocusable = weekModalEl.querySelector('button, [href]');
                 if (firstFocusable) firstFocusable.focus();
             }, 50);
+
+            const weekToPartsBtn = weekModalEl.querySelector('#weekToPartsBtn');
+            if (weekToPartsBtn) {
+                weekToPartsBtn.onclick = () => {
+                    if (currentWeekPartIds.length > 0) {
+                        window.location.href = `UI-Demo.html#parts?parts=${currentWeekPartIds.join(',')}`;
+                    }
+                };
+            }
+        }
+
+        const mockPOs = {
+            "PO-1001": { id: "PO-1001", qty: 100, orderDate: "2024-01-15", arrivalDate: "2024-03-15", status: "In Transit" },
+            "PO-1002": { id: "PO-1002", qty: 25, orderDate: "2024-01-20", arrivalDate: "2024-03-22", status: "In Transit" },
+            "PO-1003": { id: "PO-1003", qty: 200, orderDate: "2024-01-22", arrivalDate: "2024-02-28", status: "Delayed" },
+        };
+
+        function openPoModal(poId) {
+            const po = mockPOs[poId];
+            if (!po) return;
+
+            if (!poSummaryModalEl) {
+                const tpl = document.getElementById('poSummaryModalTemplate');
+                document.body.appendChild(tpl.content.cloneNode(true));
+                poSummaryModalEl = document.getElementById('poSummaryModal');
+                
+                if (poSummaryModalEl.dataset.bound !== 'true') {
+                    poSummaryModalEl.querySelectorAll('[data-dismiss="modal"]').forEach(el => el.onclick = hidePoSummaryModal);
+                     poSummaryModalEl.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') hidePoSummaryModal();
+                    });
+                    poSummaryModalEl.dataset.bound = 'true';
+                }
+            }
+
+            poSummaryModalEl.querySelector('#poSummaryModalTitle').textContent = `PO Summary: ${po.id}`;
+            poSummaryModalEl.querySelector('#poSummaryModalBody').innerHTML = `
+                <p><strong>PO #:</strong> ${po.id}</p>
+                <p><strong>Quantity:</strong> ${po.qty.toLocaleString()}</p>
+                <p><strong>Order Date:</strong> ${formatDate(po.orderDate)}</p>
+                <p><strong>Expected Arrival:</strong> ${formatDate(po.arrivalDate)}</p>
+                <p><strong>Status:</strong> ${po.status}</p>
+            `;
+
+            poSummaryModalEl.style.display = 'flex';
         }
 
         // Parts Table Functions
@@ -1720,12 +1841,54 @@
             const tbody = document.getElementById('partsTable');
             tbody.innerHTML = '';
 
-            mockParts.forEach(part => {
+            // --- Filtering ---
+            const productFilter = document.getElementById('filterFinalProduct').value;
+            const supplierFilter = document.getElementById('filterSupplier').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const partNumberSearch = document.getElementById('filterPartNumber').value.toLowerCase();
+            const preFilterBanner = document.getElementById('preFilterBanner');
+            const preFilterText = document.getElementById('preFilterText');
+
+            let filteredParts;
+
+            if (preFilterParts.length > 0) {
+                filteredParts = mockParts.filter(part => preFilterParts.includes(part.partNumber));
+                preFilterBanner.style.display = 'flex';
+                preFilterText.textContent = `Filtered to ${preFilterParts.length} parts from Assembly Overview.`;
+            } else {
+                preFilterBanner.style.display = 'none';
+                filteredParts = mockParts.filter(part => {
+                    const productMatch = !productFilter || part.finalProduct === productFilter;
+                    const supplierMatch = !supplierFilter || part.supplier === supplierFilter;
+                    const statusMatch = !statusFilter || part.status === statusFilter;
+                    const partNumberMatch = !partNumberSearch || part.partNumber.toLowerCase().includes(partNumberSearch);
+                    return productMatch && supplierMatch && statusMatch && partNumberMatch;
+                });
+            }
+
+            // Calculate weeks of stock
+            filteredParts.forEach(p => {
+                p.weeksOfStock = p.avgWeeklyConsumption > 0 ? (p.currentStock / p.avgWeeklyConsumption) : 99;
+            });
+
+            // Sorting
+            const sortedParts = filteredParts.sort((a, b) => {
+                const aVal = a[partsSortConfig.key];
+                const bVal = b[partsSortConfig.key];
+                if (aVal === null) return 1;
+                if (bVal === null) return -1;
+                if (aVal < bVal) return -1 * partsSortConfig.dir;
+                if (aVal > bVal) return 1 * partsSortConfig.dir;
+                return 0;
+            });
+
+            sortedParts.forEach(part => {
                 const row = document.createElement('tr');
                 const statusClass = part.status === 'Critical' ? 'badge-danger' : 
                                   part.status === 'PO Required' ? 'badge-warning' : 'badge-success';
                 
                 row.innerHTML = `
+                    <td><input type="checkbox" class="part-select-checkbox" data-part-id="${part.partNumber}" ${selectedPartIds.has(part.partNumber) ? 'checked' : ''}></td>
                     <td><strong>${part.partNumber}</strong></td>
                     <td>${part.description}</td>
                     <td>${part.currentStock}</td>
@@ -1741,6 +1904,28 @@
                     <td>${renderPartActions(part)}</td>
                 `;
                 tbody.appendChild(row);
+            });
+
+            // Add event listeners after rows are in the DOM
+            tbody.querySelectorAll('.part-select-checkbox').forEach(cb => {
+                cb.addEventListener('change', (e) => {
+                    const partId = e.target.dataset.partId;
+                    if (e.target.checked) {
+                        selectedPartIds.add(partId);
+                    } else {
+                        selectedPartIds.delete(partId);
+                    }
+                    updateBulkPOButton();
+                    updateBulkActionsButton();
+                    updateSelectAllCheckboxState();
+                });
+            });
+
+            tbody.querySelectorAll('.btn-icon-sm').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const partId = e.currentTarget.dataset.partId;
+                    openPartDetailModal(partId);
+                });
             });
         }
 
@@ -1908,6 +2093,26 @@
         // --- Parts Planning State ---
         let selectedPartIds = new Set();
         let partsSortConfig = { key: 'weeksOfStock', dir: 1 }; // 1 for asc, -1 for desc
+        let preFilterParts = [];
+
+        function initializePartsPage(qs) {
+            const params = new URLSearchParams(qs || '');
+            const partNumberFilter = document.getElementById('filterPartNumber');
+            let deepLinkParts = [];
+
+            if (params.has('part')) {
+                deepLinkParts = [params.get('part')];
+                partNumberFilter.value = params.get('part');
+            } else if (params.has('parts')) {
+                deepLinkParts = params.get('parts').split(',').filter(Boolean);
+                partNumberFilter.value = ''; // Clear single search if multiple are pre-filtered
+            } else {
+                partNumberFilter.value = ''; // Clear search if no params
+            }
+            
+            preFilterParts = deepLinkParts;
+            populatePartsTable();
+        }
 
         // --- Parts Planning Functions ---
         function renderPartActions(part) {
@@ -1935,73 +2140,6 @@
             } else {
                 container.style.display = 'none';
             }
-        }
-
-        function populatePartsTable() {
-            const tbody = document.getElementById('partsTable');
-            tbody.innerHTML = '';
-
-            // Calculate weeks of stock
-            mockParts.forEach(p => {
-                p.weeksOfStock = p.avgWeeklyConsumption > 0 ? (p.currentStock / p.avgWeeklyConsumption) : 99;
-            });
-
-            // Sorting
-            const sortedParts = [...mockParts].sort((a, b) => {
-                const aVal = a[partsSortConfig.key];
-                const bVal = b[partsSortConfig.key];
-                if (aVal === null) return 1;
-                if (bVal === null) return -1;
-                if (aVal < bVal) return -1 * partsSortConfig.dir;
-                if (aVal > bVal) return 1 * partsSortConfig.dir;
-                return 0;
-            });
-
-            sortedParts.forEach(part => {
-                const row = document.createElement('tr');
-                const statusClass = part.status === 'Critical' ? 'badge-danger' : 
-                                  part.status === 'PO Required' ? 'badge-warning' : 'badge-success';
-                
-                row.innerHTML = `
-                    <td><input type="checkbox" class="part-select-checkbox" data-part-id="${part.partNumber}" ${selectedPartIds.has(part.partNumber) ? 'checked' : ''}></td>
-                    <td><strong>${part.partNumber}</strong></td>
-                    <td>${part.description}</td>
-                    <td>${part.currentStock}</td>
-                    <td>${part.safetyStock}</td>
-                    <td>${part.leadTime}</td>
-                    <td>${part.moq}</td>
-                    <td>${part.supplier}</td>
-                    <td>${part.status !== 'Good' ? part.recommendedQty : '—'}</td>
-                    <td><span class="status-badge ${statusClass}">${part.status}</span></td>
-                    <td>${part.weeksOfStock.toFixed(1)}</td>
-                    <td>${part.onOrderQty}</td>
-                    <td>${part.nextArrival ? formatDate(part.nextArrival) : '—'}</td>
-                    <td>${renderPartActions(part)}</td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            // Add event listeners after rows are in the DOM
-            tbody.querySelectorAll('.part-select-checkbox').forEach(cb => {
-                cb.addEventListener('change', (e) => {
-                    const partId = e.target.dataset.partId;
-                    if (e.target.checked) {
-                        selectedPartIds.add(partId);
-                    } else {
-                        selectedPartIds.delete(partId);
-                    }
-                    updateBulkPOButton();
-                    updateBulkActionsButton();
-                    updateSelectAllCheckboxState();
-                });
-            });
-
-            tbody.querySelectorAll('.btn-icon-sm').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const partId = e.currentTarget.dataset.partId;
-                    openPartDetailModal(partId);
-                });
-            });
         }
         
         function updateSelectAllCheckboxState() {
