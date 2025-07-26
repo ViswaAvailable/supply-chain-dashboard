@@ -1072,7 +1072,7 @@
                 <div class="filters">
                     <div class="filter-group">
                         <label class="filter-label">Final Product</label>
-                        <select class="filter-select">
+                        <select id="overviewProductFilter" class="filter-select">
                             <option>All Products</option>
                             <option>Widget Assembly A</option>
                             <option>Widget Assembly B</option>
@@ -1081,7 +1081,7 @@
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Time Range</label>
-                        <select class="filter-select">
+                        <select id="overviewTimeRangeFilter" class="filter-select">
                             <option>Next 12 Weeks</option>
                             <option>Next 8 Weeks</option>
                             <option>Next 16 Weeks</option>
@@ -1105,8 +1105,8 @@
                             </span>
                             <i class="fas fa-exclamation-triangle" style="color: #d97706;"></i>
                         </div>
-                        <div class="status-card-value">3</div>
-                        <div class="status-card-change trend-down">↑ 2 from last month</div>
+                        <div class="status-card-value" data-kpi="weeksAtRisk">3</div>
+                        <div class="status-card-change trend-down" data-kpi="weeksAtRiskChange">↑ 2 from last month</div>
                     </div>
                     <div class="status-card">
                         <div class="status-card-header">
@@ -1115,8 +1115,8 @@
                             </span>
                             <i class="fas fa-shopping-cart" style="color: #3b82f6;"></i>
                         </div>
-                        <div class="status-card-value">12</div>
-                        <div class="status-card-change trend-up">↓ 5 from last week</div>
+                        <div class="status-card-value" data-kpi="partsRequiringPO">12</div>
+                        <div class="status-card-change trend-up" data-kpi="partsRequiringPOChange">↓ 5 from last week</div>
                     </div>
                     <div class="status-card">
                         <div class="status-card-header">
@@ -1125,8 +1125,8 @@
                             </span>
                             <i class="fas fa-clock" style="color: #059669;"></i>
                         </div>
-                        <div class="status-card-value">8.4<span style="font-size: 14px; color: #64748b;"> days</span></div>
-                        <div class="status-card-change trend-up">↓ 0.6 days</div>
+                        <div class="status-card-value" data-kpi="avgLeadTime">8.4<span style="font-size: 14px; color: #64748b;"> days</span></div>
+                        <div class="status-card-change trend-up" data-kpi="avgLeadTimeChange">↓ 0.6 days</div>
                     </div>
                     <div class="status-card">
                         <div class="status-card-header">
@@ -1135,8 +1135,8 @@
                             </span>
                             <i class="fas fa-star" style="color: #fbbf24;"></i>
                         </div>
-                        <div class="status-card-value">87%</div>
-                        <div class="status-card-change trend-up">↑ 3% this month</div>
+                        <div class="status-card-value" data-kpi="supplierPerformance">87%</div>
+                        <div class="status-card-change trend-up" data-kpi="supplierPerformanceChange">↑ 3% this month</div>
                     </div>
                 </div>
 
@@ -1380,15 +1380,8 @@
                             <h3 class="table-title">Lead Time Trends</h3>
                             <div class="chart-header-filter">
                                 <div class="filter-group">
-                                    <label for="leadTimePrimary">View by:</label>
-                                    <select id="leadTimePrimary" class="filter-select" aria-label="Select lead-time grouping dimension">
-                                        <option value="partCategory">Part Category</option>
-                                        <option value="finalProduct">Final Product</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label for="leadTimeSecondary" id="leadTimeSecondaryLabel">Select Category:</label>
-                                    <select id="leadTimeSecondary" class="filter-select" aria-label="Select lead-time filter value"></select>
+                                    <label for="leadTimeProductFilter" class="filter-label">Final Product:</label>
+                                    <select id="leadTimeProductFilter" class="filter-select" aria-label="Filter lead-time trend by final product"></select>
                                 </div>
                             </div>
                         </div>
@@ -1551,7 +1544,7 @@
 
                 // Initialize page-specific content
                 if (pageId === 'overview') {
-                    generateCalendarGrid();
+                    renderAssemblyOverview();
                 } else if (pageId === 'parts') {
                     initializePartsPage(queryString);
                 } else if (pageId === 'suppliers') {
@@ -1617,6 +1610,11 @@
             }
             setupSupplierFilters();
             // --- End one-time setup ---
+            
+            // --- One-time setup for Overview filters ---
+            document.getElementById('overviewProductFilter')?.addEventListener('change', renderAssemblyOverview);
+            document.getElementById('overviewTimeRangeFilter')?.addEventListener('change', renderAssemblyOverview);
+            // --- End one-time setup ---
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -1641,25 +1639,36 @@
         ];
 
         // --- Replace calendar grid with Weekly Status Grid ---
-        function generateCalendarGrid() {
-            // Remove old weeks table if present
+        function generateCalendarGrid(productFilter = 'All Products', timeRangeFilter = 'Next 12 Weeks') {
             const grid = document.getElementById('weeklyStatusGrid');
             grid.innerHTML = '';
-            // Example stub data for 12 weeks
-            const weeks = [
-                { week: 1, status: 'on-track', details: '3 POs pending', date: '2024-01-01' },
-                { week: 2, status: 'on-track', details: 'All on track', date: '2024-01-08' },
-                { week: 3, status: 'at-risk', details: '2 parts at risk', date: '2024-01-15', issue: '2 parts at risk' },
-                { week: 4, status: 'on-track', details: 'All on track', date: '2024-01-22' },
-                { week: 5, status: 'critical', details: 'Motor shortage', date: '2024-01-29', issue: 'Motor shortage' },
-                { week: 6, status: 'at-risk', details: '1 PO delayed', date: '2024-02-05', issue: '1 PO delayed' },
-                { week: 7, status: 'on-track', details: 'All on track', date: '2024-02-12' },
-                { week: 8, status: 'on-track', details: '2 POs placed', date: '2024-02-19' },
-                { week: 9, status: 'at-risk', details: 'PCB low stock', date: '2024-02-26', issue: 'PCB low stock' },
-                { week: 10, status: 'on-track', details: 'All on track', date: '2024-03-04' },
-                { week: 11, status: 'on-track', details: 'All on track', date: '2024-03-11' },
-                { week: 12, status: 'at-risk', details: '3 POs needed', date: '2024-03-18', issue: '3 POs needed' }
-            ];
+            
+            const numWeeks = parseInt(timeRangeFilter.split(' ')[1]);
+            const weeks = [];
+            const startDate = new Date('2024-01-01'); // Start on Jan 1, 2024
+
+            for (let i = 1; i <= numWeeks; i++) {
+                let status = 'on-track';
+                let details = 'All on track';
+                const weekDate = new Date(startDate);
+                weekDate.setDate(startDate.getDate() + (i - 1) * 7);
+
+                // Simulate product-specific risks across 16 weeks
+                if (productFilter === 'All Products') {
+                    if ([5, 16].includes(i)) { status = 'critical'; details = 'Critical shortage'; }
+                    else if ([3, 7, 9, 11, 14, 15].includes(i)) { status = 'at-risk'; details = 'Multiple parts at risk'; }
+                } else if (productFilter === 'Widget Assembly A') {
+                    if ([3, 9, 15].includes(i)) { status = 'at-risk'; details = 'PCB low stock'; }
+                } else if (productFilter === 'Widget Assembly B') {
+                    if ([7, 14].includes(i)) { status = 'at-risk'; details = 'Housing component delay'; }
+                } else if (productFilter === 'Motor Unit X') {
+                    if ([5, 16].includes(i)) { status = 'critical'; details = 'Motor shortage'; }
+                    else if (i === 11) { status = 'at-risk'; details = 'Bearing PO needed'; }
+                }
+                
+                weeks.push({ week: i, status, details, date: weekDate.toISOString().split('T')[0] });
+            }
+
             weeks.forEach(week => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
@@ -1769,11 +1778,17 @@
             weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel} Risk`;
 
             // Root-cause table with sort, highlight, deep links
-            const stubRows = [
+            let allStubRows = [
                 { partId: 'PCB-001', supplier: 'TechCorp Industries', supplierEmail: 'sales@techcorp.com', shortfall: 75, po: 'PO-1001', finalProduct: 'Widget Assembly A' },
                 { partId: 'MTR-205', supplier: 'MechParts Ltd', supplierEmail: 'orders@mechparts.de', shortfall: 22, po: 'PO-1002', finalProduct: 'Motor Unit X' },
                 { partId: 'BRG-034', supplier: 'GlobalSupply Co', supplierEmail: 'supply@globalsupply.cn', shortfall: 50, po: 'PO-1003', finalProduct: 'Widget Assembly B' }
             ];
+            
+            const productFilter = document.getElementById('overviewProductFilter').value;
+            const stubRows = productFilter !== 'All Products'
+                ? allStubRows.filter(r => r.finalProduct === productFilter)
+                : allStubRows;
+
             currentWeekPartIds = stubRows.map(r => r.partId); // Cache the part IDs
 
             const table = document.createElement('table');
@@ -2416,8 +2431,8 @@
         const partCategories = [...new Set(mockParts.map(p => p.partCategory))].sort();
         const finalProducts = [...new Set(mockParts.map(p => p.finalProduct))].sort();
 
-        function updateLeadTimeChart(groupType, groupValue) {
-            const filteredParts = mockParts.filter(p => p[groupType] === groupValue);
+        function updateLeadTimeChart(productValue) {
+            const filteredParts = mockParts.filter(p => p.finalProduct === productValue);
             let aggregatedData = [0, 0, 0, 0, 0, 0];
 
             if (filteredParts.length > 0) {
@@ -2431,47 +2446,36 @@
             }
 
             leadTimeChartInstance.data.datasets[0].data = aggregatedData;
-            leadTimeChartInstance.data.datasets[0].label = `Avg Lead Time for ${groupValue}`;
+            leadTimeChartInstance.data.datasets[0].label = `Avg Lead Time for ${productValue}`;
             leadTimeChartInstance.update();
 
             const announcer = document.getElementById('leadTimeAnnouncer');
             if (announcer) {
-                announcer.textContent = `Lead-time trend updated for ${groupValue}.`;
+                announcer.textContent = `Lead-time trend updated for ${productValue}.`;
             }
         }
 
         function initLeadTimeFilters() {
-            const primarySelect = document.getElementById('leadTimePrimary');
-            const secondarySelect = document.getElementById('leadTimeSecondary');
-            const secondaryLabel = document.getElementById('leadTimeSecondaryLabel');
+            const productFilter = document.getElementById('leadTimeProductFilter');
+            if (!productFilter) return;
 
-            function populateSecondary(dataSource, label, defaultValue) {
-                secondarySelect.innerHTML = '';
-                dataSource.forEach(item => {
-                    const option = new Option(item, item);
-                    secondarySelect.add(option);
-                });
-                secondarySelect.value = defaultValue;
-                secondaryLabel.textContent = `Select ${label}:`;
-            }
+            // Populate the filter with final products
+            productFilter.innerHTML = '';
+            finalProducts.forEach(item => {
+                const option = new Option(item, item);
+                productFilter.add(option);
+            });
+            
+            // Set default value to the first product
+            productFilter.value = finalProducts[0];
 
-            primarySelect.addEventListener('change', function() {
-                const selectedType = this.value;
-                if (selectedType === 'partCategory') {
-                    populateSecondary(partCategories, 'Category', partCategories[0]);
-                } else {
-                    populateSecondary(finalProducts, 'Product', finalProducts[0]);
-                }
-                updateLeadTimeChart(selectedType, secondarySelect.value);
+            // Add change listener
+            productFilter.addEventListener('change', function() {
+                updateLeadTimeChart(this.value);
             });
 
-            secondarySelect.addEventListener('change', function() {
-                updateLeadTimeChart(primarySelect.value, this.value);
-            });
-
-            // Initial population
-            populateSecondary(partCategories, 'Category', 'Critical A-Grade Parts');
-            updateLeadTimeChart('partCategory', 'Critical A-Grade Parts');
+            // Initial chart draw
+            updateLeadTimeChart(productFilter.value);
         }
 
         document.getElementById('bulkActionsBtn')?.addEventListener('click', (e) => {
@@ -2553,6 +2557,38 @@
                 modal.dataset.bound = "true";
             }
         }
+
+        // --- Assembly Overview Rendering ---
+        function renderAssemblyOverview() {
+            const productFilter = document.getElementById('overviewProductFilter').value;
+            const timeRangeFilter = document.getElementById('overviewTimeRangeFilter').value;
+            
+            updateKpiCards(productFilter, timeRangeFilter);
+            generateCalendarGrid(productFilter, timeRangeFilter);
+        }
+
+        function updateKpiCards(productFilter, timeRangeFilter) {
+            let relevantParts = mockParts;
+            if (productFilter !== 'All Products') {
+                relevantParts = mockParts.filter(p => p.finalProduct === productFilter);
+            }
+
+            // Simulate KPI calculations
+            const partsRequiringPO = relevantParts.filter(p => p.status === 'Critical' || p.status === 'PO Required').length;
+            const avgLeadTime = relevantParts.length > 0
+                ? relevantParts.reduce((sum, p) => sum + parseInt(p.leadTime), 0) / relevantParts.length
+                : 0;
+            const weeksAtRisk = Math.round(partsRequiringPO / 2) + (productFilter === 'Motor Unit X' ? 2 : 0);
+            const supplierPerformance = productFilter === 'All Products' ? 87 : (productFilter === 'Motor Unit X' ? 82 : 91);
+            
+            // Update DOM
+            document.querySelector('[data-kpi="weeksAtRisk"]').textContent = weeksAtRisk;
+            document.querySelector('[data-kpi="partsRequiringPO"]').textContent = partsRequiringPO;
+            document.querySelector('[data-kpi="avgLeadTime"]').innerHTML = `${avgLeadTime.toFixed(1)}<span style="font-size: 14px; color: #64748b;"> days</span>`;
+            document.querySelector('[data-kpi="supplierPerformance"]').textContent = `${supplierPerformance}%`;
+        }
+        
+        // --- End Assembly Overview ---
     </script>
 </body>
 </html>
