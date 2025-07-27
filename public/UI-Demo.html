@@ -1022,6 +1022,71 @@
             padding: 4px 10px;
             font-size: 13px;
         }
+
+        /* --- Reusable Tooltip --- */
+        .has-tooltip {
+            position: relative;
+            cursor: help;
+        }
+        .has-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: pre-wrap;
+            width: 250px;
+            text-align: center;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 100;
+        }
+        .has-tooltip:hover::after {
+            display: block;
+            opacity: 1;
+        }
+
+        /* --- Analytics Page Enhancements --- */
+        .chart-header-filter {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-header-filter label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+        @media (max-width: 1024px) {
+            .data-table .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
     </style>
 </head>
 <body>
@@ -1156,11 +1221,11 @@
                                 <div class="legend-color status-good"></div>
                                 <span>On Track</span>
                             </div>
-                            <div class="legend-item">
+                            <div class="legend-item has-tooltip" data-tooltip="A future shortage is predicted. There is still enough time to resolve this by placing a standard order." title="A future shortage is predicted. There is still enough time to resolve this by placing a standard order.">
                                 <div class="legend-color status-warning"></div>
                                 <span>At Risk</span>
                             </div>
-                            <div class="legend-item">
+                            <div class="legend-item has-tooltip" data-tooltip="Immediate action required. A standard order will not arrive in time to prevent this future shortage." title="Immediate action required. A standard order will not arrive in time to prevent this future shortage.">
                                 <div class="legend-color status-critical"></div>
                                 <span>Critical Risk</span>
                             </div>
@@ -1688,12 +1753,24 @@
                 btn.tabIndex = 0;
                 btn.setAttribute('aria-label',
                   `Open details for Week ${week.week} – ${week.status === 'critical' ? 'Critical Risk' : week.status === 'at-risk' ? 'At Risk' : 'On Track'}`);
+                
+                let tooltipHtml = '';
+                if (week.status === 'at-risk') {
+                    const tooltipText = "A future shortage is predicted. There is still enough time to resolve this by placing a standard order.";
+                    tooltipHtml = `class="status-pill has-tooltip" data-tooltip="${tooltipText}" title="${tooltipText}"`;
+                } else if (week.status === 'critical') {
+                    const tooltipText = "Immediate action required. A standard order will not arrive in time to prevent this future shortage.";
+                    tooltipHtml = `class="status-pill has-tooltip" data-tooltip="${tooltipText}" title="${tooltipText}"`;
+                } else {
+                    tooltipHtml = `class="status-pill"`;
+                }
+
                 btn.innerHTML = `
                   <span class="week-label">
                     <span class="week-num">Week ${week.week}</span>
                     <span class="week-date">${formatDate(week.date)}</span>
                   </span>
-                  <span class="status-pill">${week.status === 'on-track' ? 'On Track' : week.status === 'at-risk' ? 'At Risk' : 'Critical'}</span>
+                  <span ${tooltipHtml}>${week.status === 'on-track' ? 'On Track' : week.status === 'at-risk' ? 'At Risk' : 'Critical'}</span>
                   ${week.status !== 'on-track' ? `<span class="issue-icon" title="${week.issue || week.details}" aria-label="${week.issue || week.details}">🛠</span>` : ''}
                 `;
                 if (week.status !== 'on-track') {
