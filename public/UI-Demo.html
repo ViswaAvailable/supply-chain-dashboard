@@ -1022,71 +1022,6 @@
             padding: 4px 10px;
             font-size: 13px;
         }
-
-        /* --- Reusable Tooltip --- */
-        .has-tooltip {
-            position: relative;
-            cursor: help;
-        }
-        .has-tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e293b;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            white-space: pre-wrap;
-            width: 250px;
-            text-align: center;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            z-index: 100;
-        }
-        .has-tooltip:hover::after {
-            display: block;
-            opacity: 1;
-        }
-
-        /* --- Analytics Page Enhancements --- */
-        .chart-header-filter {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .chart-header-filter label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-        }
-        @media (max-width: 1024px) {
-            .data-table .table-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-        }
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
     </style>
 </head>
 <body>
@@ -1221,11 +1156,11 @@
                                 <div class="legend-color status-good"></div>
                                 <span>On Track</span>
                             </div>
-                            <div class="legend-item has-tooltip" data-tooltip="A future shortage is predicted. There is still enough time to resolve this by placing a standard order." title="A future shortage is predicted. There is still enough time to resolve this by placing a standard order.">
+                            <div class="legend-item">
                                 <div class="legend-color status-warning"></div>
                                 <span>At Risk</span>
                             </div>
-                            <div class="legend-item has-tooltip" data-tooltip="Immediate action required. A standard order will not arrive in time to prevent this future shortage." title="Immediate action required. A standard order will not arrive in time to prevent this future shortage.">
+                            <div class="legend-item">
                                 <div class="legend-color status-critical"></div>
                                 <span>Critical Risk</span>
                             </div>
@@ -1550,14 +1485,69 @@
                 partNumber: "MTR-205", description: "AC Motor 5HP", currentStock: 8, safetyStock: 15, leadTime: "21 days", moq: 25, supplier: "MechParts Ltd", recommendedQty: 25, status: "Critical", price: 340.00, avgWeeklyConsumption: 5, onOrderQty: 25, nextArrival: '2024-03-22', partCategory: "Motors", finalProduct: "Motor Unit X", monthlyLeadTimes: [21, 22, 20, 21, 22, 21]
             },
             {
-                partNumber: "BRG-034", description: "Ball Bearing 34mm", currentStock: 150, safetyStock: 50, leadTime: "7 days", moq: 200, supplier: "GlobalSupply Co", recommendedQty: 0, status: "Good", price: 12.75, avgWeeklyConsumption: 20, onOrderQty: 0, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [7, 8, 7, 6, 7, 8]
+                partNumber: "BRG-034", description: "Ball Bearing 34mm", currentStock: 150, safetyStock: 50, leadTime: "7 days", moq: 200, supplier: "GlobalSupply Co", recommendedQty: 200, status: "Good", price: 12.75, avgWeeklyConsumption: 20, onOrderQty: 200, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [7, 8, 7, 6, 7, 8]
             },
             {
-                partNumber: "SCR-M5-20", description: "M5 Hex Screw 20mm", currentStock: 2340, safetyStock: 1000, leadTime: "3 days", moq: 5000, supplier: "FastenAll Inc", recommendedQty: 5000, status: "PO Required", price: 0.15, avgWeeklyConsumption: 250, onOrderQty: 0, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [7, 8, 7, 6, 7, 8]
+                partNumber: "SCR-M5-20", description: "M5 Hex Screw 20mm", currentStock: 2340, safetyStock: 1000, leadTime: "3 days", moq: 5000, supplier: "FastenAll Inc", recommendedQty: 5000, status: "PO Required", price: 0.15, avgWeeklyConsumption: 250, onOrderQty: 5000, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [7, 8, 7, 6, 7, 8]
             },
             {
-                partNumber: "WIR-022", description: "Electrical Wire 22AWG", currentStock: 890, safetyStock: 500, leadTime: "5 days", moq: 1000, supplier: "ElectroWire Corp", recommendedQty: 0, status: "Good", price: 0.45, avgWeeklyConsumption: 150, onOrderQty: 1000, nextArrival: '2024-03-10', partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [5, 5, 6, 5, 4, 5]
-            }
+                partNumber: "WIR-022", description: "Electrical Wire 22AWG", currentStock: 890, safetyStock: 500, leadTime: "5 days", moq: 1000, supplier: "ElectroWire Corp", recommendedQty: 1000, status: "Good", price: 0.45, avgWeeklyConsumption: 150, onOrderQty: 1000, nextArrival: '2024-03-10', partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [5, 5, 6, 5, 4, 5]
+            },
+            
+
+    // --- Added for Widget Assembly A (6 more) ---
+    {
+        partNumber: "PCB-002", description: "Secondary Board", currentStock: 120, safetyStock: 50, leadTime: "12 days", moq: 100, supplier: "TechCorp Industries", recommendedQty: 100, status: "Good", price: 18.00, avgWeeklyConsumption: 15, onOrderQty: 100, nextArrival: null, partCategory: "Processors", finalProduct: "Widget Assembly A", monthlyLeadTimes: [12, 11, 12, 13, 12, 12]
+    },
+    {
+        partNumber: "LCD-15", description: "1.5-inch LCD Screen", currentStock: 30, safetyStock: 25, leadTime: "15 days", moq: 50, supplier: "TechCorp Industries", recommendedQty: 50, status: "PO Required", price: 8.50, avgWeeklyConsumption: 8, onOrderQty: 50, nextArrival: '2025-08-25', partCategory: "Processors", finalProduct: "Widget Assembly A", monthlyLeadTimes: [15, 14, 16, 15, 15, 14]
+    },
+    {
+        partNumber: "SEN-004", description: "IMU Sensor", currentStock: 10, safetyStock: 30, leadTime: "20 days", moq: 75, supplier: "TechCorp Industries", recommendedQty: 75, status: "Critical", price: 14.20, avgWeeklyConsumption: 10, onOrderQty: 75, nextArrival: null, partCategory: "Processors", finalProduct: "Widget Assembly A", monthlyLeadTimes: [20, 21, 20, 22, 21, 20]
+    },
+    {
+        partNumber: "HOU-A-01", description: "Widget A Housing", currentStock: 250, safetyStock: 100, leadTime: "10 days", moq: 300, supplier: "GlobalSupply Co", recommendedQty: 300, status: "Good", price: 2.10, avgWeeklyConsumption: 30, onOrderQty: 300, nextArrival: '2025-08-12', partCategory: "Mechanical Housings", finalProduct: "Widget Assembly A", monthlyLeadTimes: [10, 10, 11, 9, 10, 10]
+    },
+    {
+        partNumber: "BAT-LIPO-A", description: "LiPo Battery 400mAh", currentStock: 40, safetyStock: 50, leadTime: "18 days", moq: 100, supplier: "ElectroWire Corp", recommendedQty: 75, status: "PO Required", price: 5.50, avgWeeklyConsumption: 12, onOrderQty: 75, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly A", monthlyLeadTimes: [18, 19, 18, 17, 18, 19]
+    },
+    {
+        partNumber: "ANT-24G", description: "2.4GHz Antenna", currentStock: 300, safetyStock: 150, leadTime: "8 days", moq: 500, supplier: "ElectroWire Corp", recommendedQty: 500, status: "Good", price: 1.25, avgWeeklyConsumption: 40, onOrderQty: 500, nextArrival: null, partCategory: "Processors", finalProduct: "Widget Assembly A", monthlyLeadTimes: [8, 7, 8, 9, 8, 8]
+    },
+
+    // --- Added for Motor Unit X (6 more) ---
+    {
+        partNumber: "GBX-101", description: "Planetary Gearbox", currentStock: 50, safetyStock: 20, leadTime: "25 days", moq: 30, supplier: "MechParts Ltd", recommendedQty: 30, status: "Good", price: 150.00, avgWeeklyConsumption: 5, onOrderQty: 30, nextArrival: null, partCategory: "Motors", finalProduct: "Motor Unit X", monthlyLeadTimes: [25, 26, 25, 24, 25, 26]
+    },
+    {
+        partNumber: "SHF-034", description: "Drive Shaft 34mm", currentStock: 15, safetyStock: 25, leadTime: "14 days", moq: 50, supplier: "MechParts Ltd", recommendedQty: 50, status: "PO Required", price: 22.00, avgWeeklyConsumption: 4, onOrderQty: 50, nextArrival: '2025-08-20', partCategory: "Motors", finalProduct: "Motor Unit X", monthlyLeadTimes: [14, 15, 14, 13, 14, 14]
+    },
+    {
+        partNumber: "CTL-M1", description: "Motor Controller Unit", currentStock: 5, safetyStock: 10, leadTime: "30 days", moq: 20, supplier: "TechCorp Industries", recommendedQty: 20, status: "Critical", price: 85.00, avgWeeklyConsumption: 3, onOrderQty: 20, nextArrival: null, partCategory: "Motors", finalProduct: "Motor Unit X", monthlyLeadTimes: [30, 31, 29, 30, 32, 30]
+    },
+    {
+        partNumber: "CBL-PWR-M1", description: "Motor Power Cable", currentStock: 200, safetyStock: 75, leadTime: "6 days", moq: 250, supplier: "ElectroWire Corp", recommendedQty: 250, status: "Good", price: 4.75, avgWeeklyConsumption: 20, onOrderQty: 250, nextArrival: '2025-08-11', partCategory: "Mechanical Housings", finalProduct: "Motor Unit X", monthlyLeadTimes: [6, 7, 6, 5, 6, 6]
+    },
+    {
+        partNumber: "BRK-MTR-01", description: "Motor Mounting Bracket", currentStock: 40, safetyStock: 50, leadTime: "10 days", moq: 100, supplier: "GlobalSupply Co", recommendedQty: 100, status: "PO Required", price: 3.15, avgWeeklyConsumption: 10, onOrderQty: 100, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Motor Unit X", monthlyLeadTimes: [10, 11, 10, 9, 10, 11]
+    },
+    {
+        partNumber: "ENC-003", description: "Rotary Encoder", currentStock: 60, safetyStock: 30, leadTime: "16 days", moq: 50, supplier: "TechCorp Industries", recommendedQty: 50, status: "Good", price: 35.50, avgWeeklyConsumption: 8, onOrderQty: 50, nextArrival: null, partCategory: "Motors", finalProduct: "Motor Unit X", monthlyLeadTimes: [16, 17, 16, 15, 16, 16]
+    },
+
+    // --- Added for Widget Assembly B (4 more) ---
+    {
+        partNumber: "BRG-025", description: "Ball Bearing 25mm", currentStock: 20, safetyStock: 40, leadTime: "9 days", moq: 150, supplier: "GlobalSupply Co", recommendedQty: 150, status: "Critical", price: 9.50, avgWeeklyConsumption: 10, onOrderQty: 150, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [9, 10, 9, 8, 9, 10]
+    },
+    {
+        partNumber: "WSH-012", description: "Washer 12mm", currentStock: 8000, safetyStock: 2000, leadTime: "4 days", moq: 10000, supplier: "FastenAll Inc", recommendedQty: 0, status: "Good", price: 0.05, avgWeeklyConsumption: 500, onOrderQty: 10000, nextArrival: '2025-08-09', partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [4, 5, 4, 3, 4, 4]
+    },
+    {
+        partNumber: "SPR-008", description: "Compression Spring 8mm", currentStock: 450, safetyStock: 500, leadTime: "11 days", moq: 1000, supplier: "MechParts Ltd", recommendedQty: 1000, status: "PO Required", price: 0.80, avgWeeklyConsumption: 80, onOrderQty: 100, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [11, 12, 11, 10, 11, 11]
+    },
+    {
+        partNumber: "FST-KIT-B", description: "Fastener Kit for B", currentStock: 150, safetyStock: 50, leadTime: "5 days", moq: 100, supplier: "FastenAll Inc", recommendedQty: 100, status: "Good", price: 15.00, avgWeeklyConsumption: 20, onOrderQty: 100, nextArrival: null, partCategory: "Mechanical Housings", finalProduct: "Widget Assembly B", monthlyLeadTimes: [5, 6, 5, 4, 5, 5]
+    }
         ];
 
         const finalProductsList = ["Widget Assembly A", "Widget Assembly B", "Motor Unit X", "Sensor Array Z"];
@@ -1753,24 +1743,12 @@
                 btn.tabIndex = 0;
                 btn.setAttribute('aria-label',
                   `Open details for Week ${week.week} – ${week.status === 'critical' ? 'Critical Risk' : week.status === 'at-risk' ? 'At Risk' : 'On Track'}`);
-                
-                let tooltipHtml = '';
-                if (week.status === 'at-risk') {
-                    const tooltipText = "A future shortage is predicted. There is still enough time to resolve this by placing a standard order.";
-                    tooltipHtml = `class="status-pill has-tooltip" data-tooltip="${tooltipText}" title="${tooltipText}"`;
-                } else if (week.status === 'critical') {
-                    const tooltipText = "Immediate action required. A standard order will not arrive in time to prevent this future shortage.";
-                    tooltipHtml = `class="status-pill has-tooltip" data-tooltip="${tooltipText}" title="${tooltipText}"`;
-                } else {
-                    tooltipHtml = `class="status-pill"`;
-                }
-
                 btn.innerHTML = `
                   <span class="week-label">
                     <span class="week-num">Week ${week.week}</span>
                     <span class="week-date">${formatDate(week.date)}</span>
                   </span>
-                  <span ${tooltipHtml}>${week.status === 'on-track' ? 'On Track' : week.status === 'at-risk' ? 'At Risk' : 'Critical'}</span>
+                  <span class="status-pill">${week.status === 'on-track' ? 'On Track' : week.status === 'at-risk' ? 'At Risk' : 'Critical'}</span>
                   ${week.status !== 'on-track' ? `<span class="issue-icon" title="${week.issue || week.details}" aria-label="${week.issue || week.details}">🛠</span>` : ''}
                 `;
                 if (week.status !== 'on-track') {
@@ -1863,19 +1841,17 @@
             const riskLevel = week.status.charAt(0).toUpperCase() + week.status.slice(1).replace('-', ' ');
             weekModalEl.querySelector('#modalTitle').textContent = `Week ${week.week} Details: ${riskLevel} Risk`;
 
-            // Root-cause table with sort, highlight, deep links
-            let allStubRows = [
-                { partId: 'PCB-001', supplier: 'TechCorp Industries', supplierEmail: 'sales@techcorp.com', shortfall: 75, po: 'PO-1001', finalProduct: 'Widget Assembly A' },
-                { partId: 'MTR-205', supplier: 'MechParts Ltd', supplierEmail: 'orders@mechparts.de', shortfall: 22, po: 'PO-1002', finalProduct: 'Motor Unit X' },
-                { partId: 'BRG-034', supplier: 'GlobalSupply Co', supplierEmail: 'supply@globalsupply.cn', shortfall: 50, po: 'PO-1003', finalProduct: 'Widget Assembly B' }
-            ];
+            // Use the actual parts at risk passed in the week object
+            const partsInModal = week.partsAtRisk.map(p => ({
+                partId: p.partNumber,
+                supplier: p.supplier,
+                supplierEmail: mockSuppliers.find(s => s.name === p.supplier)?.contact?.email || 'N/A',
+                shortfall: p.recommendedQty,
+                po: `PO-${p.partNumber.slice(-4)}`, // Generate a plausible PO number
+                finalProduct: p.finalProduct
+            }));
             
-            const productFilter = document.getElementById('overviewProductFilter').value;
-            const stubRows = productFilter !== 'All Products'
-                ? allStubRows.filter(r => r.finalProduct === productFilter)
-                : allStubRows;
-
-            currentWeekPartIds = stubRows.map(r => r.partId); // Cache the part IDs
+            currentWeekPartIds = partsInModal.map(r => r.partId); // Cache the part IDs
 
             const table = document.createElement('table');
             table.className = 'root-cause';
@@ -1890,7 +1866,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                ${stubRows.map(row => `
+                ${partsInModal.map(row => `
                     <tr>
                         <td><a href="UI-Demo.html#parts?part=${encodeURIComponent(row.partId)}" data-part="${row.partId}">${row.partId}</a></td>
                         <td>${row.supplier}</td>
@@ -1932,6 +1908,11 @@
                         window.location.href = `UI-Demo.html#parts?parts=${currentWeekPartIds.join(',')}`;
                     }
                 };
+            }
+
+            // Enable/disable footer button
+            if(weekToPartsBtn) {
+                weekToPartsBtn.disabled = partsInModal.length === 0;
             }
         }
 
@@ -2679,29 +2660,109 @@
             const productFilter = document.getElementById('overviewProductFilter').value;
             const timeRangeFilter = document.getElementById('overviewTimeRangeFilter').value;
             
-            updateKpiCards(productFilter, timeRangeFilter);
-            generateCalendarGrid(productFilter, timeRangeFilter);
+            // First, ensure all parts have weeksOfStock calculated
+            mockParts.forEach(p => {
+                p.weeksOfStock = p.avgWeeklyConsumption > 0 ? (p.currentStock / p.avgWeeklyConsumption) : 99;
+            });
+            
+            // Filter parts based on selection
+            const relevantParts = productFilter === 'All Products'
+                ? mockParts
+                : mockParts.filter(p => p.finalProduct === productFilter);
+
+            updateKpiCards(relevantParts, timeRangeFilter);
+            generateCalendarGrid(relevantParts, timeRangeFilter);
         }
 
-        function updateKpiCards(productFilter, timeRangeFilter) {
-            let relevantParts = mockParts;
-            if (productFilter !== 'All Products') {
-                relevantParts = mockParts.filter(p => p.finalProduct === productFilter);
-            }
+        function updateKpiCards(relevantParts, timeRangeFilter) {
+            const numWeeks = parseInt(timeRangeFilter.split(' ')[1]);
 
-            // Simulate KPI calculations
-            const partsRequiringPO = relevantParts.filter(p => p.status === 'Critical' || p.status === 'PO Required').length;
+            // Filter parts that are at risk within the selected time range
+            const partsAtRiskInScope = relevantParts.filter(p => p.weeksOfStock < numWeeks);
+
+            const partsRequiringPO = partsAtRiskInScope.filter(p => p.status === 'Critical' || p.status === 'PO Required').length;
             const avgLeadTime = relevantParts.length > 0
                 ? relevantParts.reduce((sum, p) => sum + parseInt(p.leadTime), 0) / relevantParts.length
                 : 0;
-            const weeksAtRisk = Math.round(partsRequiringPO / 2) + (productFilter === 'Motor Unit X' ? 2 : 0);
-            const supplierPerformance = productFilter === 'All Products' ? 87 : (productFilter === 'Motor Unit X' ? 82 : 91);
+            // Calculate unique weeks that have a part running out of stock within the time range
+            const weeksAtRisk = [...new Set(partsAtRiskInScope.map(p => Math.floor(p.weeksOfStock) + 1))].length;
+            const supplierPerformance = relevantParts.length > 0 ? Math.round(relevantParts.reduce((sum, p) => sum + (mockSuppliers.find(s => s.name === p.supplier)?.onTimeDelivery || 0), 0) / relevantParts.length) : 87;
             
             // Update DOM
             document.querySelector('[data-kpi="weeksAtRisk"]').textContent = weeksAtRisk;
             document.querySelector('[data-kpi="partsRequiringPO"]').textContent = partsRequiringPO;
             document.querySelector('[data-kpi="avgLeadTime"]').innerHTML = `${avgLeadTime.toFixed(1)}<span style="font-size: 14px; color: #64748b;"> days</span>`;
             document.querySelector('[data-kpi="supplierPerformance"]').textContent = `${supplierPerformance}%`;
+        }
+        
+        function generateCalendarGrid(relevantParts, timeRangeFilter = 'Next 12 Weeks') {
+            const grid = document.getElementById('weeklyStatusGrid');
+            grid.innerHTML = '';
+            
+            const numWeeks = parseInt(timeRangeFilter.split(' ')[1]);
+            const weeks = [];
+            const startDate = new Date('2024-01-01'); // Start on Jan 1, 2024
+
+            for (let i = 1; i <= numWeeks; i++) {
+                const weekDate = new Date(startDate);
+                weekDate.setDate(startDate.getDate() + (i - 1) * 7);
+
+                const partsAtRiskThisWeek = relevantParts.filter(p => Math.floor(p.weeksOfStock) + 1 === i);
+                
+                let status = 'on-track';
+                let details = 'All on track';
+
+                if (partsAtRiskThisWeek.length > 0) {
+                    if (partsAtRiskThisWeek.some(p => p.status === 'Critical')) {
+                        status = 'critical';
+                        details = `${partsAtRiskThisWeek.filter(p=>p.status === 'Critical').length} critical shortage(s)`;
+                    } else {
+                        status = 'at-risk';
+                        details = `${partsAtRiskThisWeek.length} part(s) at risk`;
+                    }
+                }
+                
+                weeks.push({ 
+                    week: i, 
+                    status, 
+                    details, 
+                    date: weekDate.toISOString().split('T')[0],
+                    partsAtRisk: partsAtRiskThisWeek // Pass the actual parts
+                });
+            }
+
+            weeks.forEach(week => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `week-tile ${week.status}`;
+                btn.setAttribute('data-week', week.week);
+                btn.setAttribute('data-week-start', week.date);
+                btn.setAttribute('aria-haspopup', 'dialog');
+                btn.tabIndex = 0;
+                btn.setAttribute('aria-label',
+                  `Open details for Week ${week.week} – ${week.status === 'critical' ? 'Critical Risk' : week.status === 'at-risk' ? 'At Risk' : 'On Track'}`);
+                btn.innerHTML = `
+                  <span class="week-label">
+                    <span class="week-num">Week ${week.week}</span>
+                    <span class="week-date">${formatDate(week.date)}</span>
+                  </span>
+                  <span class="status-pill">${week.status === 'on-track' ? 'On Track' : week.status === 'at-risk' ? 'At Risk' : 'Critical'}</span>
+                  ${week.status !== 'on-track' ? `<span class="issue-icon" title="${week.issue || week.details}" aria-label="${week.issue || week.details}">🛠</span>` : ''}
+                `;
+                if (week.status !== 'on-track') {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // <-- Add this line
+                        openModal(btn, week);
+                    });
+                    btn.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            openModal(btn, week);
+                        }
+                    });
+                }
+                grid.appendChild(btn);
+            });
         }
         
         // --- End Assembly Overview ---
