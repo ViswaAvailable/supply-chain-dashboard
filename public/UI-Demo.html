@@ -1265,6 +1265,7 @@
                                     <th><input type="checkbox" id="selectAllPartsCheckbox" aria-label="Select all parts"></th>
                                 <th>Part Number</th>
                                 <th>Description</th>
+                                <th>Final Product</th>
                                 <th>Current Stock</th>
                                 <th>Safety Stock</th>
                                 <th>Lead Time</th>
@@ -2007,6 +2008,7 @@
                     <td><input type="checkbox" class="part-select-checkbox" data-part-id="${part.partNumber}" ${selectedPartIds.has(part.partNumber) ? 'checked' : ''}></td>
                     <td><strong>${part.partNumber}</strong></td>
                     <td>${part.description}</td>
+                    <td>${part.finalProduct}</td>
                     <td>${part.currentStock}</td>
                     <td>${part.safetyStock}</td>
                     <td>${part.leadTime}</td>
