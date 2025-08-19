@@ -89,8 +89,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // --- DEBUGGING ---: Log the dependencies for fetching org users
+    if (process.env.NODE_ENV !== 'production') {
     console.log("Org Users Effect Dependencies:", { userRole, orgId });
+    }
 
+ 
     if (userRole === "admin" && orgId) {
       console.log("Fetching organization users with orgId:", orgId);
       setUsersLoading(true);
@@ -101,7 +104,7 @@ export default function DashboardPage() {
         .eq("org_id", orgId)
         .then(({ data, error }) => {
           // --- DEBUGGING ---: Log the result of the fetch
-          console.log("Fetched Org Users Data:", data);
+          // console.log("Fetched Org Users Data:", data);
           console.log("Fetch Org Users Error:", error);
 
           if (error) setUsersError("Failed to load users");
@@ -117,13 +120,18 @@ export default function DashboardPage() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) {
+          if (process.env.NODE_ENV !== 'production') {
           console.log('No access token found');
+          }
           return;
         }
         const payload = JSON.parse(atob(session.access_token.split('.')[1]));
-        console.log('JWT payload:', payload);
+        // Uncomment console log below for JWT payload. Only for Dev Testing
+        // console.log('JWT payload:', payload);
       } catch (e) {
+        if (process.env.NODE_ENV !== 'production') {
         console.error('JWT inspect error:', e);
+        }
       }
     })();
   }, [supabase]);
@@ -253,11 +261,11 @@ function AdminProfileInviteModal({
   const [roleLoadingId, setRoleLoadingId] = useState<string | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
-
-  // --- DEBUGGING --- Log the received orgUsers prop
-  useEffect(() => {
-    console.log("AdminProfileInviteModal received orgUsers:", orgUsers);
-  }, [orgUsers]);
+  const [deleteConfirmUser, setDeleteConfirmUser] = useState<OrgUser | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+  const [deleteEmailConfirm, setDeleteEmailConfirm] = useState("");
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -353,7 +361,7 @@ async function handleRoleToggle(user: OrgUser) {
 
   if (error) {
     // The RPC will raise an exception if unauthorized, which Supabase returns as an error.
-    console.error("RPC Error:", error);
+    
     setRoleError(error.message || "Failed to update role. Check permissions.");
     setRoleLoadingId(null);
     return;
@@ -363,6 +371,63 @@ async function handleRoleToggle(user: OrgUser) {
   setOrgUsers(orgUsers.map(u => (u.id === user.id ? { ...u, role: newRole } : u)));
   setRoleSuccess(`Role updated for ${user.email}`);
   setRoleLoadingId(null);
+}
+
+// Handle user deletion with confirmation
+async function handleDeleteUser(user: OrgUser) {
+  setDeleteError(null);
+  setDeleteSuccess(null);
+  setDeleteConfirmUser(user);
+  setDeleteEmailConfirm("");
+}
+
+async function confirmDeleteUser() {
+  if (!deleteConfirmUser) return;
+  
+  setDeleteLoading(true);
+  setDeleteError(null);
+  setDeleteSuccess(null);
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    const accessToken = session?.access_token || '';
+
+    const response = await fetch("/api/admin-delete-user", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        userId: deleteConfirmUser.id,
+        confirmEmail: deleteEmailConfirm,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setDeleteError(result.error || "Failed to delete user.");
+      setDeleteLoading(false);
+      return;
+    }
+
+    // Success! Remove user from local state
+    setOrgUsers(orgUsers.filter(u => u.id !== deleteConfirmUser.id));
+    setDeleteSuccess(`User ${deleteConfirmUser.email} has been successfully deleted.`);
+    
+    // Close the confirmation dialog after a brief delay
+    setTimeout(() => {
+      setDeleteConfirmUser(null);
+      setDeleteEmailConfirm("");
+      setDeleteSuccess(null);
+    }, 2000);
+
+  } catch (err: any) {
+    setDeleteError(err?.message || "Failed to delete user.");
+  } finally {
+    setDeleteLoading(false);
+  }
 }
 
 
@@ -488,7 +553,8 @@ async function handleRoleToggle(user: OrgUser) {
                     <th className="px-3 py-2 text-left">Name</th>
                     <th className="px-3 py-2 text-left">Email</th>
                     <th className="px-3 py-2 text-left">Role</th>
-                    <th className="px-3 py-2"></th>
+                    <th className="px-3 py-2 text-center">Admin</th>
+                    <th className="px-3 py-2 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -500,7 +566,8 @@ async function handleRoleToggle(user: OrgUser) {
                       </td>
                       <td className="px-3 py-2">{invite.email}</td>
                       <td className="px-3 py-2">{invite.role}</td>
-                      <td className="px-3 py-2"></td>
+                      <td className="px-3 py-2 text-center">—</td>
+                      <td className="px-3 py-2 text-center">—</td>
                     </tr>
                   ))}
                   {orgUsers.filter(u => u.id !== currentUserId).map(user => (
@@ -508,7 +575,7 @@ async function handleRoleToggle(user: OrgUser) {
                       <td className="px-3 py-2">{user.name || <span className="text-gray-400">—</span>}</td>
                       <td className="px-3 py-2">{user.email}</td>
                       <td className="px-3 py-2">{user.role}</td>
-                      <td className="px-3 py-2">
+                      <td className="px-3 py-2 text-center">
                         <Switch
                           checked={user.role === "admin"}
                           onChange={() => handleRoleToggle(user)}
@@ -520,6 +587,18 @@ async function handleRoleToggle(user: OrgUser) {
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${user.role === "admin" ? 'translate-x-5' : 'translate-x-1'}`}
                           />
                         </Switch>
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        <button
+                          onClick={() => handleDeleteUser(user)}
+                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded transition-colors"
+                          title={`Delete ${user.email}`}
+                          aria-label={`Delete user ${user.email}`}
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -535,6 +614,73 @@ async function handleRoleToggle(user: OrgUser) {
           )}
         </div>
       </div>
+      
+      {/* Delete User Confirmation Dialog */}
+      {deleteConfirmUser && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4 relative">
+            <div className="text-center mb-6">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete User</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Are you sure you want to delete <strong>{deleteConfirmUser.name || deleteConfirmUser.email}</strong>? 
+                This action cannot be undone and will permanently remove their access to the application.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Type the user's email to confirm: <strong>{deleteConfirmUser.email}</strong>
+              </label>
+              <input
+                type="email"
+                value={deleteEmailConfirm}
+                onChange={(e) => setDeleteEmailConfirm(e.target.value)}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Enter email to confirm"
+                autoComplete="off"
+              />
+            </div>
+
+            {deleteError && (
+              <div className="mb-4 text-red-600 text-sm text-center">{deleteError}</div>
+            )}
+
+            {deleteSuccess && (
+              <div className="mb-4 text-green-600 text-sm text-center">{deleteSuccess}</div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setDeleteConfirmUser(null);
+                  setDeleteEmailConfirm("");
+                  setDeleteError(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                disabled={deleteLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteUser}
+                disabled={
+                  deleteLoading || 
+                  deleteEmailConfirm.toLowerCase() !== deleteConfirmUser.email.toLowerCase() ||
+                  deleteSuccess !== null
+                }
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {deleteLoading ? "Deleting..." : "Delete User"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
