@@ -241,6 +241,8 @@ function AdminProfileInviteModal({
   orgNameError: string | null;
 }) {
   const supabase = useSupabase();
+  
+  // State declarations
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteAdmin, setInviteAdmin] = useState(false);
@@ -254,10 +256,6 @@ function AdminProfileInviteModal({
     email: string;
     role: string;
   }[]>([]);
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isEmailValid = inviteEmail.length > 0 && emailRegex.test(inviteEmail);
-  const isNameValid = inviteName.trim().length > 0;
-  const canInvite = isEmailValid && isNameValid && !inviteLoading;
   const [roleLoadingId, setRoleLoadingId] = useState<string | null>(null);
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleSuccess, setRoleSuccess] = useState<string | null>(null);
@@ -266,6 +264,49 @@ function AdminProfileInviteModal({
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
   const [deleteEmailConfirm, setDeleteEmailConfirm] = useState("");
+  
+  // Computed values
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = inviteEmail.length > 0 && emailRegex.test(inviteEmail);
+  const isNameValid = inviteName.trim().length > 0;
+  const canInvite = isEmailValid && isNameValid && !inviteLoading;
+  
+  // Focus management refs
+  const modalRef = useRef<HTMLDivElement>(null);
+  const deleteModalRef = useRef<HTMLDivElement>(null);
+  
+  // Focus trap and keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (deleteConfirmUser) {
+          setDeleteConfirmUser(null);
+          setDeleteEmailConfirm("");
+          setDeleteError(null);
+        } else {
+          onClose();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Focus the modal when it opens
+    if (modalRef.current) {
+      modalRef.current.focus();
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [deleteConfirmUser, onClose]);
+
+  // Focus management for delete modal
+  useEffect(() => {
+    if (deleteConfirmUser && deleteModalRef.current) {
+      deleteModalRef.current.focus();
+    }
+  }, [deleteConfirmUser]);
 
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
@@ -433,250 +474,519 @@ async function confirmDeleteUser() {
 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-lg mx-2 relative">
-        <button
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none"
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <h2 className="text-2xl font-bold mb-6 text-center">Admin Profile/Invite</h2>
-        {orgName && (
-          <div className="mb-4 text-center text-sm text-gray-500">
-            Organization: <span className="font-semibold text-gray-700">{orgName}</span>
-          </div>
-        )}
-        {userRole !== "admin" && (
-          <div className="mb-6 text-center text-red-600 font-semibold">
-            You are not authorized to invite users. Only admins can invite.
-          </div>
-        )}
-        {userRole === "admin" && orgName && !orgNameLoading && !orgNameError && (
-          <form onSubmit={handleInvite} className="mb-6">
-            <div className="flex flex-col sm:flex-row gap-4 mb-4">
-              <div className="flex-1">
-                <label className="block text-xs font-semibold mb-1">
-                  Name <span className="text-red-600">*</span>
-                </label>
-                <input
-                  className={`border rounded-md px-3 py-2 w-full ${inviteNameError ? 'border-red-500' : ''}`}
-                  value={inviteName}
-                  onChange={e => {
-                    setInviteName(e.target.value);
-                    if (inviteNameError && e.target.value.trim()) setInviteNameError(null);
-                  }}
-                  placeholder="Name"
-                  type="text"
-                  autoComplete="off"
-                  required
-                />
-                {inviteNameError && (
-                  <div className="mt-1 text-red-600 text-xs">{inviteNameError}</div>
-                )}
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="admin-modal-title"
+      aria-describedby="admin-modal-description"
+    >
+      <div 
+        ref={modalRef}
+        className="bg-white rounded-xl shadow-lg w-full max-w-4xl mx-4 relative flex flex-col max-h-[90vh] sm:max-w-2xl lg:max-w-4xl"
+        tabIndex={-1}
+        style={{ outline: 'none' }}
+      >
+        {/* Modal Header - Fixed */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+          <div className="flex-1">
+            <h2 id="admin-modal-title" className="text-2xl font-bold text-gray-900">
+              Team Management
+            </h2>
+            <p id="admin-modal-description" className="text-sm text-gray-600 mt-1">
+              Invite new team members and manage existing users
+            </p>
+            {orgName && (
+              <div className="mt-2 text-sm text-gray-500">
+                Organization: <span className="font-semibold text-gray-700">{orgName}</span>
               </div>
-              <div className="flex-1">
-                <label className="block text-xs font-semibold mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  className={`border rounded-md px-3 py-2 w-full ${inviteEmailError || (inviteEmail && !isEmailValid) ? 'border-red-500' : ''}`}
-                  value={inviteEmail}
-                  onChange={e => {
-                    setInviteEmail(e.target.value);
-                    if (inviteEmailError && emailRegex.test(e.target.value)) setInviteEmailError(null);
-                  }}
-                  placeholder="Email"
-                  type="email"
-                  required
-                  autoComplete="off"
-                />
-                {(inviteEmailError || (inviteEmail && !isEmailValid)) && (
-                  <div className="mt-1 text-red-600 text-xs">
-                    {inviteEmailError || "Enter a valid email address."}
+            )}
+          </div>
+          <button
+            className="ml-4 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md p-2"
+            onClick={onClose}
+            aria-label="Close team management modal"
+          >
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Modal Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {userRole !== "admin" && (
+            <div className="text-center text-red-600 font-semibold p-4 bg-red-50 rounded-lg">
+              <svg className="mx-auto h-8 w-8 text-red-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              Insufficient privileges. Only administrators can manage team members.
+            </div>
+          )}
+          {userRole === "admin" && orgName && !orgNameLoading && !orgNameError && (
+            <div className="bg-blue-50 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Invite New Team Member</h3>
+              <form onSubmit={handleInvite} className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name <span className="text-red-600" aria-label="required">*</span>
+                    </label>
+                    <input
+                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${inviteNameError ? 'border-red-500' : 'border-gray-300'}`}
+                      value={inviteName}
+                      onChange={e => {
+                        setInviteName(e.target.value);
+                        if (inviteNameError && e.target.value.trim()) setInviteNameError(null);
+                      }}
+                      placeholder="Enter full name"
+                      type="text"
+                      autoComplete="name"
+                      required
+                      aria-describedby={inviteNameError ? "name-error" : undefined}
+                      aria-invalid={!!inviteNameError}
+                    />
+                    {inviteNameError && (
+                      <div id="name-error" className="mt-1 text-red-600 text-sm" role="alert">
+                        {inviteNameError}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address <span className="text-red-600" aria-label="required">*</span>
+                    </label>
+                    <input
+                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${inviteEmailError || (inviteEmail && !isEmailValid) ? 'border-red-500' : 'border-gray-300'}`}
+                      value={inviteEmail}
+                      onChange={e => {
+                        setInviteEmail(e.target.value);
+                        if (inviteEmailError && emailRegex.test(e.target.value)) setInviteEmailError(null);
+                      }}
+                      placeholder="Enter email address"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      aria-describedby={inviteEmailError || (inviteEmail && !isEmailValid) ? "email-error" : undefined}
+                      aria-invalid={!!(inviteEmailError || (inviteEmail && !isEmailValid))}
+                    />
+                    {(inviteEmailError || (inviteEmail && !isEmailValid)) && (
+                      <div id="email-error" className="mt-1 text-red-600 text-sm" role="alert">
+                        {inviteEmailError || "Enter a valid email address."}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch
+                    checked={inviteAdmin}
+                    onChange={setInviteAdmin}
+                    className={`${inviteAdmin ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                    aria-describedby="admin-role-description"
+                  >
+                    <span className="sr-only">Grant administrator privileges</span>
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${inviteAdmin ? 'translate-x-6' : 'translate-x-1'}`}
+                    />
+                  </Switch>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">Administrator Role</label>
+                    <p id="admin-role-description" className="text-xs text-gray-500">
+                      Grants full team management privileges
+                    </p>
+                  </div>
+                </div>
+                
+                <button
+                  type="submit"
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!canInvite}
+                  aria-describedby={inviteError ? "invite-error" : inviteSuccess ? "invite-success" : undefined}
+                >
+                  {inviteLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending Invitation...
+                    </span>
+                  ) : (
+                    "Send Invitation"
+                  )}
+                </button>
+                
+                {inviteError && (
+                  <div id="invite-error" className="p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <span className="text-sm text-red-700">{inviteError}</span>
+                    </div>
                   </div>
                 )}
+                
+                {inviteSuccess && (
+                  <div id="invite-success" className="p-3 bg-green-50 border border-green-200 rounded-md" role="alert">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-green-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm text-green-700">{inviteSuccess}</span>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+          {orgNameLoading && (
+            <div className="text-center p-6">
+              <div className="inline-flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading organization information...
               </div>
             </div>
-            <div className="flex items-center gap-2 mb-4">
-              <Switch
-                checked={inviteAdmin}
-                onChange={setInviteAdmin}
-                className={`${inviteAdmin ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none`}
-              >
-                <span className="sr-only">Make Admin</span>
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${inviteAdmin ? 'translate-x-6' : 'translate-x-1'}`}
-                />
-              </Switch>
-              <span className="text-sm">Make Admin</span>
+          )}
+          
+          {orgNameError && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg" role="alert">
+              <div className="flex">
+                <svg className="h-5 w-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <span className="text-sm text-red-700">{orgNameError}</span>
+              </div>
             </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition disabled:opacity-50"
-              disabled={!canInvite}
-            >
-              {inviteLoading ? "Inviting..." : "Invite User"}
-            </button>
-            {inviteError && (
-              <div className="mt-2 text-red-600 text-center text-sm">{inviteError}</div>
+          )}
+
+          <div className="bg-white rounded-lg border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Current Team Members</h3>
+              <p className="text-sm text-gray-600 mt-1">Manage roles and permissions for team members</p>
+            </div>
+            
+            <div className="overflow-hidden">
+              <div className="max-h-80 overflow-y-auto">
+                {orgUsers.length <= 1 && pendingInvites.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <p className="text-gray-500">No other team members yet</p>
+                    <p className="text-sm text-gray-400 mt-1">Invite team members to get started</p>
+                  </div>
+                ) : (
+                  <table className="min-w-full divide-y divide-gray-200" role="table" aria-label="Team members">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Member
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Contact
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Role
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Admin
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {pendingInvites.map((invite, idx) => (
+                        <tr key={`pending-${idx}`} className="bg-yellow-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className="h-10 w-10 rounded-full bg-yellow-200 flex items-center justify-center">
+                                  <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">{invite.name}</div>
+                                <div className="flex items-center">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Invitation Pending
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {invite.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                              {invite.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-400">
+                            —
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-400">
+                            —
+                          </td>
+                        </tr>
+                      ))}
+                      {orgUsers.filter(u => u.id !== currentUserId).map((user, index) => (
+                        <tr key={user.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10">
+                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                  <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                </div>
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {user.name || 'Team Member'}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  Active Member
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {user.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                              user.role === 'admin' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <Switch
+                              checked={user.role === "admin"}
+                              onChange={() => handleRoleToggle(user)}
+                              className={`${user.role === "admin" ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                              disabled={roleLoadingId === user.id}
+                              aria-label={`Toggle administrator privileges for team member`}
+                              title={`${user.role === "admin" ? 'Remove' : 'Grant'} administrator privileges`}
+                            >
+                              <span className="sr-only">
+                                {user.role === "admin" ? 'Remove administrator privileges' : 'Grant administrator privileges'}
+                              </span>
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${user.role === "admin" ? 'translate-x-6' : 'translate-x-1'}`}
+                              />
+                            </Switch>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              className="inline-flex items-center p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                              aria-label="Remove team member"
+                              title="Remove team member from organization"
+                            >
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+            
+            {/* Status Messages */}
+            {roleError && (
+              <div className="px-6 py-3 border-t border-gray-200 bg-red-50" role="alert">
+                <div className="flex">
+                  <svg className="h-5 w-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <span className="text-sm text-red-700">{roleError}</span>
+                </div>
+              </div>
             )}
-            {inviteSuccess && (
-              <div className="mt-2 text-green-600 text-center text-sm">{inviteSuccess}</div>
-            )}
-          </form>
-        )}
-        {orgNameLoading && (
-          <div className="mb-6 text-center text-gray-500">Loading organization name...</div>
-        )}
-        {orgNameError && (
-          <div className="mb-6 text-center text-red-600">{orgNameError}</div>
-        )}
-        <div className="mb-6">
-          <h3 className="font-semibold mb-2">Team Members</h3>
-          <div className="max-h-48 overflow-y-auto border rounded-md">
-            {orgUsers.length <= 1 && pendingInvites.length === 0 ? (
-              <div className="p-4 text-gray-500 text-center">No other team members yet.</div>
-            ) : (
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="px-3 py-2 text-left">Name</th>
-                    <th className="px-3 py-2 text-left">Email</th>
-                    <th className="px-3 py-2 text-left">Role</th>
-                    <th className="px-3 py-2 text-center">Admin</th>
-                    <th className="px-3 py-2 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingInvites.map((invite, idx) => (
-                    <tr key={invite.email} className="bg-yellow-50 text-yellow-700 italic">
-                      <td className="px-3 py-2 flex items-center gap-2">
-                        {invite.name}
-                        <span className="text-xs bg-yellow-200 text-yellow-800 rounded px-2 py-0.5 ml-2">Pending</span>
-                      </td>
-                      <td className="px-3 py-2">{invite.email}</td>
-                      <td className="px-3 py-2">{invite.role}</td>
-                      <td className="px-3 py-2 text-center">—</td>
-                      <td className="px-3 py-2 text-center">—</td>
-                    </tr>
-                  ))}
-                  {orgUsers.filter(u => u.id !== currentUserId).map(user => (
-                    <tr key={user.id} className="even:bg-gray-50">
-                      <td className="px-3 py-2">{user.name || <span className="text-gray-400">—</span>}</td>
-                      <td className="px-3 py-2">{user.email}</td>
-                      <td className="px-3 py-2">{user.role}</td>
-                      <td className="px-3 py-2 text-center">
-                        <Switch
-                          checked={user.role === "admin"}
-                          onChange={() => handleRoleToggle(user)}
-                          className={`${user.role === "admin" ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-5 w-10 items-center rounded-full transition-colors focus:outline-none`}
-                          disabled={roleLoadingId === user.id}
-                        >
-                          <span className="sr-only">Toggle admin</span>
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${user.role === "admin" ? 'translate-x-5' : 'translate-x-1'}`}
-                          />
-                        </Switch>
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <button
-                          onClick={() => handleDeleteUser(user)}
-                          className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded transition-colors"
-                          title={`Delete ${user.email}`}
-                          aria-label={`Delete user ${user.email}`}
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            
+            {roleSuccess && (
+              <div className="px-6 py-3 border-t border-gray-200 bg-green-50" role="alert">
+                <div className="flex">
+                  <svg className="h-5 w-5 text-green-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-sm text-green-700">{roleSuccess}</span>
+                </div>
+              </div>
             )}
           </div>
-          {roleError && (
-            <div className="mt-2 text-red-600 text-center text-sm">{roleError}</div>
-          )}
-          {roleSuccess && (
-            <div className="mt-2 text-green-600 text-center text-sm">{roleSuccess}</div>
-          )}
+        </div>
+
+        {/* Modal Footer - Sticky */}
+        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
       
       {/* Delete User Confirmation Dialog */}
       {deleteConfirmUser && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mx-4 relative">
-            <div className="text-center mb-6">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
+        <div 
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/50"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-modal-title"
+          aria-describedby="delete-modal-description"
+        >
+          <div 
+            ref={deleteModalRef}
+            className="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 flex flex-col max-h-[90vh] sm:max-w-lg"
+            tabIndex={-1}
+            style={{ outline: 'none' }}
+          >
+            {/* Delete Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-3">
+                  <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 id="delete-modal-title" className="text-lg font-semibold text-gray-900">
+                  Remove Team Member
+                </h3>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete User</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Are you sure you want to delete <strong>{deleteConfirmUser.name || deleteConfirmUser.email}</strong>? 
-                This action cannot be undone and will permanently remove their access to the application.
-              </p>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Type the user's email to confirm: <strong>{deleteConfirmUser.email}</strong>
-              </label>
-              <input
-                type="email"
-                value={deleteEmailConfirm}
-                onChange={(e) => setDeleteEmailConfirm(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="Enter email to confirm"
-                autoComplete="off"
-              />
+            {/* Delete Modal Body - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="text-center mb-6">
+                <p id="delete-modal-description" className="text-sm text-gray-600 mb-4">
+                  You are about to permanently remove a team member from your organization. 
+                  This action cannot be undone and will immediately revoke their access.
+                </p>
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <div className="flex">
+                    <svg className="h-5 w-5 text-yellow-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <div className="text-left">
+                      <p className="text-sm font-medium text-yellow-800 mb-1">Permanent Action</p>
+                      <p className="text-sm text-yellow-700">
+                        The team member will lose access to all organization resources immediately.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirm by typing the team member's email address
+                  </label>
+                  <div className="text-xs text-gray-500 mb-2">
+                    Required email: <code className="bg-gray-100 px-1 py-0.5 rounded">{deleteConfirmUser.email}</code>
+                  </div>
+                  <input
+                    type="email"
+                    value={deleteEmailConfirm}
+                    onChange={(e) => setDeleteEmailConfirm(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Type email address to confirm"
+                    autoComplete="off"
+                    aria-describedby={deleteError ? "delete-error" : undefined}
+                    aria-invalid={!!deleteError}
+                  />
+                </div>
+
+                {deleteError && (
+                  <div id="delete-error" className="p-3 bg-red-50 border border-red-200 rounded-md" role="alert">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-red-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <span className="text-sm text-red-700">{deleteError}</span>
+                    </div>
+                  </div>
+                )}
+
+                {deleteSuccess && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-md" role="alert">
+                    <div className="flex">
+                      <svg className="h-5 w-5 text-green-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm text-green-700">{deleteSuccess}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {deleteError && (
-              <div className="mb-4 text-red-600 text-sm text-center">{deleteError}</div>
-            )}
-
-            {deleteSuccess && (
-              <div className="mb-4 text-green-600 text-sm text-center">{deleteSuccess}</div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setDeleteConfirmUser(null);
-                  setDeleteEmailConfirm("");
-                  setDeleteError(null);
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                disabled={deleteLoading}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDeleteUser}
-                disabled={
-                  deleteLoading || 
-                  deleteEmailConfirm.toLowerCase() !== deleteConfirmUser.email.toLowerCase() ||
-                  deleteSuccess !== null
-                }
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {deleteLoading ? "Deleting..." : "Delete User"}
-              </button>
+            {/* Delete Modal Footer - Sticky */}
+            <div className="flex-shrink-0 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteConfirmUser(null);
+                    setDeleteEmailConfirm("");
+                    setDeleteError(null);
+                  }}
+                  className="flex-1 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  disabled={deleteLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteUser}
+                  disabled={
+                    deleteLoading || 
+                    deleteEmailConfirm.toLowerCase() !== deleteConfirmUser.email.toLowerCase() ||
+                    deleteSuccess !== null
+                  }
+                  className="flex-1 bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-describedby={deleteError ? "delete-error" : undefined}
+                >
+                  {deleteLoading ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Removing...
+                    </span>
+                  ) : (
+                    "Remove Team Member"
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
