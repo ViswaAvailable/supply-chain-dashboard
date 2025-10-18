@@ -1022,6 +1022,65 @@
             padding: 4px 10px;
             font-size: 13px;
         }
+
+        /* Part Number Search Dropdown Styles */
+        .search-dropdown-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-dropdown-item:hover,
+        .search-dropdown-item.highlighted {
+            background: #f1f5f9;
+        }
+
+        .search-dropdown-item-part {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .search-dropdown-item-supplier {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .search-dropdown-no-results {
+            padding: 12px;
+            text-align: center;
+            color: #64748b;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -1302,6 +1361,13 @@
                         <select id="filterFinalProduct" class="filter-select">
                             <option value="">All Products</option>
                         </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterSupplierPartNumber" class="filter-label">Part Number</label>
+                        <div class="search-dropdown-container">
+                            <input type="text" id="filterSupplierPartNumber" class="filter-select" placeholder="Search Part #" autocomplete="off">
+                            <div id="partNumberDropdown" class="search-dropdown"></div>
+                        </div>
                     </div>
                     <div class="filter-group">
                         <label for="filterRegion" class="filter-label">Region</label>
@@ -1655,12 +1721,65 @@
             // --- One-time setup for Supplier filters ---
             function setupSupplierFilters() {
                 const finalProductFilter = document.querySelector('#suppliers #filterFinalProduct');
+                const partNumberFilter = document.getElementById('filterSupplierPartNumber');
                 const regionFilter = document.querySelector('#suppliers #filterRegion');
                 const performanceFilter = document.querySelector('#suppliers #filterPerformance');
 
                 if (finalProductFilter) {
                     finalProductsList.forEach(p => finalProductFilter.add(new Option(p, p)));
                     finalProductFilter.addEventListener('change', () => populateSupplierCards());
+                }
+                if (partNumberFilter) {
+                    // Show suggestions on input
+                    partNumberFilter.addEventListener('input', (e) => {
+                        const searchTerm = e.target.value;
+                        showPartNumberSuggestions(searchTerm);
+                        
+                        // Also trigger filtering with debounce
+                        clearTimeout(partNumberFilter.debounceTimer);
+                        partNumberFilter.debounceTimer = setTimeout(() => {
+                            populateSupplierCards();
+                        }, 300);
+                    });
+
+                    // Handle keyboard navigation
+                    partNumberFilter.addEventListener('keydown', (e) => {
+                        const dropdown = document.getElementById('partNumberDropdown');
+                        const isDropdownVisible = dropdown && dropdown.style.display === 'block';
+
+                        if (isDropdownVisible) {
+                            switch (e.key) {
+                                case 'ArrowDown':
+                                    e.preventDefault();
+                                    navigateDropdown('down');
+                                    break;
+                                case 'ArrowUp':
+                                    e.preventDefault();
+                                    navigateDropdown('up');
+                                    break;
+                                case 'Enter':
+                                    e.preventDefault();
+                                    selectHighlightedItem();
+                                    break;
+                                case 'Escape':
+                                    e.preventDefault();
+                                    hidePartNumberDropdown();
+                                    break;
+                            }
+                        }
+                    });
+
+                    // Hide dropdown when input loses focus (with delay for clicks)
+                    partNumberFilter.addEventListener('blur', () => {
+                        setTimeout(() => hidePartNumberDropdown(), 150);
+                    });
+
+                    // Show suggestions when input gains focus and has value
+                    partNumberFilter.addEventListener('focus', (e) => {
+                        if (e.target.value.trim()) {
+                            showPartNumberSuggestions(e.target.value);
+                        }
+                    });
                 }
                 if (regionFilter) {
                     regionFilter.addEventListener('change', () => populateSupplierCards());
@@ -2055,6 +2174,8 @@
             // --- Get filter and sort values ---
             const productFilterSelect = document.querySelector('#suppliers #filterFinalProduct');
             currentFinalProduct = productFilterSelect ? productFilterSelect.value : "";
+            const partNumberFilterInput = document.getElementById('filterSupplierPartNumber');
+            const currentPartNumber = partNumberFilterInput ? partNumberFilterInput.value.toLowerCase().trim() : "";
             const regionFilterSelect = document.querySelector('#suppliers #filterRegion');
             const currentRegion = regionFilterSelect ? regionFilterSelect.value : "";
             const performanceFilterSelect = document.querySelector('#suppliers #filterPerformance');
@@ -2100,7 +2221,12 @@
                 } else if (currentPerformance === 'needs_improvement') {
                     performanceMatch = s.onTimeDelivery < 80;
                 }
-                return regionMatch && performanceMatch;
+                // Part Number Filter - check if supplier supplies any part matching the search
+                let partNumberMatch = true;
+                if (currentPartNumber) {
+                    partNumberMatch = s.parts.some(partId => partId.toLowerCase().includes(currentPartNumber));
+                }
+                return regionMatch && performanceMatch && partNumberMatch;
             });
 
             if (currentFinalProduct) {
@@ -2218,6 +2344,128 @@
             });
         }
 
+        // --- Part Number Search Dropdown Functions ---
+        function showPartNumberSuggestions(searchTerm) {
+            const dropdown = document.getElementById('partNumberDropdown');
+            if (!dropdown) return;
+
+            // Get all unique parts from all suppliers
+            const allParts = [];
+            mockSuppliers.forEach(supplier => {
+                supplier.parts.forEach(partId => {
+                    const partData = mockParts.find(p => p.partNumber === partId);
+                    if (partData && !allParts.find(p => p.partNumber === partId)) {
+                        allParts.push({
+                            partNumber: partId,
+                            supplier: supplier.name,
+                            description: partData.description || ''
+                        });
+                    }
+                });
+            });
+
+            // Filter parts based on search term
+            const filteredParts = searchTerm.trim() 
+                ? allParts.filter(part => 
+                    part.partNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    part.description.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).slice(0, 10) // Limit to 10 results
+                : [];
+
+            // Clear previous items
+            dropdown.innerHTML = '';
+            dropdownItems = [];
+            currentDropdownIndex = -1;
+
+            if (filteredParts.length === 0) {
+                if (searchTerm.trim()) {
+                    dropdown.innerHTML = '<div class="search-dropdown-no-results">No matching parts found</div>';
+                    dropdown.style.display = 'block';
+                } else {
+                    dropdown.style.display = 'none';
+                }
+                return;
+            }
+
+            // Populate dropdown with suggestions
+            filteredParts.forEach((part, index) => {
+                const item = document.createElement('div');
+                item.className = 'search-dropdown-item';
+                item.dataset.partNumber = part.partNumber;
+                item.dataset.index = index;
+                
+                item.innerHTML = `
+                    <span class="search-dropdown-item-part">${part.partNumber}</span>
+                    <span class="search-dropdown-item-supplier">${part.supplier}</span>
+                `;
+
+                item.addEventListener('click', () => selectPartFromDropdown(part.partNumber));
+                dropdown.appendChild(item);
+                dropdownItems.push(item);
+            });
+
+            dropdown.style.display = 'block';
+        }
+
+        function selectPartFromDropdown(partNumber) {
+            const input = document.getElementById('filterSupplierPartNumber');
+            const dropdown = document.getElementById('partNumberDropdown');
+            
+            if (input) {
+                input.value = partNumber;
+                populateSupplierCards(); // Trigger filtering
+            }
+            
+            if (dropdown) {
+                dropdown.style.display = 'none';
+            }
+            
+            currentDropdownIndex = -1;
+            dropdownItems = [];
+        }
+
+        function hidePartNumberDropdown() {
+            const dropdown = document.getElementById('partNumberDropdown');
+            if (dropdown) {
+                dropdown.style.display = 'none';
+            }
+            currentDropdownIndex = -1;
+            dropdownItems = [];
+        }
+
+        function navigateDropdown(direction) {
+            if (dropdownItems.length === 0) return;
+
+            // Remove previous highlight
+            if (currentDropdownIndex >= 0 && dropdownItems[currentDropdownIndex]) {
+                dropdownItems[currentDropdownIndex].classList.remove('highlighted');
+            }
+
+            // Update index
+            if (direction === 'down') {
+                currentDropdownIndex = currentDropdownIndex < dropdownItems.length - 1 
+                    ? currentDropdownIndex + 1 
+                    : 0;
+            } else if (direction === 'up') {
+                currentDropdownIndex = currentDropdownIndex > 0 
+                    ? currentDropdownIndex - 1 
+                    : dropdownItems.length - 1;
+            }
+
+            // Add new highlight
+            if (dropdownItems[currentDropdownIndex]) {
+                dropdownItems[currentDropdownIndex].classList.add('highlighted');
+                dropdownItems[currentDropdownIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function selectHighlightedItem() {
+            if (currentDropdownIndex >= 0 && dropdownItems[currentDropdownIndex]) {
+                const partNumber = dropdownItems[currentDropdownIndex].dataset.partNumber;
+                selectPartFromDropdown(partNumber);
+            }
+        }
+
         // Charts Functions
         let leadTimeChartInstance, supplierChartInstance, inventoryChartInstance;
         function initializeCharts() {
@@ -2298,6 +2546,10 @@
         let selectedPartIds = new Set();
         let partsSortConfig = { key: 'weeksOfStock', dir: 1 }; // 1 for asc, -1 for desc
         let preFilterParts = [];
+
+        // --- Part Number Search Dropdown State ---
+        let currentDropdownIndex = -1;
+        let dropdownItems = [];
 
         function initializePartsPage(qs) {
             const params = new URLSearchParams(qs || '');
@@ -2602,11 +2854,23 @@
             }
         }
 
-        document.addEventListener('click', closeBulkActionsMenu);
+        document.addEventListener('click', (e) => {
+            closeBulkActionsMenu();
+            
+            // Hide part number dropdown when clicking outside
+            const partNumberInput = document.getElementById('filterSupplierPartNumber');
+            const dropdown = document.getElementById('partNumberDropdown');
+            if (partNumberInput && dropdown && 
+                !partNumberInput.contains(e.target) && 
+                !dropdown.contains(e.target)) {
+                hidePartNumberDropdown();
+            }
+        });
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeBulkActionsMenu();
+                hidePartNumberDropdown();
             }
         });
 
