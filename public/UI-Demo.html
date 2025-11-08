@@ -1104,15 +1104,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-page="suppliers" href="#suppliers">
-                        <i class="fas fa-truck"></i>
-                        Supplier Performance
+                    <a class="nav-link" data-page="demand-forecasts" href="#demand-forecasts">
+                        <i class="fas fa-chart-area"></i>
+                        Demand Forecasts
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-page="analytics" href="#analytics">
-                        <i class="fas fa-chart-line"></i>
-                        Analytics & KPIs
+                    <a class="nav-link" data-page="suppliers" href="#suppliers">
+                        <i class="fas fa-truck"></i>
+                        Supplier Performance
                     </a>
                 </li>
             </ul>
@@ -1477,6 +1477,82 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Demand Forecasts Page -->
+            <div class="page" id="demand-forecasts">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Demand Forecasts</h1>
+                        <p class="page-subtitle">12-week demand forecast vs actual demand by final product</p>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="demandForecastProductFilter" class="filter-label">Final Product</label>
+                        <select id="demandForecastProductFilter" class="filter-select" aria-label="Select product for demand forecast">
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="status-cards" style="margin-top: 24px;">
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <span class="status-card-title">Forecast Accuracy</span>
+                            <i class="fas fa-bullseye" style="color: #3b82f6;"></i>
+                        </div>
+                        <div class="status-card-value" id="forecastAccuracy">—</div>
+                        <div class="status-card-change" id="forecastAccuracyTrend">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <span class="status-card-title">Avg Weekly Forecast</span>
+                            <i class="fas fa-chart-line" style="color: #3b82f6;"></i>
+                        </div>
+                        <div class="status-card-value" id="avgWeeklyForecast">—</div>
+                        <div class="status-card-change" id="avgWeeklyForecastChange">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <span class="status-card-title">Avg Weekly Actual</span>
+                            <i class="fas fa-check-circle" style="color: #059669;"></i>
+                        </div>
+                        <div class="status-card-value" id="avgWeeklyActual">—</div>
+                        <div class="status-card-change" id="avgWeeklyActualChange">—</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header">
+                            <span class="status-card-title">Peak Demand Week</span>
+                            <i class="fas fa-arrow-up" style="color: #d97706;"></i>
+                        </div>
+                        <div class="status-card-value" id="peakDemandWeek">—</div>
+                        <div class="status-card-change" id="peakDemandValue">—</div>
+                    </div>
+                </div>
+
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <h3 class="table-title" id="demandChartTitle">Demand Forecast</h3>
+                        <div class="legend" style="display: flex; gap: 24px;">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #3b82f6; width: 16px; height: 16px; border-radius: 4px;"></div>
+                                <span>Forecasted Demand</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #059669; width: 16px; height: 16px; border-radius: 4px;"></div>
+                                <span>Actual Demand</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="padding: 24px;">
+                        <div class="chart-container" style="height: 450px;">
+                            <div id="demandChartAnnouncer" aria-live="polite" class="sr-only"></div>
+                            <canvas id="demandForecastChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -1644,6 +1720,26 @@
           "Mechanical Housings": [5.2, 5.0, 5.1, 5.3, 5.5, 5.4]
         };
 
+        // Mock Demand Forecast Data - 12 weeks for each final product
+        const mockDemandData = {
+            "Widget Assembly A": {
+                forecast: [120, 135, 140, 150, 145, 160, 155, 170, 165, 180, 175, 190],
+                actual: [115, 142, 138, 148, 140, 165, 150, 175, 160, 185, 170, null] // null for future weeks
+            },
+            "Widget Assembly B": {
+                forecast: [200, 210, 220, 215, 230, 225, 240, 235, 250, 245, 260, 255],
+                actual: [195, 215, 218, 210, 235, 220, 245, 230, null, null, null, null]
+            },
+            "Motor Unit X": {
+                forecast: [80, 85, 90, 88, 95, 92, 100, 98, 105, 103, 110, 108],
+                actual: [78, 88, 87, 85, 98, 90, 102, 95, null, null, null, null]
+            },
+            "Sensor Array Z": {
+                forecast: [150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205],
+                actual: [148, 158, 162, 163, 172, 178, 182, 188, null, null, null, null]
+            }
+        };
+
         // Navigation
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize navigation
@@ -1674,6 +1770,8 @@
                 } else if (pageId === 'analytics') {
                     setTimeout(() => initializeCharts(), 100);
                     initLeadTimeFilters();
+                } else if (pageId === 'demand-forecasts') {
+                    setTimeout(() => initializeDemandForecastPage(), 100);
                 }
             };
 
@@ -2467,7 +2565,7 @@
         }
 
         // Charts Functions
-        let leadTimeChartInstance, supplierChartInstance, inventoryChartInstance;
+        let leadTimeChartInstance, supplierChartInstance, inventoryChartInstance, demandForecastChartInstance;
         function initializeCharts() {
             // Destroy existing charts to prevent memory leaks
             if(leadTimeChartInstance) leadTimeChartInstance.destroy();
@@ -3032,6 +3130,224 @@
         }
         
         // --- End Assembly Overview ---
+
+        // --- Demand Forecasts Page Functions ---
+        function initializeDemandForecastPage() {
+            const productFilter = document.getElementById('demandForecastProductFilter');
+            
+            if (!productFilter) return;
+            
+            // Populate filter with final products
+            productFilter.innerHTML = '';
+            Object.keys(mockDemandData).forEach(product => {
+                productFilter.add(new Option(product, product));
+            });
+            
+            // Set default to first product
+            productFilter.value = Object.keys(mockDemandData)[0];
+            
+            // Add change listener
+            productFilter.addEventListener('change', function() {
+                updateDemandForecastChart(this.value);
+            });
+            
+            // Initialize chart
+            createDemandForecastChart();
+            
+            // Load initial data
+            updateDemandForecastChart(productFilter.value);
+        }
+
+        function createDemandForecastChart() {
+            if (demandForecastChartInstance) {
+                demandForecastChartInstance.destroy();
+            }
+            
+            const ctx = document.getElementById('demandForecastChart');
+            if (!ctx) return;
+            
+            demandForecastChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 
+                             'Week 7', 'Week 8', 'Week 9', 'Week 10', 'Week 11', 'Week 12'],
+                    datasets: [
+                        {
+                            label: 'Forecasted Demand',
+                            data: [],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: '#3b82f6',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            fill: true
+                        },
+                        {
+                            label: 'Actual Demand',
+                            data: [],
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointBackgroundColor: '#059669',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            fill: true,
+                            spanGaps: false // Don't connect lines through null values
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // We have custom legend in header
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toLocaleString() + ' units';
+                                    } else {
+                                        label += 'No data';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                },
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Quantity (units)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDemandForecastChart(productName) {
+            if (!demandForecastChartInstance || !mockDemandData[productName]) return;
+            
+            const data = mockDemandData[productName];
+            
+            // Update chart data
+            demandForecastChartInstance.data.datasets[0].data = data.forecast;
+            demandForecastChartInstance.data.datasets[1].data = data.actual;
+            demandForecastChartInstance.update();
+            
+            // Update title
+            document.getElementById('demandChartTitle').textContent = `Demand Forecast: ${productName}`;
+            
+            // Update summary cards
+            updateDemandSummaryCards(productName, data);
+            
+            // Announce to screen readers
+            const announcer = document.getElementById('demandChartAnnouncer');
+            if (announcer) {
+                announcer.textContent = `Demand forecast chart updated for ${productName}.`;
+            }
+        }
+
+        function updateDemandSummaryCards(productName, data) {
+            // Calculate metrics
+            const forecast = data.forecast;
+            const actual = data.actual.filter(v => v !== null);
+            
+            // Forecast Accuracy - calculate MAPE (Mean Absolute Percentage Error) for weeks with actuals
+            let accuracy = 0;
+            if (actual.length > 0) {
+                let totalPercentageError = 0;
+                for (let i = 0; i < actual.length; i++) {
+                    if (actual[i] !== null && forecast[i] !== null && actual[i] !== 0) {
+                        totalPercentageError += Math.abs((forecast[i] - actual[i]) / actual[i]);
+                    }
+                }
+                accuracy = Math.max(0, 100 - (totalPercentageError / actual.length) * 100);
+            }
+            
+            // Average Weekly Forecast
+            const avgForecast = forecast.reduce((sum, val) => sum + val, 0) / forecast.length;
+            
+            // Average Weekly Actual (only for weeks with data)
+            const avgActual = actual.length > 0 ? actual.reduce((sum, val) => sum + val, 0) / actual.length : 0;
+            
+            // Peak Demand Week
+            const maxForecast = Math.max(...forecast);
+            const peakWeek = forecast.indexOf(maxForecast) + 1;
+            
+            // Update DOM
+            document.getElementById('forecastAccuracy').textContent = accuracy.toFixed(1) + '%';
+            document.getElementById('forecastAccuracyTrend').textContent = accuracy >= 90 ? '✓ Excellent' : accuracy >= 80 ? '⚠ Good' : '⚠ Needs Improvement';
+            document.getElementById('forecastAccuracyTrend').className = accuracy >= 90 ? 'status-card-change trend-up' : accuracy >= 80 ? 'status-card-change trend-neutral' : 'status-card-change trend-down';
+            
+            document.getElementById('avgWeeklyForecast').textContent = Math.round(avgForecast).toLocaleString();
+            document.getElementById('avgWeeklyForecastChange').textContent = 'units/week';
+            
+            document.getElementById('avgWeeklyActual').textContent = actual.length > 0 ? Math.round(avgActual).toLocaleString() : '—';
+            const variance = avgActual - avgForecast;
+            document.getElementById('avgWeeklyActualChange').textContent = actual.length > 0 
+                ? (variance >= 0 ? '↑' : '↓') + ' ' + Math.abs(Math.round(variance)).toLocaleString() + ' vs forecast'
+                : 'Pending data';
+            document.getElementById('avgWeeklyActualChange').className = variance >= 0 ? 'status-card-change trend-up' : 'status-card-change trend-down';
+            
+            document.getElementById('peakDemandWeek').textContent = 'Week ' + peakWeek;
+            document.getElementById('peakDemandValue').textContent = maxForecast.toLocaleString() + ' units';
+        }
+        
+        // --- End Demand Forecasts ---
     </script>
 </body>
 </html>
