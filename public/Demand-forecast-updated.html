@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LemonDots AI - Demand Forecasting</title>
+    <style>
+        :root {
+            --primary-dark: #1e293b;
+            --primary-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #0f172a;
+            --text-gray: #64748b;
+            --border-color: #e2e8f0;
+            --green: #10b981;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --gray-light: #f1f5f9;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--primary-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-md);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .top-nav h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .top-nav .logo-accent {
+            color: #fbbf24;
+        }
+
+        .logo-image {
+            height: 32px;
+            width: auto;
+            margin-right: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #fbbf24;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: auto auto 2rem auto;
+            margin-top: auto;
+            position: relative;
+        }
+
+        .profile-icon:hover {
+            background-color: #f59e0b;
+            border-color: #fbbf24;
+            transform: scale(1.05);
+        }
+
+        .profile-icon::after {
+            content: 'Viswa';
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+        }
+
+        .profile-icon:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 0;
+            position: fixed;
+            left: 0;
+            top: 64px;
+            bottom: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav button {
+            width: 100%;
+            text-align: left;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            background: none;
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .sidebar-nav button:hover {
+            background-color: var(--gray-light);
+            color: var(--text-dark);
+        }
+
+        .sidebar-nav button.active {
+            background-color: var(--primary-dark);
+            color: white;
+            border-right: 3px solid #fbbf24;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 2rem;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-gray);
+            font-size: 1rem;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background-color: var(--bg-white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-gray);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .kpi-change.up {
+            color: var(--green);
+        }
+
+        .kpi-change.down {
+            color: var(--red);
+        }
+
+        .arrow-icon {
+            font-size: 1rem;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            background-color: var(--bg-white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .filter-select,
+        .date-input {
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.9375rem;
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-select:focus,
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+        }
+
+        .date-range-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .date-range-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-white);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            transition: all 0.2s;
+        }
+
+        .date-range-btn:hover {
+            background-color: var(--gray-light);
+        }
+
+        .date-range-btn.active {
+            background-color: var(--primary-dark);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .custom-date-inputs {
+            display: none;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .custom-date-inputs.active {
+            display: flex;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background-color: var(--bg-white);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Table Styles */
+        .total-demand {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #334155 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .total-demand-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .total-demand-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .table-container {
+            background-color: var(--bg-white);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th:hover {
+            background-color: #334155;
+        }
+
+        .sort-icon {
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+
+        th.sorted .sort-icon {
+            opacity: 1;
+        }
+
+        th.sorted-asc .sort-icon::after {
+            content: ' ↑';
+        }
+
+        th.sorted-desc .sort-icon::after {
+            content: ' ↓';
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--gray-light);
+        }
+
+        tbody tr:hover {
+            background-color: #e0f2fe;
+        }
+
+        td {
+            padding: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .change-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .change-positive {
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .change-negative {
+            color: var(--red);
+            font-weight: 600;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(15, 23, 42, 0.95);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+
+        .tooltip.active {
+            display: block;
+        }
+
+        .tooltip-row {
+            margin-bottom: 0.25rem;
+        }
+
+        .tooltip-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .tooltip-label {
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .app-container {
+                flex-direction: column;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <h1><img src="lemondots-logo.png" alt="LemonDots Logo" class="logo-image"> LemonDots AI</h1>
+    </nav>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <ul class="sidebar-nav">
+                <li><button class="nav-btn active" data-page="demand-forecast">Demand Forecast</button></li>
+                <li><button class="nav-btn" data-page="category-breakdown">Product Category Breakdown</button></li>
+            </ul>
+            <div class="profile-icon" title="User Profile - V">V</div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Demand Forecast Page -->
+            <div id="demand-forecast" class="page active">
+                <div class="page-header">
+                    <h2>Demand Forecast Dashboard</h2>
+                    <p>Monitor and analyze demand forecasts with real-time insights</p>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Forecast Accuracy</div>
+                        <div class="kpi-value" id="kpi-accuracy">94.2%</div>
+                        <div class="kpi-change up">
+                            <span class="arrow-icon">▲</span>
+                            <span>2.1%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Avg Weekly Forecast</div>
+                        <div class="kpi-value" id="kpi-weekly-forecast">12,450</div>
+                        <div class="kpi-change up">
+                            <span class="arrow-icon">▲</span>
+                            <span>5.3%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Avg Weekly Actual</div>
+                        <div class="kpi-value" id="kpi-weekly-actual">11,890</div>
+                        <div class="kpi-change down">
+                            <span class="arrow-icon">▼</span>
+                            <span>1.2%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Peak Demand Week</div>
+                        <div class="kpi-value" id="kpi-peak-week">Week 8</div>
+                        <div class="kpi-change up">
+                            <span class="arrow-icon">▲</span>
+                            <span>3.5%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-section">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label class="filter-label">Final Product</label>
+                            <select class="filter-select" id="product-filter">
+                                <option value="all">All Products</option>
+                                <option value="strawberry-cream-biscuit">Strawberry Cream Biscuit</option>
+                                <option value="chocolate-cream-biscuit">Chocolate Cream Biscuit</option>
+                                <option value="banana-chips">Banana Chips</option>
+                                <option value="ginger-beer">Ginger Beer</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Date Range</label>
+                            <div class="date-range-buttons">
+                                <button class="date-range-btn" data-days="7">7 days</button>
+                                <button class="date-range-btn" data-days="14">14 days</button>
+                                <button class="date-range-btn" data-days="30">30 days</button>
+                                <button class="date-range-btn active" data-days="60">60 days</button>
+                                <button class="date-range-btn" data-days="90">90 days</button>
+                                <button class="date-range-btn" data-days="custom">Custom</button>
+                            </div>
+                            <div class="custom-date-inputs" id="custom-dates">
+                                <input type="date" class="date-input" id="start-date">
+                                <input type="date" class="date-input" id="end-date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Demand Forecast Trend</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="demandChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Category Breakdown Page -->
+            <div id="category-breakdown" class="page">
+                <div class="page-header">
+                    <h2>Product Category Breakdown</h2>
+                    <p>Detailed demand metrics and trends by product category</p>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-section">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label class="filter-label">Final Product</label>
+                            <select class="filter-select" id="product-filter-2">
+                                <option value="all">All Products</option>
+                                <option value="strawberry-cream-biscuit">Strawberry Cream Biscuit</option>
+                                <option value="chocolate-cream-biscuit">Chocolate Cream Biscuit</option>
+                                <option value="banana-chips">Banana Chips</option>
+                                <option value="ginger-beer">Ginger Beer</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Date Range</label>
+                            <div class="date-range-buttons">
+                                <button class="date-range-btn" data-days="7">7 days</button>
+                                <button class="date-range-btn" data-days="14">14 days</button>
+                                <button class="date-range-btn" data-days="30">30 days</button>
+                                <button class="date-range-btn active" data-days="60">60 days</button>
+                                <button class="date-range-btn" data-days="90">90 days</button>
+                                <button class="date-range-btn" data-days="custom">Custom</button>
+                            </div>
+                            <div class="custom-date-inputs" id="custom-dates-2">
+                                <input type="date" class="date-input" id="start-date-2">
+                                <input type="date" class="date-input" id="end-date-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Demand -->
+                <div class="total-demand">
+                    <div class="total-demand-label">Total Actual Demand for Selected Period</div>
+                    <div class="total-demand-value" id="total-demand-value">168,500 units</div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table id="category-table">
+                        <thead>
+                            <tr>
+                                <th data-column="name">Category Name <span class="sort-icon">↕</span></th>
+                                <th data-column="actual">Actual Demand <span class="sort-icon">↕</span></th>
+                                <th data-column="lastYear">Last Year Demand <span class="sort-icon">↕</span></th>
+                                <th data-column="changeVsLastYear">Change vs Last Year <span class="sort-icon">↕</span></th>
+                                <th data-column="forecast">Forecasted Demand <span class="sort-icon">↕</span></th>
+                                <th data-column="changeVsForecast">Change vs Forecast <span class="sort-icon">↕</span></th>
+                                <th data-column="share">Share of Total <span class="sort-icon">↕</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="category-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="chart-tooltip"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Product data with ML forecasting pattern - accurate for first 2 weeks, then diverging
+        const productData = {
+            'strawberry-cream-biscuit': {
+                name: 'Strawberry Cream Biscuit',
+                // Forecast follows actuals closely for first 2 weeks, then shows ML prediction pattern
+                forecastData: [8150, 8950, 9200, 9800, 10100, 10400, 10200, 10600, 10800, 11000, 11200, 11400],
+                actualData: [8200, 9000, 8700, 9400, 8900, 9600, 9400, 10000, 9700, 10300, 9900, 10600],
+                confidenceUpper: [8400, 9200, 9800, 10400, 10700, 11000, 10800, 11200, 11400, 11600, 11800, 12000],
+                confidenceLower: [7900, 8700, 8600, 9200, 9500, 9800, 9600, 10000, 10200, 10400, 10600, 10800],
+                categoryData: {
+                    // Data by date range (7, 14, 30, 60, 90 days)
+                    7: { actual: 8200, lastYear: 7800, forecast: 8500 },
+                    14: { actual: 17200, lastYear: 16100, forecast: 17700 },
+                    30: { actual: 35800, lastYear: 33400, forecast: 37200 },
+                    60: { actual: 48500, lastYear: 45200, forecast: 51000 },
+                    90: { actual: 72800, lastYear: 68100, forecast: 76500 }
+                }
+            },
+            'chocolate-cream-biscuit': {
+                name: 'Chocolate Cream Biscuit',
+                // Forecast follows actuals closely for first 2 weeks, then shows upward trend prediction
+                forecastData: [11750, 12250, 12800, 13500, 14000, 14200, 14500, 14800, 15000, 15200, 15400, 15600],
+                actualData: [11800, 12300, 11600, 12800, 12000, 13300, 12600, 13800, 13000, 14300, 13600, 14800],
+                confidenceUpper: [12000, 12500, 13400, 14100, 14600, 14800, 15100, 15400, 15600, 15800, 16000, 16200],
+                confidenceLower: [11500, 12000, 12200, 12900, 13400, 13600, 13900, 14200, 14400, 14600, 14800, 15000],
+                categoryData: {
+                    // Data by date range (7, 14, 30, 60, 90 days)
+                    7: { actual: 11800, lastYear: 11200, forecast: 12100 },
+                    14: { actual: 24100, lastYear: 22800, forecast: 24800 },
+                    30: { actual: 49200, lastYear: 46500, forecast: 51000 },
+                    60: { actual: 68100, lastYear: 64200, forecast: 71300 },
+                    90: { actual: 102600, lastYear: 96800, forecast: 107200 }
+                }
+            },
+            'banana-chips': {
+                name: 'Banana Chips',
+                // Forecast follows actuals for first 2 weeks, then shows seasonal decline prediction
+                forecastData: [5950, 6550, 6800, 7200, 7000, 6800, 6600, 6400, 6200, 6000, 5800, 5600],
+                actualData: [6000, 6600, 6300, 7000, 6700, 7300, 6900, 7600, 7200, 7800, 7500, 8100],
+                confidenceUpper: [6200, 6800, 7200, 7600, 7400, 7200, 7000, 6800, 6600, 6400, 6200, 6000],
+                confidenceLower: [5700, 6300, 6400, 6800, 6600, 6400, 6200, 6000, 5800, 5600, 5400, 5200],
+                categoryData: {
+                    // Data by date range (7, 14, 30, 60, 90 days)
+                    7: { actual: 6000, lastYear: 6400, forecast: 5800 },
+                    14: { actual: 12600, lastYear: 13200, forecast: 12100 },
+                    30: { actual: 25900, lastYear: 27100, forecast: 24800 },
+                    60: { actual: 36400, lastYear: 38900, forecast: 37800 },
+                    90: { actual: 54800, lastYear: 58600, forecast: 52200 }
+                }
+            },
+            'ginger-beer': {
+                name: 'Ginger Beer',
+                // Forecast follows actuals for first 2 weeks, then shows steady growth prediction
+                forecastData: [4250, 4550, 4800, 5000, 5200, 5400, 5600, 5800, 6000, 6200, 6400, 6600],
+                actualData: [4300, 4600, 4400, 4800, 4500, 5000, 4700, 5200, 4900, 5400, 5100, 5600],
+                confidenceUpper: [4500, 4800, 5100, 5300, 5500, 5700, 5900, 6100, 6300, 6500, 6700, 6900],
+                confidenceLower: [4000, 4300, 4500, 4700, 4900, 5100, 5300, 5500, 5700, 5900, 6100, 6300],
+                categoryData: {
+                    // Data by date range (7, 14, 30, 60, 90 days)
+                    7: { actual: 4300, lastYear: 4600, forecast: 4200 },
+                    14: { actual: 8900, lastYear: 9400, forecast: 8700 },
+                    30: { actual: 18200, lastYear: 19100, forecast: 17800 },
+                    60: { actual: 26500, lastYear: 28100, forecast: 27300 },
+                    90: { actual: 39800, lastYear: 42200, forecast: 40900 }
+                }
+            }
+        };
+
+        // Generate weeks labels
+        function generateWeekLabels(weeks = 12) {
+            const labels = [];
+            const today = new Date();
+            for (let i = weeks - 1; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - (i * 7));
+                const month = date.toLocaleDateString('en-US', { month: 'short' });
+                const day = date.getDate();
+                labels.push(`${month} ${day}`);
+            }
+            return labels;
+        }
+
+        // Initialize chart
+        let demandChart = null;
+        let currentProduct = 'all';
+        let currentDays = 60;
+        let currentCategoryDays = 60;
+
+        function initializeChart() {
+            const ctx = document.getElementById('demandChart');
+            if (!ctx) return;
+
+            const weeks = Math.ceil(currentDays / 7);
+            const labels = generateWeekLabels(weeks);
+
+            let forecastDataset = [];
+            let actualDataset = [];
+            let confidenceUpperDataset = [];
+            let confidenceLowerDataset = [];
+
+            if (currentProduct === 'all') {
+                // Aggregate all products
+                Object.keys(productData).forEach(productKey => {
+                    const product = productData[productKey];
+                    const productWeeks = Math.min(weeks, product.forecastData.length);
+                    for (let i = 0; i < productWeeks; i++) {
+                        if (forecastDataset[i] === undefined) {
+                            forecastDataset[i] = 0;
+                            actualDataset[i] = 0;
+                            confidenceUpperDataset[i] = 0;
+                            confidenceLowerDataset[i] = 0;
+                        }
+                        forecastDataset[i] += product.forecastData[i] || 0;
+                        actualDataset[i] += product.actualData[i] || 0;
+                        confidenceUpperDataset[i] += product.confidenceUpper[i] || 0;
+                        confidenceLowerDataset[i] += product.confidenceLower[i] || 0;
+                    }
+                });
+            } else {
+                const product = productData[currentProduct];
+                if (product) {
+                    const productWeeks = Math.min(weeks, product.forecastData.length);
+                    forecastDataset = product.forecastData.slice(0, productWeeks);
+                    actualDataset = product.actualData.slice(0, productWeeks);
+                    confidenceUpperDataset = product.confidenceUpper.slice(0, productWeeks);
+                    confidenceLowerDataset = product.confidenceLower.slice(0, productWeeks);
+                }
+            }
+
+            // Pad arrays if needed
+            while (forecastDataset.length < weeks) {
+                forecastDataset.push(0);
+                actualDataset.push(0);
+                confidenceUpperDataset.push(0);
+                confidenceLowerDataset.push(0);
+            }
+
+            if (demandChart) {
+                demandChart.destroy();
+            }
+
+            demandChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.slice(0, forecastDataset.length),
+                    datasets: [
+                        {
+                            label: 'Confidence Band',
+                            data: confidenceUpperDataset,
+                            borderColor: 'rgba(203, 213, 225, 0.8)',
+                            backgroundColor: 'rgba(203, 213, 225, 0.2)',
+                            fill: '+1',
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            borderWidth: 1,
+                            order: 3
+                        },
+                        {
+                            label: 'Lower Confidence Band',
+                            data: confidenceLowerDataset,
+                            borderColor: 'rgba(203, 213, 225, 0.8)',
+                            backgroundColor: 'rgba(203, 213, 225, 0.2)',
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 0,
+                            borderWidth: 1,
+                            order: 4
+                        },
+                        {
+                            label: 'Forecast',
+                            data: forecastDataset,
+                            borderColor: '#60a5fa',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 4,
+                            pointBackgroundColor: '#60a5fa',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            order: 2
+                        },
+                        {
+                            label: 'Actual Demand',
+                            data: actualDataset,
+                            borderColor: '#1f2937',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 3,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#1f2937',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                filter: function(legendItem, chartData) {
+                                    // Hide the lower confidence band from legend
+                                    return legendItem.text !== 'Lower Confidence Band';
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label === 'Lower Confidence Band') {
+                                        return null; // Hide lower confidence band from tooltip
+                                    }
+                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update KPIs
+        function updateKPIs() {
+            if (currentProduct === 'all') {
+                let totalForecast = 0;
+                let totalActual = 0;
+                let maxWeek = 0;
+                let maxValue = 0;
+
+                Object.keys(productData).forEach(productKey => {
+                    const product = productData[productKey];
+                    const weeks = Math.min(Math.ceil(currentDays / 7), product.forecastData.length);
+                    for (let i = 0; i < weeks; i++) {
+                        totalForecast += product.forecastData[i] || 0;
+                        totalActual += product.actualData[i] || 0;
+                        if (product.forecastData[i] > maxValue) {
+                            maxValue = product.forecastData[i];
+                            maxWeek = i + 1;
+                        }
+                    }
+                });
+
+                const avgForecast = Math.round(totalForecast / Math.ceil(currentDays / 7));
+                const avgActual = Math.round(totalActual / Math.ceil(currentDays / 7));
+                const accuracy = Math.round((1 - Math.abs(totalForecast - totalActual) / totalForecast) * 100 * 10) / 10;
+
+                document.getElementById('kpi-weekly-forecast').textContent = avgForecast.toLocaleString();
+                document.getElementById('kpi-weekly-actual').textContent = avgActual.toLocaleString();
+                document.getElementById('kpi-accuracy').textContent = accuracy + '%';
+                document.getElementById('kpi-peak-week').textContent = `Week ${maxWeek}`;
+            } else {
+                const product = productData[currentProduct];
+                if (product) {
+                    const weeks = Math.min(Math.ceil(currentDays / 7), product.forecastData.length);
+                    let totalForecast = 0;
+                    let totalActual = 0;
+                    let maxWeek = 0;
+                    let maxValue = 0;
+
+                    for (let i = 0; i < weeks; i++) {
+                        totalForecast += product.forecastData[i] || 0;
+                        totalActual += product.actualData[i] || 0;
+                        if (product.forecastData[i] > maxValue) {
+                            maxValue = product.forecastData[i];
+                            maxWeek = i + 1;
+                        }
+                    }
+
+                    const avgForecast = Math.round(totalForecast / weeks);
+                    const avgActual = Math.round(totalActual / weeks);
+                    const accuracy = Math.round((1 - Math.abs(totalForecast - totalActual) / totalForecast) * 100 * 10) / 10;
+
+                    document.getElementById('kpi-weekly-forecast').textContent = avgForecast.toLocaleString();
+                    document.getElementById('kpi-weekly-actual').textContent = avgActual.toLocaleString();
+                    document.getElementById('kpi-accuracy').textContent = accuracy + '%';
+                    document.getElementById('kpi-peak-week').textContent = `Week ${maxWeek}`;
+                }
+            }
+        }
+
+        // Category breakdown table data
+        let categoryTableData = [];
+        let sortColumn = null;
+        let sortDirection = 'asc';
+
+        function generateCategoryTableData() {
+            categoryTableData = [];
+            
+            if (currentProduct === 'all') {
+                Object.keys(productData).forEach(productKey => {
+                    const product = productData[productKey];
+                    const data = product.categoryData[currentCategoryDays];
+                    const changeVsLastYear = ((data.actual - data.lastYear) / data.lastYear * 100).toFixed(1);
+                    const changeVsForecast = ((data.actual - data.forecast) / data.forecast * 100).toFixed(1);
+                    
+                    categoryTableData.push({
+                        name: product.name,
+                        actual: data.actual,
+                        lastYear: data.lastYear,
+                        changeVsLastYear: parseFloat(changeVsLastYear),
+                        forecast: data.forecast,
+                        changeVsForecast: parseFloat(changeVsForecast),
+                        share: 0 // Will calculate after getting totals
+                    });
+                });
+            } else {
+                const product = productData[currentProduct];
+                if (product) {
+                    const data = product.categoryData[currentCategoryDays];
+                    const changeVsLastYear = ((data.actual - data.lastYear) / data.lastYear * 100).toFixed(1);
+                    const changeVsForecast = ((data.actual - data.forecast) / data.forecast * 100).toFixed(1);
+                    
+                    categoryTableData.push({
+                        name: product.name,
+                        actual: data.actual,
+                        lastYear: data.lastYear,
+                        changeVsLastYear: parseFloat(changeVsLastYear),
+                        forecast: data.forecast,
+                        changeVsForecast: parseFloat(changeVsForecast),
+                        share: 100.0 // Single product gets 100%
+                    });
+                }
+            }
+
+            // Calculate total demand and shares
+            const totalDemand = categoryTableData.reduce((sum, item) => sum + item.actual, 0);
+            
+            // Update shares based on total
+            if (currentProduct === 'all') {
+                categoryTableData.forEach(item => {
+                    item.share = (item.actual / totalDemand * 100);
+                });
+            }
+            
+            document.getElementById('total-demand-value').textContent = totalDemand.toLocaleString() + ' units';
+
+            renderCategoryTable();
+        }
+
+        function renderCategoryTable() {
+            const tbody = document.getElementById('category-table-body');
+            if (!tbody) return;
+
+            // Sort data
+            if (sortColumn) {
+                categoryTableData.sort((a, b) => {
+                    let aVal = a[sortColumn];
+                    let bVal = b[sortColumn];
+                    
+                    if (typeof aVal === 'string') {
+                        aVal = aVal.toLowerCase();
+                        bVal = bVal.toLowerCase();
+                    }
+                    
+                    if (sortDirection === 'asc') {
+                        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                    } else {
+                        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+                    }
+                });
+            }
+
+            tbody.innerHTML = categoryTableData.map(item => {
+                const changeVsLastYearClass = item.changeVsLastYear >= 0 ? 'change-positive' : 'change-negative';
+                const changeVsForecastClass = item.changeVsForecast >= 0 ? 'change-positive' : 'change-negative';
+                const changeVsLastYearSign = item.changeVsLastYear >= 0 ? '+' : '';
+                const changeVsForecastSign = item.changeVsForecast >= 0 ? '+' : '';
+
+                return `
+                    <tr>
+                        <td class="category-name">${item.name}</td>
+                        <td>${item.actual.toLocaleString()}</td>
+                        <td>${item.lastYear.toLocaleString()}</td>
+                        <td class="change-cell">
+                            <span class="${changeVsLastYearClass}">${changeVsLastYearSign}${item.changeVsLastYear.toFixed(1)}%</span>
+                        </td>
+                        <td>${item.forecast.toLocaleString()}</td>
+                        <td class="change-cell">
+                            <span class="${changeVsForecastClass}">${changeVsForecastSign}${item.changeVsForecast.toFixed(1)}%</span>
+                        </td>
+                        <td>${item.share.toFixed(1)}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Table sorting
+        function setupTableSorting() {
+            const headers = document.querySelectorAll('#category-table th[data-column]');
+            headers.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-column');
+                    
+                    // Remove sorted class from all headers
+                    headers.forEach(h => {
+                        h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+                    });
+                    
+                    // Toggle sort direction if same column
+                    if (sortColumn === column) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortColumn = column;
+                        sortDirection = 'asc';
+                    }
+                    
+                    // Add sorted class
+                    header.classList.add('sorted', `sorted-${sortDirection}`);
+                    
+                    renderCategoryTable();
+                });
+            });
+        }
+
+        // Navigation
+        function setupNavigation() {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetPage = btn.getAttribute('data-page');
+                    
+                    // Update active nav button
+                    navButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    // Update active page
+                    document.querySelectorAll('.page').forEach(page => {
+                        page.classList.remove('active');
+                    });
+                    document.getElementById(targetPage).classList.add('active');
+                    
+                    // Initialize data for category breakdown page
+                    if (targetPage === 'category-breakdown') {
+                        generateCategoryTableData();
+                    }
+                });
+            });
+        }
+
+        // Date range filters
+        function setupDateRangeFilters() {
+            const dateRangeButtons = document.querySelectorAll('.date-range-btn');
+            dateRangeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const days = btn.getAttribute('data-days');
+                    const container = btn.closest('.filter-group');
+                    const customInputs = container.querySelector('.custom-date-inputs');
+                    const isOnCategoryPage = btn.closest('#category-breakdown') !== null;
+                    
+                    // Remove active from all buttons in this group
+                    btn.parentElement.querySelectorAll('.date-range-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    
+                    if (days === 'custom') {
+                        btn.classList.add('active');
+                        if (customInputs) {
+                            customInputs.classList.add('active');
+                        }
+                    } else {
+                        btn.classList.add('active');
+                        if (customInputs) {
+                            customInputs.classList.remove('active');
+                        }
+                        
+                        if (isOnCategoryPage) {
+                            currentCategoryDays = parseInt(days);
+                            generateCategoryTableData();
+                        } else {
+                            currentDays = parseInt(days);
+                            updateKPIs();
+                            initializeChart();
+                        }
+                    }
+                });
+            });
+        }
+
+        // Product filters
+        function setupProductFilters() {
+            const productFilter1 = document.getElementById('product-filter');
+            const productFilter2 = document.getElementById('product-filter-2');
+            
+            if (productFilter1) {
+                productFilter1.addEventListener('change', (e) => {
+                    currentProduct = e.target.value;
+                    updateKPIs();
+                    initializeChart();
+                });
+            }
+            
+            if (productFilter2) {
+                productFilter2.addEventListener('change', (e) => {
+                    currentProduct = e.target.value;
+                    generateCategoryTableData();
+                });
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setupNavigation();
+            setupDateRangeFilters();
+            setupProductFilters();
+            setupTableSorting();
+            initializeChart();
+            updateKPIs();
+            generateCategoryTableData();
+        });
+    </script>
+</body>
+</html>
