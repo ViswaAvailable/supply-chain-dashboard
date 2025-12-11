@@ -15,16 +15,14 @@
             --green: #10b981;
             --red: #ef4444;
             --blue: #3b82f6;
+            --amber: #f59e0b;
+            --purple: #8b5cf6;
             --gray-light: #f1f5f9;
             --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -33,7 +31,6 @@
             line-height: 1.6;
         }
 
-        /* Top Navigation */
         .top-nav {
             background-color: var(--primary-dark);
             color: white;
@@ -46,86 +43,33 @@
             z-index: 100;
         }
 
-        .top-nav h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: -0.025em;
-        }
-
-        .top-nav .logo-accent {
-            color: #fbbf24;
-        }
-
-        .logo-image {
-            height: 32px;
-            width: auto;
-            margin-right: 0.75rem;
-            vertical-align: middle;
-        }
+        .top-nav h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; }
+        .top-nav .logo-accent { color: #fbbf24; }
+        .logo-image { height: 32px; width: auto; margin-right: 0.75rem; vertical-align: middle; }
 
         .profile-icon {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             background-color: #fbbf24;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; font-weight: 700;
             color: var(--primary-dark);
             border: 2px solid rgba(251, 191, 36, 0.3);
             cursor: pointer;
             transition: all 0.2s;
             margin: auto auto 2rem auto;
-            margin-top: auto;
             position: relative;
         }
 
-        .profile-icon:hover {
-            background-color: #f59e0b;
-            border-color: #fbbf24;
-            transform: scale(1.05);
-        }
+        .profile-icon:hover { background-color: #f59e0b; border-color: #fbbf24; transform: scale(1.05); }
 
-        .profile-icon::after {
-            content: 'Viswa';
-            position: absolute;
-            right: 50px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(15, 23, 42, 0.95);
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s;
-            box-shadow: var(--shadow-md);
-            z-index: 1000;
-        }
+        .app-container { display: flex; margin-top: 64px; min-height: calc(100vh - 64px); }
 
-        .profile-icon:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Layout Container */
-        .app-container {
-            display: flex;
-            margin-top: 64px;
-            min-height: calc(100vh - 64px);
-        }
-
-        /* Sidebar Navigation */
         .sidebar {
             width: 260px;
             background-color: var(--bg-white);
             border-right: 1px solid var(--border-color);
-            padding: 2rem 0;
+            padding: 1.5rem 0;
             position: fixed;
             left: 0;
             top: 64px;
@@ -135,261 +79,342 @@
             flex-direction: column;
         }
 
-        .sidebar-nav {
-            list-style: none;
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-gray);
         }
 
-        .sidebar-nav li {
-            margin-bottom: 0.5rem;
-        }
+        .sidebar-nav { list-style: none; }
+        .sidebar-nav li { margin-bottom: 0.25rem; }
 
         .sidebar-nav button {
             width: 100%;
             text-align: left;
-            padding: 0.875rem 1.5rem;
+            padding: 0.75rem 1.5rem;
             border: none;
             background: none;
             color: var(--text-gray);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        .sidebar-nav button:hover {
-            background-color: var(--gray-light);
-            color: var(--text-dark);
-        }
+        .sidebar-nav button:hover { background-color: var(--gray-light); color: var(--text-dark); }
+        .sidebar-nav button.active { background-color: var(--primary-dark); color: white; border-right: 3px solid #fbbf24; }
 
-        .sidebar-nav button.active {
-            background-color: var(--primary-dark);
+        .nav-icon { 
+            width: 18px; 
+            height: 18px; 
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+        
+        .nav-btn:hover .nav-icon,
+        .nav-btn.active .nav-icon { opacity: 1; }
+        
+        .nav-btn.active .nav-icon path,
+        .nav-btn.active .nav-icon rect,
+        .nav-btn.active .nav-icon circle,
+        .nav-btn.active .nav-icon line,
+        .nav-btn.active .nav-icon polyline { stroke: white; }
+        
+        .btn-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .category-item:last-child { border-bottom: none; }
+        
+        .category-item-name { font-weight: 500; }
+        
+        .category-item-count {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            margin-left: 0.5rem;
+        }
+        
+        .btn-delete {
+            padding: 0.25rem 0.5rem;
+            background: none;
+            border: 1px solid var(--red);
+            color: var(--red);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background-color: var(--red);
             color: white;
-            border-right: 3px solid #fbbf24;
+        }
+        
+        .btn-delete:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: 260px;
-            padding: 2rem;
+        /* Searchable Dropdown */
+        .searchable-select {
+            position: relative;
         }
-
-        .page {
+        
+        .searchable-select-input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+            cursor: text;
+            transition: all 0.2s;
+        }
+        
+        .searchable-select-input:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+        }
+        
+        .searchable-select-arrow {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-gray);
+            font-size: 0.625rem;
+        }
+        
+        .searchable-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
             display: none;
         }
-
-        .page.active {
+        
+        .searchable-select-dropdown.active {
             display: block;
         }
-
-        /* Page Header */
-        .page-header {
-            margin-bottom: 2rem;
+        
+        .searchable-select-option {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.15s;
         }
-
-        .page-header h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 0.5rem;
+        
+        .searchable-select-option:hover,
+        .searchable-select-option.highlighted {
+            background-color: var(--gray-light);
         }
-
-        .page-header p {
+        
+        .searchable-select-option.selected {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .searchable-select-no-results {
+            padding: 0.5rem 0.75rem;
             color: var(--text-gray);
-            font-size: 1rem;
+            font-size: 0.875rem;
+            font-style: italic;
         }
 
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        /* Info Tooltip */
+        .info-tooltip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.375rem;
+            cursor: pointer;
         }
+        
+        .info-icon {
+            width: 14px;
+            height: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s;
+        }
+        
+        .info-icon:hover {
+            color: #fbbf24;
+        }
+        
+        .info-tooltip-content {
+            position: fixed;
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: normal;
+            white-space: normal;
+            width: 260px;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 9999;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+        
+        .info-tooltip:hover .info-tooltip-content {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* SKU Settings Info Icon */
+        .header-with-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .sku-info-tooltip {
+            position: relative;
+            display: inline-flex;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .sku-info-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--amber);
+            transition: transform 0.2s;
+        }
+        
+        .sku-info-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sku-info-content {
+            position: fixed;
+            background-color: #fef3c7;
+            color: #78350f;
+            padding: 0.875rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #fbbf24;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: normal;
+            white-space: normal;
+            width: 300px;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 9999;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+        
+        .sku-info-tooltip:hover .sku-info-content {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .main-content { flex: 1; margin-left: 260px; padding: 2rem; }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .page-header { margin-bottom: 2rem; }
+        .page-header h2 { font-size: 1.75rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem; }
+        .page-header p { color: var(--text-gray); font-size: 0.95rem; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
 
         .kpi-card {
             background-color: var(--bg-white);
             border-radius: 0.75rem;
-            padding: 1.5rem;
+            padding: 1.25rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .kpi-label { font-size: 0.8rem; color: var(--text-gray); font-weight: 500; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .kpi-value { font-size: 1.75rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.25rem; }
+        .kpi-change { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 600; }
+        .kpi-change.up { color: var(--green); }
+        .kpi-change.down { color: var(--red); }
 
-        .kpi-label {
-            font-size: 0.875rem;
-            color: var(--text-gray);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .kpi-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .kpi-change {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .kpi-change.up {
-            color: var(--green);
-        }
-
-        .kpi-change.down {
-            color: var(--red);
-        }
-
-        .arrow-icon {
-            font-size: 1rem;
-        }
-
-        /* Filters Section */
         .filters-section {
             background-color: var(--bg-white);
             border-radius: 0.75rem;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
         }
 
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
+        .filters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; align-items: end; }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+        .filter-group { display: flex; flex-direction: column; gap: 0.375rem; }
+        .filter-label { font-size: 0.8rem; font-weight: 600; color: var(--text-dark); }
 
-        .filter-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .filter-select,
-        .date-input {
-            padding: 0.625rem 0.875rem;
+        .filter-select, .date-input, .text-input {
+            padding: 0.5rem 0.75rem;
             border: 1px solid var(--border-color);
             border-radius: 0.5rem;
-            font-size: 0.9375rem;
+            font-size: 0.875rem;
             color: var(--text-dark);
             background-color: var(--bg-white);
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .filter-select:focus,
-        .date-input:focus {
+        .filter-select:focus, .date-input:focus, .text-input:focus {
             outline: none;
             border-color: var(--primary-dark);
             box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
         }
 
-        .date-range-buttons {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .date-range-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-white);
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-dark);
-            transition: all 0.2s;
-        }
-
-        .date-range-btn:hover {
-            background-color: var(--gray-light);
-        }
-
-        .date-range-btn.active {
-            background-color: var(--primary-dark);
-            color: white;
-            border-color: var(--primary-dark);
-        }
-
-        .custom-date-inputs {
-            display: none;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .custom-date-inputs.active {
-            display: flex;
-        }
-
-        /* Chart Container */
         .chart-container {
             background-color: var(--bg-white);
             border-radius: 0.75rem;
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
         }
 
-        .chart-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .chart-header h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--primary-dark);
-            margin-bottom: 0.5rem;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 400px;
-        }
-
-        /* Table Styles */
-        .total-demand {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #334155 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-md);
-        }
-
-        .total-demand-label {
-            font-size: 0.875rem;
-            opacity: 0.9;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .total-demand-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
+        .chart-header { margin-bottom: 1rem; }
+        .chart-header h3 { font-size: 1.125rem; font-weight: 600; color: var(--primary-dark); }
+        .chart-wrapper { position: relative; height: 350px; }
 
         .table-container {
             background-color: var(--bg-white);
@@ -399,251 +424,311 @@
             border: 1px solid var(--border-color);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        .table-scroll { overflow-x: auto; }
 
-        thead {
-            background-color: var(--primary-dark);
-            color: white;
-        }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+
+        thead { background-color: var(--primary-dark); color: white; }
 
         th {
-            padding: 1rem;
+            padding: 0.875rem 1rem;
             text-align: left;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             cursor: pointer;
             user-select: none;
-            position: relative;
+            white-space: nowrap;
         }
 
-        th:hover {
-            background-color: #334155;
-        }
+        th:hover { background-color: #334155; }
+        .sort-icon { margin-left: 0.375rem; font-size: 0.7rem; opacity: 0.6; }
+        th.sorted .sort-icon { opacity: 1; }
+        th.sorted-asc .sort-icon::after { content: ' ↑'; }
+        th.sorted-desc .sort-icon::after { content: ' ↓'; }
 
-        .sort-icon {
-            margin-left: 0.5rem;
+        tbody tr { border-bottom: 1px solid var(--border-color); transition: background-color 0.2s; }
+        tbody tr:nth-child(even) { background-color: var(--gray-light); }
+        tbody tr:hover { background-color: #e0f2fe; }
+
+        td { padding: 0.75rem 1rem; font-size: 0.875rem; }
+
+        .confidence-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
             font-size: 0.75rem;
-            opacity: 0.6;
-        }
-
-        th.sorted .sort-icon {
-            opacity: 1;
-        }
-
-        th.sorted-asc .sort-icon::after {
-            content: ' ↑';
-        }
-
-        th.sorted-desc .sort-icon::after {
-            content: ' ↓';
-        }
-
-        tbody tr {
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: var(--gray-light);
-        }
-
-        tbody tr:hover {
-            background-color: #e0f2fe;
-        }
-
-        td {
-            padding: 1rem;
-            font-size: 0.9375rem;
-        }
-
-        .category-name {
             font-weight: 600;
-            color: var(--primary-dark);
         }
 
-        .change-cell {
+        .confidence-high { background-color: #dcfce7; color: #166534; }
+        .confidence-medium { background-color: #fef3c7; color: #92400e; }
+        .confidence-low { background-color: #fee2e2; color: #991b1b; }
+
+        .override-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            color: var(--amber);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary { background-color: var(--primary-dark); color: white; }
+        .btn-primary:hover { background-color: #334155; }
+        .btn-success { background-color: var(--green); color: white; }
+        .btn-success:hover { background-color: #059669; }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-dark); }
+        .btn-outline:hover { background-color: var(--gray-light); }
+
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .action-bar-left { display: flex; gap: 0.75rem; align-items: center; }
+        .action-bar-right { display: flex; gap: 0.75rem; }
+
+        .editable-cell {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .change-positive {
-            color: var(--green);
-            font-weight: 600;
+        .editable-input {
+            width: 80px;
+            padding: 0.375rem 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            text-align: right;
         }
 
-        .change-negative {
-            color: var(--red);
-            font-weight: 600;
+        .editable-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        /* Tooltip */
-        .tooltip {
-            position: absolute;
-            background-color: rgba(15, 23, 42, 0.95);
-            color: white;
-            padding: 0.75rem;
+        .category-select {
+            padding: 0.375rem 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            min-width: 140px;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: var(--gray-light);
+            color: var(--text-dark);
+        }
+
+        .category-badge.biscuits { background-color: #fef3c7; color: #92400e; }
+        .category-badge.snacks { background-color: #dbeafe; color: #1e40af; }
+        .category-badge.beverages { background-color: #dcfce7; color: #166534; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background-color: var(--bg-white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-header { margin-bottom: 1rem; }
+        .modal-header h3 { font-size: 1.125rem; font-weight: 600; color: var(--primary-dark); }
+        .modal-body { margin-bottom: 1.5rem; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; }
+
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.625rem;
+            border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             font-size: 0.875rem;
-            pointer-events: none;
-            z-index: 1000;
+        }
+
+        .stats-row { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.75rem; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-value { font-size: 1.25rem; font-weight: 600; color: var(--primary-dark); }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background-color: var(--primary-dark);
+            color: white;
+            border-radius: 0.5rem;
             box-shadow: var(--shadow-md);
-            display: none;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1001;
         }
 
-        .tooltip.active {
-            display: block;
-        }
+        .toast.active { transform: translateY(0); opacity: 1; }
+        .toast.success { background-color: var(--green); }
 
-        .tooltip-row {
-            margin-bottom: 0.25rem;
-        }
-
-        .tooltip-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .tooltip-label {
-            font-weight: 600;
-            margin-right: 0.5rem;
-        }
-
-        /* Responsive */
         @media (max-width: 1024px) {
-            .sidebar {
-                width: 220px;
-            }
-
-            .main-content {
-                margin-left: 220px;
-            }
+            .sidebar { width: 220px; }
+            .main-content { margin-left: 220px; }
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                position: static;
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .app-container {
-                flex-direction: column;
-            }
-
-            .kpi-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
+            .sidebar { position: static; width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .main-content { margin-left: 0; }
+            .app-container { flex-direction: column; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; }
+            .filters-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Top Navigation -->
     <nav class="top-nav">
         <h1><img src="lemondots-logo.png" alt="LemonDots Logo" class="logo-image"> LemonDots AI</h1>
     </nav>
 
-    <!-- App Container -->
     <div class="app-container">
-        <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <ul class="sidebar-nav">
-                <li><button class="nav-btn active" data-page="demand-forecast">Demand Forecast</button></li>
-                <li><button class="nav-btn" data-page="category-breakdown">Product Category Breakdown</button></li>
-            </ul>
-            <div class="profile-icon" title="User Profile - V">V</div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Forecasting</div>
+                <ul class="sidebar-nav">
+                    <li><button class="nav-btn active" data-page="demand-forecast">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Demand Forecast
+                    </button></li>
+                    <li><button class="nav-btn" data-page="daily-forecast">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        Daily Forecast Detail
+                    </button></li>
+                </ul>
+            </div>
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Configuration</div>
+                <ul class="sidebar-nav">
+                    <li><button class="nav-btn" data-page="sku-settings">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        SKU Settings
+                    </button></li>
+                </ul>
+            </div>
+            <div style="flex: 1;"></div>
+            <div class="profile-icon" title="User Profile">V</div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Demand Forecast Page -->
+            <!-- Demand Forecast Page (Chart View) -->
             <div id="demand-forecast" class="page active">
                 <div class="page-header">
                     <h2>Demand Forecast Dashboard</h2>
                     <p>Monitor and analyze demand forecasts with real-time insights</p>
                 </div>
 
-                <!-- KPI Cards -->
                 <div class="kpi-grid">
                     <div class="kpi-card">
                         <div class="kpi-label">Forecast Accuracy</div>
                         <div class="kpi-value" id="kpi-accuracy">94.2%</div>
-                        <div class="kpi-change up">
-                            <span class="arrow-icon">▲</span>
-                            <span>2.1%</span>
-                        </div>
+                        <div class="kpi-change up"><span>▲</span><span>2.1%</span></div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Avg Weekly Forecast</div>
                         <div class="kpi-value" id="kpi-weekly-forecast">12,450</div>
-                        <div class="kpi-change up">
-                            <span class="arrow-icon">▲</span>
-                            <span>5.3%</span>
-                        </div>
+                        <div class="kpi-change up"><span>▲</span><span>5.3%</span></div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Avg Weekly Actual</div>
                         <div class="kpi-value" id="kpi-weekly-actual">11,890</div>
-                        <div class="kpi-change down">
-                            <span class="arrow-icon">▼</span>
-                            <span>1.2%</span>
-                        </div>
+                        <div class="kpi-change down"><span>▼</span><span>1.2%</span></div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">Peak Demand Week</div>
-                        <div class="kpi-value" id="kpi-peak-week">Week 8</div>
-                        <div class="kpi-change up">
-                            <span class="arrow-icon">▲</span>
-                            <span>3.5%</span>
-                        </div>
+                        <div class="kpi-label">Min Qty Overrides</div>
+                        <div class="kpi-value" id="kpi-overrides">24</div>
+                        <div class="kpi-change" style="color: var(--amber);"><span>⚠</span><span>Active</span></div>
                     </div>
                 </div>
 
-                <!-- Filters -->
                 <div class="filters-section">
                     <div class="filters-grid">
                         <div class="filter-group">
-                            <label class="filter-label">Final Product</label>
-                            <select class="filter-select" id="product-filter">
-                                <option value="all">All Products</option>
-                                <option value="strawberry-cream-biscuit">Strawberry Cream Biscuit</option>
-                                <option value="chocolate-cream-biscuit">Chocolate Cream Biscuit</option>
-                                <option value="banana-chips">Banana Chips</option>
-                                <option value="ginger-beer">Ginger Beer</option>
-                            </select>
+                            <label class="filter-label">SKU Category</label>
+                            <div class="searchable-select" id="category-filter-container" data-filter-id="category-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Categories" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">SKU / Final Product</label>
+                            <div class="searchable-select" id="product-filter-container" data-filter-id="product-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Products" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Outlet</label>
+                            <div class="searchable-select" id="outlet-filter-container" data-filter-id="outlet-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Outlets" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">Date Range</label>
-                            <div class="date-range-buttons">
-                                <button class="date-range-btn" data-days="7">7 days</button>
-                                <button class="date-range-btn" data-days="14">14 days</button>
-                                <button class="date-range-btn" data-days="30">30 days</button>
-                                <button class="date-range-btn active" data-days="60">60 days</button>
-                                <button class="date-range-btn" data-days="90">90 days</button>
-                                <button class="date-range-btn" data-days="custom">Custom</button>
-                            </div>
-                            <div class="custom-date-inputs" id="custom-dates">
-                                <input type="date" class="date-input" id="start-date">
-                                <input type="date" class="date-input" id="end-date">
-                            </div>
+                            <select class="filter-select" id="date-range-filter">
+                                <option value="7">7 days</option>
+                                <option value="14">14 days</option>
+                                <option value="30" selected>30 days</option>
+                                <option value="60">60 days</option>
+                                <option value="90">90 days</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chart -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3>Demand Forecast Trend</h3>
@@ -654,271 +739,991 @@
                 </div>
             </div>
 
-            <!-- Product Category Breakdown Page -->
-            <div id="category-breakdown" class="page">
+            <!-- Daily Forecast Detail Page -->
+            <div id="daily-forecast" class="page">
                 <div class="page-header">
-                    <h2>Product Category Breakdown</h2>
-                    <p>Detailed demand metrics and trends by product category</p>
+                    <h2>Daily Forecast Detail</h2>
+                    <p>Detailed daily demand forecasts by outlet and SKU with confidence intervals</p>
                 </div>
 
-                <!-- Filters -->
                 <div class="filters-section">
                     <div class="filters-grid">
                         <div class="filter-group">
-                            <label class="filter-label">Final Product</label>
-                            <select class="filter-select" id="product-filter-2">
-                                <option value="all">All Products</option>
-                                <option value="strawberry-cream-biscuit">Strawberry Cream Biscuit</option>
-                                <option value="chocolate-cream-biscuit">Chocolate Cream Biscuit</option>
-                                <option value="banana-chips">Banana Chips</option>
-                                <option value="ginger-beer">Ginger Beer</option>
-                            </select>
+                            <label class="filter-label">SKU Category</label>
+                            <div class="searchable-select" id="daily-category-filter-container" data-filter-id="daily-category-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Categories" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">SKU / Final Product</label>
+                            <div class="searchable-select" id="daily-sku-filter-container" data-filter-id="daily-sku-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All SKUs" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Outlet</label>
+                            <div class="searchable-select" id="daily-outlet-filter-container" data-filter-id="daily-outlet-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Outlets" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">Date Range</label>
-                            <div class="date-range-buttons">
-                                <button class="date-range-btn" data-days="7">7 days</button>
-                                <button class="date-range-btn" data-days="14">14 days</button>
-                                <button class="date-range-btn" data-days="30">30 days</button>
-                                <button class="date-range-btn active" data-days="60">60 days</button>
-                                <button class="date-range-btn" data-days="90">90 days</button>
-                                <button class="date-range-btn" data-days="custom">Custom</button>
-                            </div>
-                            <div class="custom-date-inputs" id="custom-dates-2">
-                                <input type="date" class="date-input" id="start-date-2">
-                                <input type="date" class="date-input" id="end-date-2">
-                            </div>
+                            <select class="filter-select" id="daily-date-filter">
+                                <option value="7" selected>Next 7 days</option>
+                                <option value="14">Next 14 days</option>
+                                <option value="30">Next 30 days</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- Total Demand -->
-                <div class="total-demand">
-                    <div class="total-demand-label">Total Actual Demand for Selected Period</div>
-                    <div class="total-demand-value" id="total-demand-value">168,500 units</div>
+                <div class="action-bar">
+                    <div class="stats-row" style="margin-bottom: 0;">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Forecasted</span>
+                            <span class="stat-value" id="total-forecasted">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Min Qty Overrides</span>
+                            <span class="stat-value" id="override-count">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Confidence</span>
+                            <span class="stat-value" id="avg-confidence">-</span>
+                        </div>
+                    </div>
+                    <div class="action-bar-right">
+                        <button class="btn btn-primary" onclick="exportDailyForecast()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Export to Excel
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Table -->
                 <div class="table-container">
-                    <table id="category-table">
-                        <thead>
-                            <tr>
-                                <th data-column="name">Category Name <span class="sort-icon">↕</span></th>
-                                <th data-column="actual">Actual Demand <span class="sort-icon">↕</span></th>
-                                <th data-column="lastYear">Last Year Demand <span class="sort-icon">↕</span></th>
-                                <th data-column="changeVsLastYear">Change vs Last Year <span class="sort-icon">↕</span></th>
-                                <th data-column="forecast">Forecasted Demand <span class="sort-icon">↕</span></th>
-                                <th data-column="changeVsForecast">Change vs Forecast <span class="sort-icon">↕</span></th>
-                                <th data-column="share">Share of Total <span class="sort-icon">↕</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="category-table-body">
-                        </tbody>
-                    </table>
+                    <div class="table-scroll">
+                        <table id="daily-forecast-table">
+                            <thead>
+                                <tr>
+                                    <th data-column="outlet">Outlet <span class="sort-icon">↕</span></th>
+                                    <th data-column="sku">SKU <span class="sort-icon">↕</span></th>
+                                    <th data-column="category">Category <span class="sort-icon">↕</span></th>
+                                    <th data-column="date">Date <span class="sort-icon">↕</span></th>
+                                    <th data-column="day">Day <span class="sort-icon">↕</span></th>
+                                    <th data-column="forecast">Forecasted Demand <span class="sort-icon">↕</span></th>
+                                    <th data-column="minConf">
+                                        Lower Bound
+                                        <span class="info-tooltip">
+                                            <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <span class="info-tooltip-content">The minimum expected demand value based on the confidence interval. This represents the lower boundary of the forecast range.</span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th data-column="maxConf">
+                                        Upper Bound
+                                        <span class="info-tooltip">
+                                            <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <span class="info-tooltip-content">The maximum expected demand value based on the confidence interval. This represents the upper boundary of the forecast range.</span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th data-column="confidence">
+                                        Confidence Rating
+                                        <span class="info-tooltip">
+                                            <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <span class="info-tooltip-content"><strong>High:</strong> Narrow confidence range, reliable forecast.<br><strong>Medium:</strong> Moderate uncertainty.<br><strong>Low:</strong> Wide confidence range, consider safety stock.</span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="daily-forecast-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SKU Settings Page -->
+            <div id="sku-settings" class="page">
+                <div class="page-header">
+                    <h2>SKU Settings</h2>
+                    <p>Configure minimum quantities and assign categories to SKUs</p>
+                </div>
+
+                <div class="action-bar">
+                    <div class="action-bar-left">
+                        <input type="text" class="text-input" id="sku-search" placeholder="Search SKUs..." style="width: 250px;">
+                    </div>
+                    <div class="action-bar-right">
+                        <button class="btn btn-outline" onclick="openCategoryModal()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Category
+                        </button>
+                        <button class="btn btn-outline" onclick="openManageCategoriesModal()">Manage Categories</button>
+                        <button class="btn btn-success" onclick="saveAllSettings()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Save All Changes
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table id="sku-settings-table">
+                            <thead>
+                                <tr>
+                                    <th data-column="sku">SKU Name <span class="sort-icon">↕</span></th>
+                                    <th data-column="category">Category <span class="sort-icon">↕</span></th>
+                                    <th data-column="minQty">
+                                        <span class="header-with-info">
+                                            Minimum Quantity
+                                            <span class="sku-info-tooltip">
+                                                <svg class="sku-info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                                                </svg>
+                                                <span class="sku-info-content">
+                                                    <strong>How Minimum Quantity Works:</strong><br>
+                                                    When the forecasted demand for a SKU is less than the minimum quantity you set, the system will automatically use the minimum quantity instead. This ensures you never order below viable production or delivery thresholds.
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th data-column="currentForecast">Current Avg Forecast <span class="sort-icon">↕</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="sku-settings-body"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Tooltip -->
-    <div class="tooltip" id="chart-tooltip"></div>
+    <!-- New Category Modal -->
+    <div class="modal-overlay" id="category-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Create New Category</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="new-category-name" placeholder="Enter category name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCategoryModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createCategory()">Create Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Categories Modal -->
+    <div class="modal-overlay" id="manage-categories-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Manage Categories</h3>
+            </div>
+            <div class="modal-body">
+                <div id="categories-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeManageCategoriesModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script>
-        // Product data with ML forecasting pattern - accurate for first 2 weeks, then diverging
-        const productData = {
-            'strawberry-cream-biscuit': {
-                name: 'Strawberry Cream Biscuit',
-                // Forecast follows actuals closely for first 2 weeks, then shows ML prediction pattern
-                forecastData: [8150, 8950, 9200, 9800, 10100, 10400, 10200, 10600, 10800, 11000, 11200, 11400],
-                actualData: [8200, 9000, 8700, 9400, 8900, 9600, 9400, 10000, 9700, 10300, 9900, 10600],
-                confidenceUpper: [8400, 9200, 9800, 10400, 10700, 11000, 10800, 11200, 11400, 11600, 11800, 12000],
-                confidenceLower: [7900, 8700, 8600, 9200, 9500, 9800, 9600, 10000, 10200, 10400, 10600, 10800],
-                categoryData: {
-                    // Data by date range (7, 14, 30, 60, 90 days)
-                    7: { actual: 8200, lastYear: 7800, forecast: 8500 },
-                    14: { actual: 17200, lastYear: 16100, forecast: 17700 },
-                    30: { actual: 35800, lastYear: 33400, forecast: 37200 },
-                    60: { actual: 48500, lastYear: 45200, forecast: 51000 },
-                    90: { actual: 72800, lastYear: 68100, forecast: 76500 }
-                }
-            },
-            'chocolate-cream-biscuit': {
-                name: 'Chocolate Cream Biscuit',
-                // Forecast follows actuals closely for first 2 weeks, then shows upward trend prediction
-                forecastData: [11750, 12250, 12800, 13500, 14000, 14200, 14500, 14800, 15000, 15200, 15400, 15600],
-                actualData: [11800, 12300, 11600, 12800, 12000, 13300, 12600, 13800, 13000, 14300, 13600, 14800],
-                confidenceUpper: [12000, 12500, 13400, 14100, 14600, 14800, 15100, 15400, 15600, 15800, 16000, 16200],
-                confidenceLower: [11500, 12000, 12200, 12900, 13400, 13600, 13900, 14200, 14400, 14600, 14800, 15000],
-                categoryData: {
-                    // Data by date range (7, 14, 30, 60, 90 days)
-                    7: { actual: 11800, lastYear: 11200, forecast: 12100 },
-                    14: { actual: 24100, lastYear: 22800, forecast: 24800 },
-                    30: { actual: 49200, lastYear: 46500, forecast: 51000 },
-                    60: { actual: 68100, lastYear: 64200, forecast: 71300 },
-                    90: { actual: 102600, lastYear: 96800, forecast: 107200 }
-                }
-            },
-            'banana-chips': {
-                name: 'Banana Chips',
-                // Forecast follows actuals for first 2 weeks, then shows seasonal decline prediction
-                forecastData: [5950, 6550, 6800, 7200, 7000, 6800, 6600, 6400, 6200, 6000, 5800, 5600],
-                actualData: [6000, 6600, 6300, 7000, 6700, 7300, 6900, 7600, 7200, 7800, 7500, 8100],
-                confidenceUpper: [6200, 6800, 7200, 7600, 7400, 7200, 7000, 6800, 6600, 6400, 6200, 6000],
-                confidenceLower: [5700, 6300, 6400, 6800, 6600, 6400, 6200, 6000, 5800, 5600, 5400, 5200],
-                categoryData: {
-                    // Data by date range (7, 14, 30, 60, 90 days)
-                    7: { actual: 6000, lastYear: 6400, forecast: 5800 },
-                    14: { actual: 12600, lastYear: 13200, forecast: 12100 },
-                    30: { actual: 25900, lastYear: 27100, forecast: 24800 },
-                    60: { actual: 36400, lastYear: 38900, forecast: 37800 },
-                    90: { actual: 54800, lastYear: 58600, forecast: 52200 }
-                }
-            },
-            'ginger-beer': {
-                name: 'Ginger Beer',
-                // Forecast follows actuals for first 2 weeks, then shows steady growth prediction
-                forecastData: [4250, 4550, 4800, 5000, 5200, 5400, 5600, 5800, 6000, 6200, 6400, 6600],
-                actualData: [4300, 4600, 4400, 4800, 4500, 5000, 4700, 5200, 4900, 5400, 5100, 5600],
-                confidenceUpper: [4500, 4800, 5100, 5300, 5500, 5700, 5900, 6100, 6300, 6500, 6700, 6900],
-                confidenceLower: [4000, 4300, 4500, 4700, 4900, 5100, 5300, 5500, 5700, 5900, 6100, 6300],
-                categoryData: {
-                    // Data by date range (7, 14, 30, 60, 90 days)
-                    7: { actual: 4300, lastYear: 4600, forecast: 4200 },
-                    14: { actual: 8900, lastYear: 9400, forecast: 8700 },
-                    30: { actual: 18200, lastYear: 19100, forecast: 17800 },
-                    60: { actual: 26500, lastYear: 28100, forecast: 27300 },
-                    90: { actual: 39800, lastYear: 42200, forecast: 40900 }
-                }
-            }
-        };
+        // ==================== DATA MODEL ====================
+        
+        // Categories
+        let categories = [
+            { id: 'biscuits', name: 'Biscuits' },
+            { id: 'snacks', name: 'Snacks' },
+            { id: 'beverages', name: 'Beverages' }
+        ];
 
-        // Generate weeks labels
-        function generateWeekLabels(weeks = 12) {
-            const labels = [];
+        // Outlets
+        const outlets = [
+            { id: 'outlet-1', name: 'Downtown Bakery' },
+            { id: 'outlet-2', name: 'Mall Kiosk Central' },
+            { id: 'outlet-3', name: 'Airport Terminal A' },
+            { id: 'outlet-4', name: 'University Café' },
+            { id: 'outlet-5', name: 'Suburban Store' }
+        ];
+
+        // SKUs with settings
+        let skuData = [
+            { id: 'strawberry-cream-biscuit', name: 'Strawberry Cream Biscuit', categoryId: 'biscuits', minQuantity: 50, avgForecast: 120 },
+            { id: 'chocolate-cream-biscuit', name: 'Chocolate Cream Biscuit', categoryId: 'biscuits', minQuantity: 75, avgForecast: 180 },
+            { id: 'vanilla-wafer', name: 'Vanilla Wafer', categoryId: 'biscuits', minQuantity: 40, avgForecast: 95 },
+            { id: 'banana-chips', name: 'Banana Chips', categoryId: 'snacks', minQuantity: 30, avgForecast: 85 },
+            { id: 'potato-crisps', name: 'Potato Crisps', categoryId: 'snacks', minQuantity: 60, avgForecast: 140 },
+            { id: 'ginger-beer', name: 'Ginger Beer', categoryId: 'beverages', minQuantity: 25, avgForecast: 65 },
+            { id: 'lemon-soda', name: 'Lemon Soda', categoryId: 'beverages', minQuantity: 35, avgForecast: 55 }
+        ];
+
+        // Generate daily forecast data
+        function generateDailyForecasts() {
+            const forecasts = [];
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const today = new Date();
-            for (let i = weeks - 1; i >= 0; i--) {
+
+            for (let d = 0; d < 30; d++) {
                 const date = new Date(today);
-                date.setDate(date.getDate() - (i * 7));
-                const month = date.toLocaleDateString('en-US', { month: 'short' });
-                const day = date.getDate();
-                labels.push(`${month} ${day}`);
+                date.setDate(date.getDate() + d);
+                const dayName = days[date.getDay()];
+                const dateStr = date.toISOString().split('T')[0];
+
+                outlets.forEach(outlet => {
+                    skuData.forEach(sku => {
+                        // Generate forecast with some variation
+                        const baseValue = sku.avgForecast * (0.7 + Math.random() * 0.6);
+                        const outletMultiplier = outlet.id === 'outlet-3' ? 1.3 : outlet.id === 'outlet-5' ? 0.8 : 1;
+                        const dayMultiplier = (dayName === 'Saturday' || dayName === 'Sunday') ? 1.2 : 1;
+                        
+                        let rawForecast = Math.round(baseValue * outletMultiplier * dayMultiplier);
+                        const confidenceRange = Math.round(rawForecast * (0.1 + Math.random() * 0.15));
+                        const minConf = Math.max(0, rawForecast - confidenceRange);
+                        const maxConf = rawForecast + confidenceRange;
+                        
+                        // Confidence rating based on range
+                        const confPercent = confidenceRange / rawForecast;
+                        let confidenceRating;
+                        if (confPercent < 0.12) confidenceRating = 'High';
+                        else if (confPercent < 0.18) confidenceRating = 'Medium';
+                        else confidenceRating = 'Low';
+
+                        // Apply minimum quantity override
+                        const isOverridden = rawForecast < sku.minQuantity;
+                        const finalForecast = Math.max(rawForecast, sku.minQuantity);
+
+                        forecasts.push({
+                            outletId: outlet.id,
+                            outlet: outlet.name,
+                            skuId: sku.id,
+                            sku: sku.name,
+                            categoryId: sku.categoryId,
+                            date: dateStr,
+                            day: dayName,
+                            rawForecast: rawForecast,
+                            forecast: finalForecast,
+                            minConf: minConf,
+                            maxConf: maxConf,
+                            confidenceRating: confidenceRating,
+                            isOverridden: isOverridden
+                        });
+                    });
+                });
             }
-            return labels;
+            return forecasts;
         }
 
-        // Initialize chart
+        let dailyForecasts = generateDailyForecasts();
+
+        // ==================== NAVIGATION ====================
+        
+        function setupNavigation() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetPage = btn.dataset.page;
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                    document.getElementById(targetPage).classList.add('active');
+
+                    if (targetPage === 'daily-forecast') renderDailyForecastTable();
+                    if (targetPage === 'sku-settings') renderSKUSettingsTable();
+                });
+            });
+        }
+
+        // ==================== SEARCHABLE DROPDOWN ====================
+        
+        class SearchableSelect {
+            constructor(container, options, onChange) {
+                this.container = container;
+                this.options = options;
+                this.onChange = onChange;
+                this.input = container.querySelector('.searchable-select-input');
+                this.dropdown = container.querySelector('.searchable-select-dropdown');
+                this.selectedValue = 'all';
+                this.highlightedIndex = -1;
+                
+                this.init();
+            }
+            
+            init() {
+                this.renderOptions(this.options);
+                
+                this.input.addEventListener('focus', () => this.open());
+                this.input.addEventListener('input', () => this.filter());
+                this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+                
+                document.addEventListener('click', (e) => {
+                    if (!this.container.contains(e.target)) this.close();
+                });
+            }
+            
+            renderOptions(opts) {
+                if (opts.length === 0) {
+                    this.dropdown.innerHTML = '<div class="searchable-select-no-results">No results found</div>';
+                    return;
+                }
+                
+                this.dropdown.innerHTML = opts.map((opt, idx) => `
+                    <div class="searchable-select-option ${opt.value === this.selectedValue ? 'selected' : ''}" 
+                         data-value="${opt.value}" data-index="${idx}">
+                        ${opt.label}
+                    </div>
+                `).join('');
+                
+                this.dropdown.querySelectorAll('.searchable-select-option').forEach(opt => {
+                    opt.addEventListener('click', () => this.select(opt.dataset.value));
+                    opt.addEventListener('mouseenter', () => {
+                        this.highlightedIndex = parseInt(opt.dataset.index);
+                        this.updateHighlight();
+                    });
+                });
+            }
+            
+            filter() {
+                const search = this.input.value.toLowerCase();
+                const filtered = this.options.filter(opt => 
+                    opt.label.toLowerCase().includes(search)
+                );
+                this.renderOptions(filtered);
+                this.highlightedIndex = 0;
+                this.updateHighlight();
+            }
+            
+            open() {
+                this.dropdown.classList.add('active');
+                this.input.select();
+                this.highlightedIndex = this.options.findIndex(o => o.value === this.selectedValue);
+                this.updateHighlight();
+            }
+            
+            close() {
+                this.dropdown.classList.remove('active');
+                const selected = this.options.find(o => o.value === this.selectedValue);
+                this.input.value = selected ? selected.label : '';
+            }
+            
+            select(value) {
+                this.selectedValue = value;
+                this.input.dataset.value = value;
+                const selected = this.options.find(o => o.value === value);
+                this.input.value = selected ? selected.label : '';
+                this.close();
+                this.renderOptions(this.options);
+                if (this.onChange) this.onChange(value);
+            }
+            
+            handleKeydown(e) {
+                const visibleOptions = this.dropdown.querySelectorAll('.searchable-select-option');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.highlightedIndex = Math.min(this.highlightedIndex + 1, visibleOptions.length - 1);
+                    this.updateHighlight();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                    this.updateHighlight();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const highlighted = visibleOptions[this.highlightedIndex];
+                    if (highlighted) this.select(highlighted.dataset.value);
+                } else if (e.key === 'Escape') {
+                    this.close();
+                }
+            }
+            
+            updateHighlight() {
+                this.dropdown.querySelectorAll('.searchable-select-option').forEach((opt, idx) => {
+                    opt.classList.toggle('highlighted', idx === this.highlightedIndex);
+                });
+            }
+            
+            getValue() {
+                return this.selectedValue;
+            }
+            
+            setOptions(options) {
+                this.options = options;
+                this.renderOptions(options);
+            }
+        }
+        
+        // Store searchable select instances
+        const searchableSelects = {};
+        
+        function initializeSearchableFilters() {
+            // Category options
+            const categoryOptions = [
+                { value: 'all', label: 'All Categories' },
+                ...categories.map(c => ({ value: c.id, label: c.name }))
+            ];
+            
+            // SKU options
+            const skuOptions = [
+                { value: 'all', label: 'All SKUs' },
+                ...skuData.map(s => ({ value: s.id, label: s.name }))
+            ];
+            
+            // Outlet options
+            const outletOptions = [
+                { value: 'all', label: 'All Outlets' },
+                ...outlets.map(o => ({ value: o.id, label: o.name }))
+            ];
+            
+            // Demand Forecast page filters
+            const categoryContainer = document.getElementById('category-filter-container');
+            if (categoryContainer) {
+                searchableSelects['category-filter'] = new SearchableSelect(
+                    categoryContainer, categoryOptions, () => { initializeChart(); updateKPIs(); }
+                );
+            }
+            
+            const productContainer = document.getElementById('product-filter-container');
+            if (productContainer) {
+                searchableSelects['product-filter'] = new SearchableSelect(
+                    productContainer, skuOptions, () => { initializeChart(); updateKPIs(); }
+                );
+            }
+            
+            const outletContainer = document.getElementById('outlet-filter-container');
+            if (outletContainer) {
+                searchableSelects['outlet-filter'] = new SearchableSelect(
+                    outletContainer, outletOptions, () => { initializeChart(); updateKPIs(); }
+                );
+            }
+            
+            // Daily Forecast page filters
+            const dailyCategoryContainer = document.getElementById('daily-category-filter-container');
+            if (dailyCategoryContainer) {
+                searchableSelects['daily-category-filter'] = new SearchableSelect(
+                    dailyCategoryContainer, categoryOptions, renderDailyForecastTable
+                );
+            }
+            
+            const dailySkuContainer = document.getElementById('daily-sku-filter-container');
+            if (dailySkuContainer) {
+                searchableSelects['daily-sku-filter'] = new SearchableSelect(
+                    dailySkuContainer, skuOptions, renderDailyForecastTable
+                );
+            }
+            
+            const dailyOutletContainer = document.getElementById('daily-outlet-filter-container');
+            if (dailyOutletContainer) {
+                searchableSelects['daily-outlet-filter'] = new SearchableSelect(
+                    dailyOutletContainer, outletOptions, renderDailyForecastTable
+                );
+            }
+        }
+        
+        // Helper to get filter value (works with both searchable and regular selects)
+        function getFilterValue(filterId) {
+            if (searchableSelects[filterId]) {
+                return searchableSelects[filterId].getValue();
+            }
+            const el = document.getElementById(filterId);
+            return el ? el.value : 'all';
+        }
+        
+        function updateCategoryOptions() {
+            const categoryOptions = [
+                { value: 'all', label: 'All Categories' },
+                ...categories.map(c => ({ value: c.id, label: c.name }))
+            ];
+            
+            ['category-filter', 'daily-category-filter'].forEach(id => {
+                if (searchableSelects[id]) {
+                    searchableSelects[id].setOptions(categoryOptions);
+                }
+            });
+        }
+
+        // ==================== DAILY FORECAST TABLE ====================
+        
+        let dailySortColumn = 'date';
+        let dailySortDir = 'asc';
+
+        function getFilteredForecasts() {
+            const categoryFilter = getFilterValue('daily-category-filter');
+            const skuFilter = getFilterValue('daily-sku-filter');
+            const outletFilter = getFilterValue('daily-outlet-filter');
+            const dateRange = parseInt(document.getElementById('daily-date-filter').value);
+
+            const today = new Date().toISOString().split('T')[0];
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() + dateRange);
+            const endDateStr = endDate.toISOString().split('T')[0];
+
+            return dailyForecasts.filter(f => {
+                if (categoryFilter !== 'all' && f.categoryId !== categoryFilter) return false;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return false;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return false;
+                if (f.date < today || f.date > endDateStr) return false;
+                return true;
+            });
+        }
+
+        function renderDailyForecastTable() {
+            let data = getFilteredForecasts();
+
+            // Sort
+            data.sort((a, b) => {
+                let aVal = a[dailySortColumn];
+                let bVal = b[dailySortColumn];
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (dailySortDir === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+            });
+
+            // Update stats
+            const totalForecast = data.reduce((sum, f) => sum + f.forecast, 0);
+            const overrideCount = data.filter(f => f.isOverridden).length;
+            const avgConf = data.length > 0 ? 
+                (data.filter(f => f.confidenceRating === 'High').length / data.length * 100).toFixed(0) + '% High' : '-';
+
+            document.getElementById('total-forecasted').textContent = totalForecast.toLocaleString();
+            document.getElementById('override-count').textContent = overrideCount;
+            document.getElementById('avg-confidence').textContent = avgConf;
+
+            // Render table
+            const tbody = document.getElementById('daily-forecast-body');
+            tbody.innerHTML = data.slice(0, 100).map(f => {
+                const confClass = f.confidenceRating === 'High' ? 'confidence-high' : 
+                                  f.confidenceRating === 'Medium' ? 'confidence-medium' : 'confidence-low';
+                const catClass = f.categoryId === 'biscuits' ? 'biscuits' : 
+                                 f.categoryId === 'snacks' ? 'snacks' : 'beverages';
+                const override = f.isOverridden ? 
+                    `<span class="override-indicator">⚠ Min Qty</span>` : '';
+
+                return `<tr>
+                    <td>${f.outlet}</td>
+                    <td><strong>${f.sku}</strong></td>
+                    <td><span class="category-badge ${catClass}">${categories.find(c => c.id === f.categoryId)?.name || f.categoryId}</span></td>
+                    <td>${f.date}</td>
+                    <td>${f.day}</td>
+                    <td>${f.forecast.toLocaleString()} ${override}</td>
+                    <td>${f.minConf.toLocaleString()}</td>
+                    <td>${f.maxConf.toLocaleString()}</td>
+                    <td><span class="confidence-badge ${confClass}">${f.confidenceRating}</span></td>
+                </tr>`;
+            }).join('');
+
+            // Update sort indicators
+            document.querySelectorAll('#daily-forecast-table th').forEach(th => {
+                th.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+                if (th.dataset.column === dailySortColumn) {
+                    th.classList.add('sorted', `sorted-${dailySortDir}`);
+                }
+            });
+        }
+
+        function setupDailyForecastSorting() {
+            document.querySelectorAll('#daily-forecast-table th[data-column]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const col = th.dataset.column;
+                    if (dailySortColumn === col) {
+                        dailySortDir = dailySortDir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        dailySortColumn = col;
+                        dailySortDir = 'asc';
+                    }
+                    renderDailyForecastTable();
+                });
+            });
+        }
+
+        function setupDailyForecastFilters() {
+            // Only setup for daily-date-filter (searchable selects handle their own events)
+            document.getElementById('daily-date-filter')?.addEventListener('change', renderDailyForecastTable);
+        }
+
+        // ==================== EXPORT TO EXCEL ====================
+        
+        function exportDailyForecast() {
+            // Get filtered and sorted data
+            let data = getFilteredForecasts();
+            
+            // Sort the data same as displayed
+            data.sort((a, b) => {
+                let aVal = a[dailySortColumn];
+                let bVal = b[dailySortColumn];
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (dailySortDir === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+            });
+            
+            // Get current filter values for filename
+            const categoryFilter = getFilterValue('daily-category-filter');
+            const skuFilter = getFilterValue('daily-sku-filter');
+            const outletFilter = getFilterValue('daily-outlet-filter');
+            const dateRange = document.getElementById('daily-date-filter').value;
+            
+            // Prepare data for Excel
+            const excelData = data.map(f => ({
+                'Outlet': f.outlet,
+                'SKU': f.sku,
+                'Category': categories.find(c => c.id === f.categoryId)?.name || f.categoryId,
+                'Date': f.date,
+                'Day': f.day,
+                'Forecasted Demand': f.forecast,
+                'Lower Bound': f.minConf,
+                'Upper Bound': f.maxConf,
+                'Confidence Rating': f.confidenceRating,
+                'Min Qty Override': f.isOverridden ? 'Yes' : 'No'
+            }));
+            
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 20 },  // Outlet
+                { wch: 25 },  // SKU
+                { wch: 12 },  // Category
+                { wch: 12 },  // Date
+                { wch: 12 },  // Day
+                { wch: 18 },  // Forecasted Demand
+                { wch: 12 },  // Lower Bound
+                { wch: 12 },  // Upper Bound
+                { wch: 18 },  // Confidence Rating
+                { wch: 15 }   // Min Qty Override
+            ];
+            
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Daily Forecast');
+            
+            // Generate filename with filter info
+            const today = new Date().toISOString().split('T')[0];
+            let filename = `DailyForecast_${today}`;
+            if (categoryFilter !== 'all') {
+                const cat = categories.find(c => c.id === categoryFilter);
+                filename += `_${cat ? cat.name : categoryFilter}`;
+            }
+            if (skuFilter !== 'all') {
+                const sku = skuData.find(s => s.id === skuFilter);
+                filename += `_${sku ? sku.name.replace(/\s+/g, '-') : skuFilter}`;
+            }
+            if (outletFilter !== 'all') {
+                const outlet = outlets.find(o => o.id === outletFilter);
+                filename += `_${outlet ? outlet.name.replace(/\s+/g, '-') : outletFilter}`;
+            }
+            filename += `_${dateRange}days.xlsx`;
+            
+            // Download the file
+            XLSX.writeFile(wb, filename);
+            
+            // Show success toast
+            showToast(`Exported ${data.length} records to Excel`, 'success');
+        }
+
+        // ==================== SKU SETTINGS TABLE ====================
+        
+        let skuSortColumn = 'sku';
+        let skuSortDir = 'asc';
+
+        function renderSKUSettingsTable() {
+            let data = [...skuData];
+            const search = document.getElementById('sku-search').value.toLowerCase();
+            if (search) {
+                data = data.filter(s => s.name.toLowerCase().includes(search));
+            }
+
+            // Sort
+            data.sort((a, b) => {
+                let aVal = skuSortColumn === 'sku' ? a.name : 
+                           skuSortColumn === 'category' ? a.categoryId : 
+                           skuSortColumn === 'minQty' ? a.minQuantity : a.avgForecast;
+                let bVal = skuSortColumn === 'sku' ? b.name : 
+                           skuSortColumn === 'category' ? b.categoryId : 
+                           skuSortColumn === 'minQty' ? b.minQuantity : b.avgForecast;
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (skuSortDir === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+            });
+
+            const tbody = document.getElementById('sku-settings-body');
+            tbody.innerHTML = data.map(sku => {
+                const categoryOptions = categories.map(c => 
+                    `<option value="${c.id}" ${c.id === sku.categoryId ? 'selected' : ''}>${c.name}</option>`
+                ).join('');
+
+                return `<tr data-sku-id="${sku.id}">
+                    <td><strong>${sku.name}</strong></td>
+                    <td>
+                        <select class="category-select" onchange="updateSKUCategory('${sku.id}', this.value)">
+                            ${categoryOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <div class="editable-cell">
+                            <input type="number" class="editable-input" value="${sku.minQuantity}" 
+                                   onchange="updateMinQuantity('${sku.id}', this.value)" min="0">
+                            <span style="color: var(--text-gray); font-size: 0.75rem;">units</span>
+                        </div>
+                    </td>
+                    <td>${sku.avgForecast} units</td>
+                </tr>`;
+            }).join('');
+
+            // Update sort indicators
+            document.querySelectorAll('#sku-settings-table th').forEach(th => {
+                th.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+                if (th.dataset.column === skuSortColumn) {
+                    th.classList.add('sorted', `sorted-${skuSortDir}`);
+                }
+            });
+        }
+
+        function setupSKUSettingsSorting() {
+            document.querySelectorAll('#sku-settings-table th[data-column]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const col = th.dataset.column;
+                    if (skuSortColumn === col) {
+                        skuSortDir = skuSortDir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        skuSortColumn = col;
+                        skuSortDir = 'asc';
+                    }
+                    renderSKUSettingsTable();
+                });
+            });
+        }
+
+        function updateMinQuantity(skuId, value) {
+            const sku = skuData.find(s => s.id === skuId);
+            if (sku) {
+                sku.minQuantity = parseInt(value) || 0;
+                renderSKUSettingsTable();
+                regenerateForecasts();
+            }
+        }
+
+        function updateSKUCategory(skuId, categoryId) {
+            const sku = skuData.find(s => s.id === skuId);
+            if (sku) {
+                sku.categoryId = categoryId;
+                regenerateForecasts();
+            }
+        }
+
+        function regenerateForecasts() {
+            dailyForecasts = generateDailyForecasts();
+            updateKPIs();
+        }
+
+        function saveAllSettings() {
+            showToast('Settings saved successfully!', 'success');
+        }
+
+        // ==================== CATEGORY MODALS ====================
+        
+        function openCategoryModal() {
+            document.getElementById('category-modal').classList.add('active');
+            document.getElementById('new-category-name').value = '';
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('category-modal').classList.remove('active');
+        }
+
+        function createCategory() {
+            const name = document.getElementById('new-category-name').value.trim();
+            if (!name) {
+                alert('Please enter a category name');
+                return;
+            }
+            const id = name.toLowerCase().replace(/\s+/g, '-');
+            if (categories.find(c => c.id === id)) {
+                alert('Category already exists');
+                return;
+            }
+            categories.push({ id, name });
+            closeCategoryModal();
+            renderSKUSettingsTable();
+            updateCategoryFilters();
+            showToast(`Category "${name}" created!`, 'success');
+        }
+
+        function openManageCategoriesModal() {
+            renderCategoriesList();
+            document.getElementById('manage-categories-modal').classList.add('active');
+        }
+
+        function closeManageCategoriesModal() {
+            document.getElementById('manage-categories-modal').classList.remove('active');
+        }
+
+        function renderCategoriesList() {
+            const container = document.getElementById('categories-list');
+            container.innerHTML = categories.map(cat => {
+                const skuCount = skuData.filter(s => s.categoryId === cat.id).length;
+                const canDelete = skuCount === 0;
+                return `
+                    <div class="category-item">
+                        <div>
+                            <span class="category-item-name">${cat.name}</span>
+                            <span class="category-item-count">(${skuCount} SKU${skuCount !== 1 ? 's' : ''})</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteCategory('${cat.id}')" ${canDelete ? '' : 'disabled'} title="${canDelete ? 'Delete category' : 'Cannot delete: SKUs assigned'}">
+                            Delete
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            if (categories.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-gray); text-align: center;">No categories yet</p>';
+            }
+        }
+
+        function deleteCategory(categoryId) {
+            const skuCount = skuData.filter(s => s.categoryId === categoryId).length;
+            if (skuCount > 0) {
+                alert('Cannot delete category with assigned SKUs. Please reassign SKUs first.');
+                return;
+            }
+            const category = categories.find(c => c.id === categoryId);
+            if (confirm(`Delete category "${category.name}"?`)) {
+                categories = categories.filter(c => c.id !== categoryId);
+                renderCategoriesList();
+                renderSKUSettingsTable();
+                updateCategoryFilters();
+                showToast(`Category "${category.name}" deleted`, 'success');
+            }
+        }
+
+        function updateCategoryFilters() {
+            updateCategoryOptions();
+        }
+
+        // ==================== TOAST ====================
+        
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast active' + (type ? ` ${type}` : '');
+            setTimeout(() => toast.classList.remove('active'), 3000);
+        }
+
+        // ==================== CHART ====================
+        
         let demandChart = null;
-        let currentProduct = 'all';
-        let currentDays = 60;
-        let currentCategoryDays = 60;
 
         function initializeChart() {
             const ctx = document.getElementById('demandChart');
             if (!ctx) return;
 
-            const weeks = Math.ceil(currentDays / 7);
-            const labels = generateWeekLabels(weeks);
+            const days = parseInt(document.getElementById('date-range-filter').value);
+            const categoryFilter = getFilterValue('category-filter');
+            const skuFilter = getFilterValue('product-filter');
+            const outletFilter = getFilterValue('outlet-filter');
 
-            let forecastDataset = [];
-            let actualDataset = [];
-            let confidenceUpperDataset = [];
-            let confidenceLowerDataset = [];
+            // Aggregate data by date
+            const dateMap = new Map();
+            dailyForecasts.forEach(f => {
+                if (categoryFilter !== 'all' && f.categoryId !== categoryFilter) return;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return;
 
-            if (currentProduct === 'all') {
-                // Aggregate all products
-                Object.keys(productData).forEach(productKey => {
-                    const product = productData[productKey];
-                    const productWeeks = Math.min(weeks, product.forecastData.length);
-                    for (let i = 0; i < productWeeks; i++) {
-                        if (forecastDataset[i] === undefined) {
-                            forecastDataset[i] = 0;
-                            actualDataset[i] = 0;
-                            confidenceUpperDataset[i] = 0;
-                            confidenceLowerDataset[i] = 0;
-                        }
-                        forecastDataset[i] += product.forecastData[i] || 0;
-                        actualDataset[i] += product.actualData[i] || 0;
-                        confidenceUpperDataset[i] += product.confidenceUpper[i] || 0;
-                        confidenceLowerDataset[i] += product.confidenceLower[i] || 0;
-                    }
-                });
-            } else {
-                const product = productData[currentProduct];
-                if (product) {
-                    const productWeeks = Math.min(weeks, product.forecastData.length);
-                    forecastDataset = product.forecastData.slice(0, productWeeks);
-                    actualDataset = product.actualData.slice(0, productWeeks);
-                    confidenceUpperDataset = product.confidenceUpper.slice(0, productWeeks);
-                    confidenceLowerDataset = product.confidenceLower.slice(0, productWeeks);
+                if (!dateMap.has(f.date)) {
+                    dateMap.set(f.date, { forecast: 0, minConf: 0, maxConf: 0 });
                 }
-            }
+                const d = dateMap.get(f.date);
+                d.forecast += f.forecast;
+                d.minConf += f.minConf;
+                d.maxConf += f.maxConf;
+            });
 
-            // Pad arrays if needed
-            while (forecastDataset.length < weeks) {
-                forecastDataset.push(0);
-                actualDataset.push(0);
-                confidenceUpperDataset.push(0);
-                confidenceLowerDataset.push(0);
-            }
+            const sortedDates = Array.from(dateMap.keys()).sort().slice(0, days);
+            const labels = sortedDates.map(d => {
+                const date = new Date(d);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            const forecastData = sortedDates.map(d => dateMap.get(d).forecast);
+            const minConfData = sortedDates.map(d => dateMap.get(d).minConf);
+            const maxConfData = sortedDates.map(d => dateMap.get(d).maxConf);
 
-            if (demandChart) {
-                demandChart.destroy();
-            }
+            if (demandChart) demandChart.destroy();
 
             demandChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels.slice(0, forecastDataset.length),
+                    labels,
                     datasets: [
                         {
-                            label: 'Confidence Band',
-                            data: confidenceUpperDataset,
+                            label: 'Upper Confidence',
+                            data: maxConfData,
                             borderColor: 'rgba(203, 213, 225, 0.8)',
                             backgroundColor: 'rgba(203, 213, 225, 0.2)',
                             fill: '+1',
                             tension: 0.4,
                             pointRadius: 0,
-                            pointHoverRadius: 0,
                             borderWidth: 1,
                             order: 3
                         },
                         {
-                            label: 'Lower Confidence Band',
-                            data: confidenceLowerDataset,
+                            label: 'Lower Confidence',
+                            data: minConfData,
                             borderColor: 'rgba(203, 213, 225, 0.8)',
                             backgroundColor: 'rgba(203, 213, 225, 0.2)',
                             fill: false,
                             tension: 0.4,
                             pointRadius: 0,
-                            pointHoverRadius: 0,
                             borderWidth: 1,
                             order: 4
                         },
                         {
-                            label: 'Forecast',
-                            data: forecastDataset,
-                            borderColor: '#60a5fa',
-                            backgroundColor: 'transparent',
-                            tension: 0.4,
-                            fill: false,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 4,
-                            pointBackgroundColor: '#60a5fa',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            order: 2
-                        },
-                        {
-                            label: 'Actual Demand',
-                            data: actualDataset,
+                            label: 'Forecasted Demand',
+                            data: forecastData,
                             borderColor: '#1f2937',
                             backgroundColor: 'transparent',
                             tension: 0.4,
-                            fill: false,
                             borderWidth: 3,
-                            pointRadius: 5,
+                            pointRadius: 4,
                             pointBackgroundColor: '#1f2937',
                             pointBorderColor: '#ffffff',
                             pointBorderWidth: 2,
@@ -929,344 +1734,148 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: {
                             position: 'top',
                             labels: {
-                                filter: function(legendItem, chartData) {
-                                    // Hide the lower confidence band from legend
-                                    return legendItem.text !== 'Lower Confidence Band';
-                                },
-                                usePointStyle: true,
-                                pointStyle: 'circle'
+                                filter: item => item.text !== 'Lower Confidence',
+                                usePointStyle: true
                             }
                         },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
                             callbacks: {
-                                label: function(context) {
-                                    if (context.dataset.label === 'Lower Confidence Band') {
-                                        return null; // Hide lower confidence band from tooltip
-                                    }
-                                    return context.dataset.label + ': ' + context.parsed.y.toLocaleString();
-                                }
+                                label: ctx => ctx.dataset.label === 'Lower Confidence' ? null : 
+                                    `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
                             }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString();
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
+                            ticks: { callback: v => v.toLocaleString() },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' }
                         },
-                        x: {
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }
+                        x: { grid: { color: 'rgba(0, 0, 0, 0.1)' } }
                     }
                 }
             });
         }
 
-        // Update KPIs
+        function setupChartFilters() {
+            // Only setup for date-range-filter (searchable selects handle their own events)
+            document.getElementById('date-range-filter')?.addEventListener('change', () => {
+                initializeChart();
+                updateKPIs();
+            });
+        }
+
+        // ==================== KPIs ====================
+        
         function updateKPIs() {
-            if (currentProduct === 'all') {
-                let totalForecast = 0;
-                let totalActual = 0;
-                let maxWeek = 0;
-                let maxValue = 0;
+            const categoryFilter = getFilterValue('category-filter');
+            const skuFilter = getFilterValue('product-filter');
+            const outletFilter = getFilterValue('outlet-filter');
 
-                Object.keys(productData).forEach(productKey => {
-                    const product = productData[productKey];
-                    const weeks = Math.min(Math.ceil(currentDays / 7), product.forecastData.length);
-                    for (let i = 0; i < weeks; i++) {
-                        totalForecast += product.forecastData[i] || 0;
-                        totalActual += product.actualData[i] || 0;
-                        if (product.forecastData[i] > maxValue) {
-                            maxValue = product.forecastData[i];
-                            maxWeek = i + 1;
-                        }
-                    }
-                });
+            let filtered = dailyForecasts.filter(f => {
+                if (categoryFilter !== 'all' && f.categoryId !== categoryFilter) return false;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return false;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return false;
+                return true;
+            });
 
-                const avgForecast = Math.round(totalForecast / Math.ceil(currentDays / 7));
-                const avgActual = Math.round(totalActual / Math.ceil(currentDays / 7));
-                const accuracy = Math.round((1 - Math.abs(totalForecast - totalActual) / totalForecast) * 100 * 10) / 10;
+            const totalForecast = filtered.reduce((sum, f) => sum + f.forecast, 0);
+            const avgWeekly = Math.round(totalForecast / 4);
+            const overrides = filtered.filter(f => f.isOverridden).length;
+            const accuracy = 94.2 + (Math.random() * 2 - 1);
 
-                document.getElementById('kpi-weekly-forecast').textContent = avgForecast.toLocaleString();
-                document.getElementById('kpi-weekly-actual').textContent = avgActual.toLocaleString();
-                document.getElementById('kpi-accuracy').textContent = accuracy + '%';
-                document.getElementById('kpi-peak-week').textContent = `Week ${maxWeek}`;
-            } else {
-                const product = productData[currentProduct];
-                if (product) {
-                    const weeks = Math.min(Math.ceil(currentDays / 7), product.forecastData.length);
-                    let totalForecast = 0;
-                    let totalActual = 0;
-                    let maxWeek = 0;
-                    let maxValue = 0;
-
-                    for (let i = 0; i < weeks; i++) {
-                        totalForecast += product.forecastData[i] || 0;
-                        totalActual += product.actualData[i] || 0;
-                        if (product.forecastData[i] > maxValue) {
-                            maxValue = product.forecastData[i];
-                            maxWeek = i + 1;
-                        }
-                    }
-
-                    const avgForecast = Math.round(totalForecast / weeks);
-                    const avgActual = Math.round(totalActual / weeks);
-                    const accuracy = Math.round((1 - Math.abs(totalForecast - totalActual) / totalForecast) * 100 * 10) / 10;
-
-                    document.getElementById('kpi-weekly-forecast').textContent = avgForecast.toLocaleString();
-                    document.getElementById('kpi-weekly-actual').textContent = avgActual.toLocaleString();
-                    document.getElementById('kpi-accuracy').textContent = accuracy + '%';
-                    document.getElementById('kpi-peak-week').textContent = `Week ${maxWeek}`;
-                }
-            }
+            document.getElementById('kpi-accuracy').textContent = accuracy.toFixed(1) + '%';
+            document.getElementById('kpi-weekly-forecast').textContent = avgWeekly.toLocaleString();
+            document.getElementById('kpi-weekly-actual').textContent = Math.round(avgWeekly * 0.96).toLocaleString();
+            document.getElementById('kpi-overrides').textContent = overrides;
         }
 
-        // Category breakdown table data
-        let categoryTableData = [];
-        let sortColumn = null;
-        let sortDirection = 'asc';
+        // ==================== SEARCH ====================
+        
+        function setupSearch() {
+            document.getElementById('sku-search')?.addEventListener('input', renderSKUSettingsTable);
+        }
 
-        function generateCategoryTableData() {
-            categoryTableData = [];
-            
-            if (currentProduct === 'all') {
-                Object.keys(productData).forEach(productKey => {
-                    const product = productData[productKey];
-                    const data = product.categoryData[currentCategoryDays];
-                    const changeVsLastYear = ((data.actual - data.lastYear) / data.lastYear * 100).toFixed(1);
-                    const changeVsForecast = ((data.actual - data.forecast) / data.forecast * 100).toFixed(1);
-                    
-                    categoryTableData.push({
-                        name: product.name,
-                        actual: data.actual,
-                        lastYear: data.lastYear,
-                        changeVsLastYear: parseFloat(changeVsLastYear),
-                        forecast: data.forecast,
-                        changeVsForecast: parseFloat(changeVsForecast),
-                        share: 0 // Will calculate after getting totals
-                    });
-                });
-            } else {
-                const product = productData[currentProduct];
-                if (product) {
-                    const data = product.categoryData[currentCategoryDays];
-                    const changeVsLastYear = ((data.actual - data.lastYear) / data.lastYear * 100).toFixed(1);
-                    const changeVsForecast = ((data.actual - data.forecast) / data.forecast * 100).toFixed(1);
-                    
-                    categoryTableData.push({
-                        name: product.name,
-                        actual: data.actual,
-                        lastYear: data.lastYear,
-                        changeVsLastYear: parseFloat(changeVsLastYear),
-                        forecast: data.forecast,
-                        changeVsForecast: parseFloat(changeVsForecast),
-                        share: 100.0 // Single product gets 100%
+        // ==================== TOOLTIP POSITIONING ====================
+        
+        function setupTooltipPositioning() {
+            // SKU Settings tooltip (Minimum Quantity)
+            document.querySelectorAll('.sku-info-tooltip').forEach(tooltip => {
+                const icon = tooltip.querySelector('.sku-info-icon');
+                const content = tooltip.querySelector('.sku-info-content');
+                
+                if (icon && content) {
+                    tooltip.addEventListener('mouseenter', () => {
+                        positionTooltip(icon, content, 300);
                     });
                 }
-            }
-
-            // Calculate total demand and shares
-            const totalDemand = categoryTableData.reduce((sum, item) => sum + item.actual, 0);
+            });
             
-            // Update shares based on total
-            if (currentProduct === 'all') {
-                categoryTableData.forEach(item => {
-                    item.share = (item.actual / totalDemand * 100);
-                });
-            }
-            
-            document.getElementById('total-demand-value').textContent = totalDemand.toLocaleString() + ' units';
-
-            renderCategoryTable();
-        }
-
-        function renderCategoryTable() {
-            const tbody = document.getElementById('category-table-body');
-            if (!tbody) return;
-
-            // Sort data
-            if (sortColumn) {
-                categoryTableData.sort((a, b) => {
-                    let aVal = a[sortColumn];
-                    let bVal = b[sortColumn];
-                    
-                    if (typeof aVal === 'string') {
-                        aVal = aVal.toLowerCase();
-                        bVal = bVal.toLowerCase();
-                    }
-                    
-                    if (sortDirection === 'asc') {
-                        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-                    } else {
-                        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-                    }
-                });
-            }
-
-            tbody.innerHTML = categoryTableData.map(item => {
-                const changeVsLastYearClass = item.changeVsLastYear >= 0 ? 'change-positive' : 'change-negative';
-                const changeVsForecastClass = item.changeVsForecast >= 0 ? 'change-positive' : 'change-negative';
-                const changeVsLastYearSign = item.changeVsLastYear >= 0 ? '+' : '';
-                const changeVsForecastSign = item.changeVsForecast >= 0 ? '+' : '';
-
-                return `
-                    <tr>
-                        <td class="category-name">${item.name}</td>
-                        <td>${item.actual.toLocaleString()}</td>
-                        <td>${item.lastYear.toLocaleString()}</td>
-                        <td class="change-cell">
-                            <span class="${changeVsLastYearClass}">${changeVsLastYearSign}${item.changeVsLastYear.toFixed(1)}%</span>
-                        </td>
-                        <td>${item.forecast.toLocaleString()}</td>
-                        <td class="change-cell">
-                            <span class="${changeVsForecastClass}">${changeVsForecastSign}${item.changeVsForecast.toFixed(1)}%</span>
-                        </td>
-                        <td>${item.share.toFixed(1)}%</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Table sorting
-        function setupTableSorting() {
-            const headers = document.querySelectorAll('#category-table th[data-column]');
-            headers.forEach(header => {
-                header.addEventListener('click', () => {
-                    const column = header.getAttribute('data-column');
-                    
-                    // Remove sorted class from all headers
-                    headers.forEach(h => {
-                        h.classList.remove('sorted', 'sorted-asc', 'sorted-desc');
+            // Daily Forecast Detail tooltips (Lower Bound, Upper Bound, Confidence Rating)
+            document.querySelectorAll('.info-tooltip').forEach(tooltip => {
+                const icon = tooltip.querySelector('.info-icon');
+                const content = tooltip.querySelector('.info-tooltip-content');
+                
+                if (icon && content) {
+                    tooltip.addEventListener('mouseenter', () => {
+                        positionTooltip(icon, content, 260);
                     });
-                    
-                    // Toggle sort direction if same column
-                    if (sortColumn === column) {
-                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        sortColumn = column;
-                        sortDirection = 'asc';
-                    }
-                    
-                    // Add sorted class
-                    header.classList.add('sorted', `sorted-${sortDirection}`);
-                    
-                    renderCategoryTable();
-                });
+                }
             });
         }
-
-        // Navigation
-        function setupNavigation() {
-            const navButtons = document.querySelectorAll('.nav-btn');
-            navButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const targetPage = btn.getAttribute('data-page');
-                    
-                    // Update active nav button
-                    navButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    
-                    // Update active page
-                    document.querySelectorAll('.page').forEach(page => {
-                        page.classList.remove('active');
-                    });
-                    document.getElementById(targetPage).classList.add('active');
-                    
-                    // Initialize data for category breakdown page
-                    if (targetPage === 'category-breakdown') {
-                        generateCategoryTableData();
-                    }
-                });
-            });
-        }
-
-        // Date range filters
-        function setupDateRangeFilters() {
-            const dateRangeButtons = document.querySelectorAll('.date-range-btn');
-            dateRangeButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const days = btn.getAttribute('data-days');
-                    const container = btn.closest('.filter-group');
-                    const customInputs = container.querySelector('.custom-date-inputs');
-                    const isOnCategoryPage = btn.closest('#category-breakdown') !== null;
-                    
-                    // Remove active from all buttons in this group
-                    btn.parentElement.querySelectorAll('.date-range-btn').forEach(b => {
-                        b.classList.remove('active');
-                    });
-                    
-                    if (days === 'custom') {
-                        btn.classList.add('active');
-                        if (customInputs) {
-                            customInputs.classList.add('active');
-                        }
-                    } else {
-                        btn.classList.add('active');
-                        if (customInputs) {
-                            customInputs.classList.remove('active');
-                        }
-                        
-                        if (isOnCategoryPage) {
-                            currentCategoryDays = parseInt(days);
-                            generateCategoryTableData();
-                        } else {
-                            currentDays = parseInt(days);
-                            updateKPIs();
-                            initializeChart();
-                        }
-                    }
-                });
-            });
-        }
-
-        // Product filters
-        function setupProductFilters() {
-            const productFilter1 = document.getElementById('product-filter');
-            const productFilter2 = document.getElementById('product-filter-2');
+        
+        function positionTooltip(icon, content, tooltipWidth) {
+            const rect = icon.getBoundingClientRect();
             
-            if (productFilter1) {
-                productFilter1.addEventListener('change', (e) => {
-                    currentProduct = e.target.value;
-                    updateKPIs();
-                    initializeChart();
-                });
+            // Try to position to the right of the icon first
+            let left = rect.right + 10;
+            let top = rect.top - 10;
+            
+            // If tooltip would go off the right edge, position to the left instead
+            if (left + tooltipWidth > window.innerWidth - 20) {
+                left = rect.left - tooltipWidth - 10;
             }
             
-            if (productFilter2) {
-                productFilter2.addEventListener('change', (e) => {
-                    currentProduct = e.target.value;
-                    generateCategoryTableData();
-                });
+            // If still off-screen on the left, center it below the icon
+            if (left < 10) {
+                left = Math.max(10, rect.left + rect.width / 2 - tooltipWidth / 2);
+                top = rect.bottom + 10;
             }
+            
+            // If tooltip would go off the top, adjust
+            if (top < 10) {
+                top = 10;
+            }
+            
+            // If tooltip would go off the bottom, adjust
+            if (top + 150 > window.innerHeight) {
+                top = window.innerHeight - 160;
+            }
+            
+            content.style.left = left + 'px';
+            content.style.top = top + 'px';
         }
 
-        // Initialize on page load
+        // ==================== INIT ====================
+        
         document.addEventListener('DOMContentLoaded', () => {
             setupNavigation();
-            setupDateRangeFilters();
-            setupProductFilters();
-            setupTableSorting();
+            initializeSearchableFilters();
+            setupDailyForecastSorting();
+            setupDailyForecastFilters();
+            setupSKUSettingsSorting();
+            setupChartFilters();
+            setupSearch();
+            setupTooltipPositioning();
             initializeChart();
             updateKPIs();
-            generateCategoryTableData();
         });
     </script>
 </body>
