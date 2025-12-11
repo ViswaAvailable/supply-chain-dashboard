@@ -111,7 +111,66 @@
         .sidebar-nav button:hover { background-color: var(--gray-light); color: var(--text-dark); }
         .sidebar-nav button.active { background-color: var(--primary-dark); color: white; border-right: 3px solid #fbbf24; }
 
-        .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+        .nav-icon { 
+            width: 18px; 
+            height: 18px; 
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+        
+        .nav-btn:hover .nav-icon,
+        .nav-btn.active .nav-icon { opacity: 1; }
+        
+        .nav-btn.active .nav-icon path,
+        .nav-btn.active .nav-icon rect,
+        .nav-btn.active .nav-icon circle,
+        .nav-btn.active .nav-icon line,
+        .nav-btn.active .nav-icon polyline { stroke: white; }
+        
+        .btn-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .category-item:last-child { border-bottom: none; }
+        
+        .category-item-name { font-weight: 500; }
+        
+        .category-item-count {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            margin-left: 0.5rem;
+        }
+        
+        .btn-delete {
+            padding: 0.25rem 0.5rem;
+            background: none;
+            border: 1px solid var(--red);
+            color: var(--red);
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background-color: var(--red);
+            color: white;
+        }
+        
+        .btn-delete:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
 
         .main-content { flex: 1; margin-left: 260px; padding: 2rem; }
 
@@ -395,14 +454,32 @@
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Forecasting</div>
                 <ul class="sidebar-nav">
-                    <li><button class="nav-btn active" data-page="demand-forecast"><span class="nav-icon">📈</span> Demand Forecast</button></li>
-                    <li><button class="nav-btn" data-page="daily-forecast"><span class="nav-icon">📋</span> Daily Forecast Detail</button></li>
+                    <li><button class="nav-btn active" data-page="demand-forecast">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Demand Forecast
+                    </button></li>
+                    <li><button class="nav-btn" data-page="daily-forecast">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        Daily Forecast Detail
+                    </button></li>
                 </ul>
             </div>
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Configuration</div>
                 <ul class="sidebar-nav">
-                    <li><button class="nav-btn" data-page="sku-settings"><span class="nav-icon">⚙️</span> SKU Settings</button></li>
+                    <li><button class="nav-btn" data-page="sku-settings">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        SKU Settings
+                    </button></li>
                 </ul>
             </div>
             <div style="flex: 1;"></div>
@@ -553,8 +630,8 @@
                                     <th data-column="date">Date <span class="sort-icon">↕</span></th>
                                     <th data-column="day">Day <span class="sort-icon">↕</span></th>
                                     <th data-column="forecast">Forecasted Demand <span class="sort-icon">↕</span></th>
-                                    <th data-column="minConf">Min Confidence <span class="sort-icon">↕</span></th>
-                                    <th data-column="maxConf">Max Confidence <span class="sort-icon">↕</span></th>
+                                    <th data-column="minConf">Lower Bound <span class="sort-icon">↕</span></th>
+                                    <th data-column="maxConf">Upper Bound <span class="sort-icon">↕</span></th>
                                     <th data-column="confidence">Confidence Rating <span class="sort-icon">↕</span></th>
                                 </tr>
                             </thead>
@@ -576,8 +653,20 @@
                         <input type="text" class="text-input" id="sku-search" placeholder="Search SKUs..." style="width: 250px;">
                     </div>
                     <div class="action-bar-right">
-                        <button class="btn btn-outline" onclick="openCategoryModal()">+ New Category</button>
-                        <button class="btn btn-success" onclick="saveAllSettings()">💾 Save All Changes</button>
+                        <button class="btn btn-outline" onclick="openCategoryModal()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Category
+                        </button>
+                        <button class="btn btn-outline" onclick="openManageCategoriesModal()">Manage Categories</button>
+                        <button class="btn btn-success" onclick="saveAllSettings()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Save All Changes
+                        </button>
                     </div>
                 </div>
 
@@ -590,7 +679,6 @@
                                     <th data-column="category">Category <span class="sort-icon">↕</span></th>
                                     <th data-column="minQty">Minimum Quantity <span class="sort-icon">↕</span></th>
                                     <th data-column="currentForecast">Current Avg Forecast <span class="sort-icon">↕</span></th>
-                                    <th data-column="status">Override Status</th>
                                 </tr>
                             </thead>
                             <tbody id="sku-settings-body"></tbody>
@@ -623,6 +711,21 @@
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeCategoryModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="createCategory()">Create Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Categories Modal -->
+    <div class="modal-overlay" id="manage-categories-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Manage Categories</h3>
+            </div>
+            <div class="modal-body">
+                <div id="categories-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeManageCategoriesModal()">Done</button>
             </div>
         </div>
     </div>
@@ -891,13 +994,6 @@
 
             const tbody = document.getElementById('sku-settings-body');
             tbody.innerHTML = data.map(sku => {
-                const isOverriding = sku.minQuantity > sku.avgForecast;
-                const statusHtml = isOverriding ? 
-                    `<span class="override-indicator">⚠ Override Active</span>` :
-                    `<span style="color: var(--green); font-size: 0.875rem;">✓ Normal</span>`;
-                const catClass = sku.categoryId === 'biscuits' ? 'biscuits' : 
-                                 sku.categoryId === 'snacks' ? 'snacks' : 'beverages';
-
                 const categoryOptions = categories.map(c => 
                     `<option value="${c.id}" ${c.id === sku.categoryId ? 'selected' : ''}>${c.name}</option>`
                 ).join('');
@@ -917,7 +1013,6 @@
                         </div>
                     </td>
                     <td>${sku.avgForecast} units</td>
-                    <td>${statusHtml}</td>
                 </tr>`;
             }).join('');
 
@@ -971,7 +1066,7 @@
             showToast('Settings saved successfully!', 'success');
         }
 
-        // ==================== CATEGORY MODAL ====================
+        // ==================== CATEGORY MODALS ====================
         
         function openCategoryModal() {
             document.getElementById('category-modal').classList.add('active');
@@ -996,7 +1091,66 @@
             categories.push({ id, name });
             closeCategoryModal();
             renderSKUSettingsTable();
+            updateCategoryFilters();
             showToast(`Category "${name}" created!`, 'success');
+        }
+
+        function openManageCategoriesModal() {
+            renderCategoriesList();
+            document.getElementById('manage-categories-modal').classList.add('active');
+        }
+
+        function closeManageCategoriesModal() {
+            document.getElementById('manage-categories-modal').classList.remove('active');
+        }
+
+        function renderCategoriesList() {
+            const container = document.getElementById('categories-list');
+            container.innerHTML = categories.map(cat => {
+                const skuCount = skuData.filter(s => s.categoryId === cat.id).length;
+                const canDelete = skuCount === 0;
+                return `
+                    <div class="category-item">
+                        <div>
+                            <span class="category-item-name">${cat.name}</span>
+                            <span class="category-item-count">(${skuCount} SKU${skuCount !== 1 ? 's' : ''})</span>
+                        </div>
+                        <button class="btn-delete" onclick="deleteCategory('${cat.id}')" ${canDelete ? '' : 'disabled'} title="${canDelete ? 'Delete category' : 'Cannot delete: SKUs assigned'}">
+                            Delete
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            if (categories.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-gray); text-align: center;">No categories yet</p>';
+            }
+        }
+
+        function deleteCategory(categoryId) {
+            const skuCount = skuData.filter(s => s.categoryId === categoryId).length;
+            if (skuCount > 0) {
+                alert('Cannot delete category with assigned SKUs. Please reassign SKUs first.');
+                return;
+            }
+            const category = categories.find(c => c.id === categoryId);
+            if (confirm(`Delete category "${category.name}"?`)) {
+                categories = categories.filter(c => c.id !== categoryId);
+                renderCategoriesList();
+                renderSKUSettingsTable();
+                updateCategoryFilters();
+                showToast(`Category "${category.name}" deleted`, 'success');
+            }
+        }
+
+        function updateCategoryFilters() {
+            const categoryOptions = '<option value="all">All Categories</option>' + 
+                categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            
+            ['category-filter', 'daily-category-filter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = categoryOptions;
+            });
         }
 
         // ==================== TOAST ====================
