@@ -783,18 +783,30 @@
                     </div>
                 </div>
 
-                <div class="stats-row">
-                    <div class="stat-item">
-                        <span class="stat-label">Total Forecasted</span>
-                        <span class="stat-value" id="total-forecasted">0</span>
+                <div class="action-bar">
+                    <div class="stats-row" style="margin-bottom: 0;">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Forecasted</span>
+                            <span class="stat-value" id="total-forecasted">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Min Qty Overrides</span>
+                            <span class="stat-value" id="override-count">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Avg Confidence</span>
+                            <span class="stat-value" id="avg-confidence">-</span>
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Min Qty Overrides</span>
-                        <span class="stat-value" id="override-count">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Avg Confidence</span>
-                        <span class="stat-value" id="avg-confidence">-</span>
+                    <div class="action-bar-right">
+                        <button class="btn btn-primary" onclick="exportDailyForecast()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Export to Excel
+                        </button>
                     </div>
                 </div>
 
@@ -947,6 +959,7 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script>
         // ==================== DATA MODEL ====================
         
@@ -1359,6 +1372,89 @@
         function setupDailyForecastFilters() {
             // Only setup for daily-date-filter (searchable selects handle their own events)
             document.getElementById('daily-date-filter')?.addEventListener('change', renderDailyForecastTable);
+        }
+
+        // ==================== EXPORT TO EXCEL ====================
+        
+        function exportDailyForecast() {
+            // Get filtered and sorted data
+            let data = getFilteredForecasts();
+            
+            // Sort the data same as displayed
+            data.sort((a, b) => {
+                let aVal = a[dailySortColumn];
+                let bVal = b[dailySortColumn];
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                if (dailySortDir === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+                return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+            });
+            
+            // Get current filter values for filename
+            const categoryFilter = getFilterValue('daily-category-filter');
+            const skuFilter = getFilterValue('daily-sku-filter');
+            const outletFilter = getFilterValue('daily-outlet-filter');
+            const dateRange = document.getElementById('daily-date-filter').value;
+            
+            // Prepare data for Excel
+            const excelData = data.map(f => ({
+                'Outlet': f.outlet,
+                'SKU': f.sku,
+                'Category': categories.find(c => c.id === f.categoryId)?.name || f.categoryId,
+                'Date': f.date,
+                'Day': f.day,
+                'Forecasted Demand': f.forecast,
+                'Lower Bound': f.minConf,
+                'Upper Bound': f.maxConf,
+                'Confidence Rating': f.confidenceRating,
+                'Min Qty Override': f.isOverridden ? 'Yes' : 'No'
+            }));
+            
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 20 },  // Outlet
+                { wch: 25 },  // SKU
+                { wch: 12 },  // Category
+                { wch: 12 },  // Date
+                { wch: 12 },  // Day
+                { wch: 18 },  // Forecasted Demand
+                { wch: 12 },  // Lower Bound
+                { wch: 12 },  // Upper Bound
+                { wch: 18 },  // Confidence Rating
+                { wch: 15 }   // Min Qty Override
+            ];
+            
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Daily Forecast');
+            
+            // Generate filename with filter info
+            const today = new Date().toISOString().split('T')[0];
+            let filename = `DailyForecast_${today}`;
+            if (categoryFilter !== 'all') {
+                const cat = categories.find(c => c.id === categoryFilter);
+                filename += `_${cat ? cat.name : categoryFilter}`;
+            }
+            if (skuFilter !== 'all') {
+                const sku = skuData.find(s => s.id === skuFilter);
+                filename += `_${sku ? sku.name.replace(/\s+/g, '-') : skuFilter}`;
+            }
+            if (outletFilter !== 'all') {
+                const outlet = outlets.find(o => o.id === outletFilter);
+                filename += `_${outlet ? outlet.name.replace(/\s+/g, '-') : outletFilter}`;
+            }
+            filename += `_${dateRange}days.xlsx`;
+            
+            // Download the file
+            XLSX.writeFile(wb, filename);
+            
+            // Show success toast
+            showToast(`Exported ${data.length} records to Excel`, 'success');
         }
 
         // ==================== SKU SETTINGS TABLE ====================
