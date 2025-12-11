@@ -867,8 +867,19 @@
                 </div>
 
                 <div class="action-bar">
-                    <div class="action-bar-left">
-                        <input type="text" class="text-input" id="sku-search" placeholder="Search SKUs..." style="width: 250px;">
+                    <div class="action-bar-left" style="gap: 1rem;">
+                        <div class="filter-group" style="min-width: 180px;">
+                            <label class="filter-label">Category</label>
+                            <div class="searchable-select" id="sku-category-filter-container" data-filter-id="sku-category-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Categories" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group" style="min-width: 250px;">
+                            <label class="filter-label">Search SKU</label>
+                            <input type="text" class="text-input" id="sku-search" placeholder="Type to search...">
+                        </div>
                     </div>
                     <div class="action-bar-right">
                         <button class="btn btn-outline" onclick="openCategoryModal()">
@@ -1248,6 +1259,14 @@
                     dailyOutletContainer, outletOptions, renderDailyForecastTable
                 );
             }
+            
+            // SKU Settings page filter
+            const skuCategoryContainer = document.getElementById('sku-category-filter-container');
+            if (skuCategoryContainer) {
+                searchableSelects['sku-category-filter'] = new SearchableSelect(
+                    skuCategoryContainer, categoryOptions, renderSKUSettingsTable
+                );
+            }
         }
         
         // Helper to get filter value (works with both searchable and regular selects)
@@ -1265,7 +1284,7 @@
                 ...categories.map(c => ({ value: c.id, label: c.name }))
             ];
             
-            ['category-filter', 'daily-category-filter'].forEach(id => {
+            ['category-filter', 'daily-category-filter', 'sku-category-filter'].forEach(id => {
                 if (searchableSelects[id]) {
                     searchableSelects[id].setOptions(categoryOptions);
                 }
@@ -1464,6 +1483,14 @@
 
         function renderSKUSettingsTable() {
             let data = [...skuData];
+            
+            // Filter by category
+            const categoryFilter = getFilterValue('sku-category-filter');
+            if (categoryFilter !== 'all') {
+                data = data.filter(s => s.categoryId === categoryFilter);
+            }
+            
+            // Filter by search
             const search = document.getElementById('sku-search').value.toLowerCase();
             if (search) {
                 data = data.filter(s => s.name.toLowerCase().includes(search));
