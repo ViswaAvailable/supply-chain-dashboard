@@ -172,6 +172,203 @@
             cursor: not-allowed;
         }
 
+        /* Searchable Dropdown */
+        .searchable-select {
+            position: relative;
+        }
+        
+        .searchable-select-input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            background-color: var(--bg-white);
+            cursor: text;
+            transition: all 0.2s;
+        }
+        
+        .searchable-select-input:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
+        }
+        
+        .searchable-select-arrow {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-gray);
+            font-size: 0.625rem;
+        }
+        
+        .searchable-select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-md);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+            display: none;
+        }
+        
+        .searchable-select-dropdown.active {
+            display: block;
+        }
+        
+        .searchable-select-option {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.15s;
+        }
+        
+        .searchable-select-option:hover,
+        .searchable-select-option.highlighted {
+            background-color: var(--gray-light);
+        }
+        
+        .searchable-select-option.selected {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .searchable-select-no-results {
+            padding: 0.5rem 0.75rem;
+            color: var(--text-gray);
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+
+        /* Info Tooltip */
+        .info-tooltip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.375rem;
+            cursor: pointer;
+        }
+        
+        .info-icon {
+            width: 14px;
+            height: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s;
+        }
+        
+        .info-icon:hover {
+            color: #fbbf24;
+        }
+        
+        .info-tooltip-content {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-dark);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: normal;
+            white-space: normal;
+            width: 260px;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 100;
+            line-height: 1.5;
+        }
+        
+        .info-tooltip-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--primary-dark);
+        }
+        
+        .info-tooltip:hover .info-tooltip-content {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* SKU Settings Info Icon */
+        .header-with-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .sku-info-tooltip {
+            position: relative;
+            display: inline-flex;
+            margin-left: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .sku-info-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--amber);
+            transition: transform 0.2s;
+        }
+        
+        .sku-info-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        .sku-info-content {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #fef3c7;
+            color: #78350f;
+            padding: 0.875rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #fbbf24;
+            font-size: 0.8rem;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: normal;
+            white-space: normal;
+            width: 300px;
+            box-shadow: var(--shadow-md);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 100;
+            line-height: 1.5;
+        }
+        
+        .sku-info-content::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #fef3c7;
+        }
+        
+        .sku-info-tooltip:hover .sku-info-content {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .main-content { flex: 1; margin-left: 260px; padding: 2rem; }
 
         .page { display: none; }
@@ -521,24 +718,27 @@
                     <div class="filters-grid">
                         <div class="filter-group">
                             <label class="filter-label">SKU Category</label>
-                            <select class="filter-select" id="category-filter">
-                                <option value="all">All Categories</option>
-                                <option value="biscuits">Biscuits</option>
-                                <option value="snacks">Snacks</option>
-                                <option value="beverages">Beverages</option>
-                            </select>
+                            <div class="searchable-select" id="category-filter-container" data-filter-id="category-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Categories" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">SKU / Final Product</label>
-                            <select class="filter-select" id="product-filter">
-                                <option value="all">All Products</option>
-                            </select>
+                            <div class="searchable-select" id="product-filter-container" data-filter-id="product-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Products" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">Outlet</label>
-                            <select class="filter-select" id="outlet-filter">
-                                <option value="all">All Outlets</option>
-                            </select>
+                            <div class="searchable-select" id="outlet-filter-container" data-filter-id="outlet-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Outlets" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">Date Range</label>
@@ -574,24 +774,27 @@
                     <div class="filters-grid">
                         <div class="filter-group">
                             <label class="filter-label">SKU Category</label>
-                            <select class="filter-select" id="daily-category-filter">
-                                <option value="all">All Categories</option>
-                                <option value="biscuits">Biscuits</option>
-                                <option value="snacks">Snacks</option>
-                                <option value="beverages">Beverages</option>
-                            </select>
+                            <div class="searchable-select" id="daily-category-filter-container" data-filter-id="daily-category-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Categories" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">SKU / Final Product</label>
-                            <select class="filter-select" id="daily-sku-filter">
-                                <option value="all">All SKUs</option>
-                            </select>
+                            <div class="searchable-select" id="daily-sku-filter-container" data-filter-id="daily-sku-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All SKUs" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">Outlet</label>
-                            <select class="filter-select" id="daily-outlet-filter">
-                                <option value="all">All Outlets</option>
-                            </select>
+                            <div class="searchable-select" id="daily-outlet-filter-container" data-filter-id="daily-outlet-filter">
+                                <input type="text" class="searchable-select-input" placeholder="All Outlets" data-value="all">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-label">Date Range</label>
@@ -630,9 +833,36 @@
                                     <th data-column="date">Date <span class="sort-icon">↕</span></th>
                                     <th data-column="day">Day <span class="sort-icon">↕</span></th>
                                     <th data-column="forecast">Forecasted Demand <span class="sort-icon">↕</span></th>
-                                    <th data-column="minConf">Lower Bound <span class="sort-icon">↕</span></th>
-                                    <th data-column="maxConf">Upper Bound <span class="sort-icon">↕</span></th>
-                                    <th data-column="confidence">Confidence Rating <span class="sort-icon">↕</span></th>
+                                    <th data-column="minConf">
+                                        Lower Bound
+                                        <span class="info-tooltip">
+                                            <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <span class="info-tooltip-content">The minimum expected demand value based on the confidence interval. This represents the lower boundary of the forecast range.</span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th data-column="maxConf">
+                                        Upper Bound
+                                        <span class="info-tooltip">
+                                            <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <span class="info-tooltip-content">The maximum expected demand value based on the confidence interval. This represents the upper boundary of the forecast range.</span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
+                                    <th data-column="confidence">
+                                        Confidence Rating
+                                        <span class="info-tooltip">
+                                            <svg class="info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                            </svg>
+                                            <span class="info-tooltip-content"><strong>High:</strong> Narrow confidence range, reliable forecast.<br><strong>Medium:</strong> Moderate uncertainty.<br><strong>Low:</strong> Wide confidence range, consider safety stock.</span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="daily-forecast-body"></tbody>
@@ -677,20 +907,27 @@
                                 <tr>
                                     <th data-column="sku">SKU Name <span class="sort-icon">↕</span></th>
                                     <th data-column="category">Category <span class="sort-icon">↕</span></th>
-                                    <th data-column="minQty">Minimum Quantity <span class="sort-icon">↕</span></th>
+                                    <th data-column="minQty">
+                                        <span class="header-with-info">
+                                            Minimum Quantity
+                                            <span class="sku-info-tooltip">
+                                                <svg class="sku-info-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+                                                </svg>
+                                                <span class="sku-info-content">
+                                                    <strong>How Minimum Quantity Works:</strong><br>
+                                                    When the forecasted demand for a SKU is less than the minimum quantity you set, the system will automatically use the minimum quantity instead. This ensures you never order below viable production or delivery thresholds.
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <span class="sort-icon">↕</span>
+                                    </th>
                                     <th data-column="currentForecast">Current Avg Forecast <span class="sort-icon">↕</span></th>
                                 </tr>
                             </thead>
                             <tbody id="sku-settings-body"></tbody>
                         </table>
                     </div>
-                </div>
-
-                <div style="margin-top: 1.5rem; padding: 1rem; background-color: #fef3c7; border-radius: 0.5rem; border: 1px solid #fbbf24;">
-                    <strong style="color: #92400e;">💡 How Minimum Quantity Works:</strong>
-                    <p style="color: #78350f; margin-top: 0.5rem; font-size: 0.875rem;">
-                        When the forecasted demand for a SKU is less than the minimum quantity you set, the system will automatically use the minimum quantity instead. This ensures you never order below viable production or delivery thresholds.
-                    </p>
                 </div>
             </div>
         </main>
@@ -839,25 +1076,210 @@
             });
         }
 
-        // ==================== FILTER POPULATION ====================
+        // ==================== SEARCHABLE DROPDOWN ====================
         
-        function populateFilters() {
-            // Outlet filters
-            const outletOptions = '<option value="all">All Outlets</option>' + 
-                outlets.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+        class SearchableSelect {
+            constructor(container, options, onChange) {
+                this.container = container;
+                this.options = options;
+                this.onChange = onChange;
+                this.input = container.querySelector('.searchable-select-input');
+                this.dropdown = container.querySelector('.searchable-select-dropdown');
+                this.selectedValue = 'all';
+                this.highlightedIndex = -1;
+                
+                this.init();
+            }
             
-            ['outlet-filter', 'daily-outlet-filter'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = outletOptions;
-            });
-
-            // SKU filters
-            const skuOptions = '<option value="all">All SKUs</option>' + 
-                skuData.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            init() {
+                this.renderOptions(this.options);
+                
+                this.input.addEventListener('focus', () => this.open());
+                this.input.addEventListener('input', () => this.filter());
+                this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+                
+                document.addEventListener('click', (e) => {
+                    if (!this.container.contains(e.target)) this.close();
+                });
+            }
             
-            ['product-filter', 'daily-sku-filter'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = skuOptions;
+            renderOptions(opts) {
+                if (opts.length === 0) {
+                    this.dropdown.innerHTML = '<div class="searchable-select-no-results">No results found</div>';
+                    return;
+                }
+                
+                this.dropdown.innerHTML = opts.map((opt, idx) => `
+                    <div class="searchable-select-option ${opt.value === this.selectedValue ? 'selected' : ''}" 
+                         data-value="${opt.value}" data-index="${idx}">
+                        ${opt.label}
+                    </div>
+                `).join('');
+                
+                this.dropdown.querySelectorAll('.searchable-select-option').forEach(opt => {
+                    opt.addEventListener('click', () => this.select(opt.dataset.value));
+                    opt.addEventListener('mouseenter', () => {
+                        this.highlightedIndex = parseInt(opt.dataset.index);
+                        this.updateHighlight();
+                    });
+                });
+            }
+            
+            filter() {
+                const search = this.input.value.toLowerCase();
+                const filtered = this.options.filter(opt => 
+                    opt.label.toLowerCase().includes(search)
+                );
+                this.renderOptions(filtered);
+                this.highlightedIndex = 0;
+                this.updateHighlight();
+            }
+            
+            open() {
+                this.dropdown.classList.add('active');
+                this.input.select();
+                this.highlightedIndex = this.options.findIndex(o => o.value === this.selectedValue);
+                this.updateHighlight();
+            }
+            
+            close() {
+                this.dropdown.classList.remove('active');
+                const selected = this.options.find(o => o.value === this.selectedValue);
+                this.input.value = selected ? selected.label : '';
+            }
+            
+            select(value) {
+                this.selectedValue = value;
+                this.input.dataset.value = value;
+                const selected = this.options.find(o => o.value === value);
+                this.input.value = selected ? selected.label : '';
+                this.close();
+                this.renderOptions(this.options);
+                if (this.onChange) this.onChange(value);
+            }
+            
+            handleKeydown(e) {
+                const visibleOptions = this.dropdown.querySelectorAll('.searchable-select-option');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.highlightedIndex = Math.min(this.highlightedIndex + 1, visibleOptions.length - 1);
+                    this.updateHighlight();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.highlightedIndex = Math.max(this.highlightedIndex - 1, 0);
+                    this.updateHighlight();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const highlighted = visibleOptions[this.highlightedIndex];
+                    if (highlighted) this.select(highlighted.dataset.value);
+                } else if (e.key === 'Escape') {
+                    this.close();
+                }
+            }
+            
+            updateHighlight() {
+                this.dropdown.querySelectorAll('.searchable-select-option').forEach((opt, idx) => {
+                    opt.classList.toggle('highlighted', idx === this.highlightedIndex);
+                });
+            }
+            
+            getValue() {
+                return this.selectedValue;
+            }
+            
+            setOptions(options) {
+                this.options = options;
+                this.renderOptions(options);
+            }
+        }
+        
+        // Store searchable select instances
+        const searchableSelects = {};
+        
+        function initializeSearchableFilters() {
+            // Category options
+            const categoryOptions = [
+                { value: 'all', label: 'All Categories' },
+                ...categories.map(c => ({ value: c.id, label: c.name }))
+            ];
+            
+            // SKU options
+            const skuOptions = [
+                { value: 'all', label: 'All SKUs' },
+                ...skuData.map(s => ({ value: s.id, label: s.name }))
+            ];
+            
+            // Outlet options
+            const outletOptions = [
+                { value: 'all', label: 'All Outlets' },
+                ...outlets.map(o => ({ value: o.id, label: o.name }))
+            ];
+            
+            // Demand Forecast page filters
+            const categoryContainer = document.getElementById('category-filter-container');
+            if (categoryContainer) {
+                searchableSelects['category-filter'] = new SearchableSelect(
+                    categoryContainer, categoryOptions, () => { initializeChart(); updateKPIs(); }
+                );
+            }
+            
+            const productContainer = document.getElementById('product-filter-container');
+            if (productContainer) {
+                searchableSelects['product-filter'] = new SearchableSelect(
+                    productContainer, skuOptions, () => { initializeChart(); updateKPIs(); }
+                );
+            }
+            
+            const outletContainer = document.getElementById('outlet-filter-container');
+            if (outletContainer) {
+                searchableSelects['outlet-filter'] = new SearchableSelect(
+                    outletContainer, outletOptions, () => { initializeChart(); updateKPIs(); }
+                );
+            }
+            
+            // Daily Forecast page filters
+            const dailyCategoryContainer = document.getElementById('daily-category-filter-container');
+            if (dailyCategoryContainer) {
+                searchableSelects['daily-category-filter'] = new SearchableSelect(
+                    dailyCategoryContainer, categoryOptions, renderDailyForecastTable
+                );
+            }
+            
+            const dailySkuContainer = document.getElementById('daily-sku-filter-container');
+            if (dailySkuContainer) {
+                searchableSelects['daily-sku-filter'] = new SearchableSelect(
+                    dailySkuContainer, skuOptions, renderDailyForecastTable
+                );
+            }
+            
+            const dailyOutletContainer = document.getElementById('daily-outlet-filter-container');
+            if (dailyOutletContainer) {
+                searchableSelects['daily-outlet-filter'] = new SearchableSelect(
+                    dailyOutletContainer, outletOptions, renderDailyForecastTable
+                );
+            }
+        }
+        
+        // Helper to get filter value (works with both searchable and regular selects)
+        function getFilterValue(filterId) {
+            if (searchableSelects[filterId]) {
+                return searchableSelects[filterId].getValue();
+            }
+            const el = document.getElementById(filterId);
+            return el ? el.value : 'all';
+        }
+        
+        function updateCategoryOptions() {
+            const categoryOptions = [
+                { value: 'all', label: 'All Categories' },
+                ...categories.map(c => ({ value: c.id, label: c.name }))
+            ];
+            
+            ['category-filter', 'daily-category-filter'].forEach(id => {
+                if (searchableSelects[id]) {
+                    searchableSelects[id].setOptions(categoryOptions);
+                }
             });
         }
 
@@ -867,9 +1289,9 @@
         let dailySortDir = 'asc';
 
         function getFilteredForecasts() {
-            const categoryFilter = document.getElementById('daily-category-filter').value;
-            const skuFilter = document.getElementById('daily-sku-filter').value;
-            const outletFilter = document.getElementById('daily-outlet-filter').value;
+            const categoryFilter = getFilterValue('daily-category-filter');
+            const skuFilter = getFilterValue('daily-sku-filter');
+            const outletFilter = getFilterValue('daily-outlet-filter');
             const dateRange = parseInt(document.getElementById('daily-date-filter').value);
 
             const today = new Date().toISOString().split('T')[0];
@@ -959,9 +1381,8 @@
         }
 
         function setupDailyForecastFilters() {
-            ['daily-category-filter', 'daily-sku-filter', 'daily-outlet-filter', 'daily-date-filter'].forEach(id => {
-                document.getElementById(id)?.addEventListener('change', renderDailyForecastTable);
-            });
+            // Only setup for daily-date-filter (searchable selects handle their own events)
+            document.getElementById('daily-date-filter')?.addEventListener('change', renderDailyForecastTable);
         }
 
         // ==================== SKU SETTINGS TABLE ====================
@@ -1144,13 +1565,7 @@
         }
 
         function updateCategoryFilters() {
-            const categoryOptions = '<option value="all">All Categories</option>' + 
-                categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            
-            ['category-filter', 'daily-category-filter'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = categoryOptions;
-            });
+            updateCategoryOptions();
         }
 
         // ==================== TOAST ====================
@@ -1171,9 +1586,9 @@
             if (!ctx) return;
 
             const days = parseInt(document.getElementById('date-range-filter').value);
-            const categoryFilter = document.getElementById('category-filter').value;
-            const skuFilter = document.getElementById('product-filter').value;
-            const outletFilter = document.getElementById('outlet-filter').value;
+            const categoryFilter = getFilterValue('category-filter');
+            const skuFilter = getFilterValue('product-filter');
+            const outletFilter = getFilterValue('outlet-filter');
 
             // Aggregate data by date
             const dateMap = new Map();
@@ -1278,20 +1693,19 @@
         }
 
         function setupChartFilters() {
-            ['category-filter', 'product-filter', 'outlet-filter', 'date-range-filter'].forEach(id => {
-                document.getElementById(id)?.addEventListener('change', () => {
-                    initializeChart();
-                    updateKPIs();
-                });
+            // Only setup for date-range-filter (searchable selects handle their own events)
+            document.getElementById('date-range-filter')?.addEventListener('change', () => {
+                initializeChart();
+                updateKPIs();
             });
         }
 
         // ==================== KPIs ====================
         
         function updateKPIs() {
-            const categoryFilter = document.getElementById('category-filter').value;
-            const skuFilter = document.getElementById('product-filter').value;
-            const outletFilter = document.getElementById('outlet-filter').value;
+            const categoryFilter = getFilterValue('category-filter');
+            const skuFilter = getFilterValue('product-filter');
+            const outletFilter = getFilterValue('outlet-filter');
 
             let filtered = dailyForecasts.filter(f => {
                 if (categoryFilter !== 'all' && f.categoryId !== categoryFilter) return false;
@@ -1321,7 +1735,7 @@
         
         document.addEventListener('DOMContentLoaded', () => {
             setupNavigation();
-            populateFilters();
+            initializeSearchableFilters();
             setupDailyForecastSorting();
             setupDailyForecastFilters();
             setupSKUSettingsSorting();
