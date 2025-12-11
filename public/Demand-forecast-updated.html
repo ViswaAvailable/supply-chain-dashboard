@@ -331,10 +331,7 @@
         }
         
         .sku-info-content {
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
+            position: fixed;
             background-color: #fef3c7;
             color: #78350f;
             padding: 0.875rem 1rem;
@@ -349,19 +346,10 @@
             box-shadow: var(--shadow-md);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.2s;
-            z-index: 100;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 9999;
             line-height: 1.5;
-        }
-        
-        .sku-info-content::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 6px solid transparent;
-            border-top-color: #fef3c7;
+            pointer-events: none;
         }
         
         .sku-info-tooltip:hover .sku-info-content {
@@ -1731,6 +1719,39 @@
             document.getElementById('sku-search')?.addEventListener('input', renderSKUSettingsTable);
         }
 
+        // ==================== TOOLTIP POSITIONING ====================
+        
+        function setupTooltipPositioning() {
+            document.querySelectorAll('.sku-info-tooltip').forEach(tooltip => {
+                const icon = tooltip.querySelector('.sku-info-icon');
+                const content = tooltip.querySelector('.sku-info-content');
+                
+                if (icon && content) {
+                    tooltip.addEventListener('mouseenter', () => {
+                        const rect = icon.getBoundingClientRect();
+                        const tooltipWidth = 300;
+                        
+                        // Position to the right of the icon
+                        let left = rect.right + 10;
+                        let top = rect.top - 10;
+                        
+                        // If tooltip would go off the right edge, position to the left instead
+                        if (left + tooltipWidth > window.innerWidth - 20) {
+                            left = rect.left - tooltipWidth - 10;
+                        }
+                        
+                        // If tooltip would go off the top, adjust
+                        if (top < 10) {
+                            top = 10;
+                        }
+                        
+                        content.style.left = left + 'px';
+                        content.style.top = top + 'px';
+                    });
+                }
+            });
+        }
+
         // ==================== INIT ====================
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -1741,6 +1762,7 @@
             setupSKUSettingsSorting();
             setupChartFilters();
             setupSearch();
+            setupTooltipPositioning();
             initializeChart();
             updateKPIs();
         });
