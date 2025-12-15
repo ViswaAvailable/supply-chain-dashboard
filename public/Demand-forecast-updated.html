@@ -1023,10 +1023,6 @@
                             <label class="filter-label">Search Events</label>
                             <input type="text" class="text-input" id="event-search" placeholder="Type to search...">
                         </div>
-                        <label class="pill-toggle" title="When enabled, events can apply uplift to forecast values in the demo">
-                            <input type="checkbox" id="events-apply-uplift-toggle" checked>
-                            Apply uplift to forecasts
-                        </label>
                     </div>
                     <div class="action-bar-right">
                         <button class="btn btn-primary" onclick="openEventModal()">
@@ -1158,9 +1154,6 @@
                         </select>
                     </div>
                 </div>
-                <div style="margin-top: 0.75rem; color: var(--text-gray); font-size: 0.85rem;">
-                    Note: In production, these events should be sent as features to the ML pipeline (e.g., is_event_day, days_to_event, event_type, event_uplift_pct).
-                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeEventModal()">Cancel</button>
@@ -1206,8 +1199,6 @@
 
         // ==================== EVENTS (DEMO) ====================
         const EVENTS_STORAGE_KEY = 'ld_demo_events_v1';
-        const EVENTS_SETTINGS_KEY = 'ld_demo_events_settings_v1';
-
         function isoToday() {
             return new Date().toISOString().split('T')[0];
         }
@@ -1290,22 +1281,7 @@
             localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
         }
 
-        function loadEventSettings() {
-            try {
-                const raw = localStorage.getItem(EVENTS_SETTINGS_KEY);
-                if (!raw) return { applyUplift: true };
-                return { applyUplift: true, ...JSON.parse(raw) };
-            } catch {
-                return { applyUplift: true };
-            }
-        }
-
-        function saveEventSettings(settings) {
-            localStorage.setItem(EVENTS_SETTINGS_KEY, JSON.stringify(settings));
-        }
-
         let events = [];
-        let eventSettings = { applyUplift: true };
 
         function isWithinRangeISO(dateISO, startISO, endISO) {
             return dateISO >= startISO && dateISO <= endISO;
@@ -1326,7 +1302,6 @@
         }
 
         function computeEventUpliftMultiplier(forecastRow) {
-            if (!eventSettings.applyUplift) return 1;
             const evts = getEventsForForecastRow(forecastRow).filter(e => e.mode === 'uplift' && (e.upliftPct || 0) > 0);
             if (evts.length === 0) return 1;
             // Conservative combination: take max uplift (avoid compounding unrealistically in demo)
@@ -1787,7 +1762,7 @@
                 'Confidence Rating': f.confidenceRating,
                 'Min Qty Override': f.isOverridden ? 'Yes' : 'No',
                 'Events': getEventsForForecastRow(f).map(e => e.name).join('; '),
-                'Event Uplift Applied': (getEventsForForecastRow(f).some(e => e.mode === 'uplift' && (e.upliftPct || 0) > 0) && eventSettings.applyUplift) ? 'Yes' : 'No'
+                'Event Uplift Applied': getEventsForForecastRow(f).some(e => e.mode === 'uplift' && (e.upliftPct || 0) > 0) ? 'Yes' : 'No'
             }));
             
             // Create workbook and worksheet
@@ -1841,19 +1816,6 @@
         let editingEventId = null;
 
         function hydrateEventManagerControls() {
-            const toggle = document.getElementById('events-apply-uplift-toggle');
-            if (toggle) {
-                toggle.checked = !!eventSettings.applyUplift;
-                toggle.addEventListener('change', () => {
-                    eventSettings.applyUplift = !!toggle.checked;
-                    saveEventSettings(eventSettings);
-                    regenerateForecasts();
-                    initializeChart();
-                    renderDailyForecastTable();
-                    showToast(`Event uplift ${eventSettings.applyUplift ? 'enabled' : 'disabled'}`, 'success');
-                });
-            }
-
             document.getElementById('event-search')?.addEventListener('input', renderEventsTable);
 
             // Sorting
@@ -2553,8 +2515,6 @@
         // ==================== INIT ====================
         
         document.addEventListener('DOMContentLoaded', () => {
-            // Load persisted demo settings
-            eventSettings = loadEventSettings();
             events = loadEvents();
 
             setupNavigation();
