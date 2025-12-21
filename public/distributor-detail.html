@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributor Performance Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Reusing styles from UI-Demo.html for consistency */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .data-table { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 24px; }
+        .table-header { background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-title { font-size: 18px; font-weight: 600; color: #1e293b; }
+        .table-filters { display: flex; gap: 12px; }
+        .filter-input { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 24px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; color: #374151; font-size: 14px; }
+        td { font-size: 14px; color: #1e293b; }
+        tr:hover { background: #f8fafc; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .text-danger { color: #dc2626; font-weight: 600; }
+
+        /* Page Layout */
+        .detail-container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .breadcrumb { margin-bottom: 16px; }
+        .breadcrumb a { text-decoration: none; color: #3b82f6; }
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 28px; font-weight: 700; }
+        .main-grid { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
+        .main-column { display: flex; flex-direction: column; gap: 24px; }
+        .side-column { display: flex; flex-direction: column; gap: 24px; }
+        .chart-wrapper { position: relative; height: 260px; }
+        .kpi-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .kpi-card h4 { font-size: 14px; color: #64748b; margin-bottom: 8px; }
+        .kpi-card .value { font-size: 32px; font-weight: 700; color: #1e293b; }
+        .kpi-card .change { font-size: 12px; margin-top: 4px; }
+        .kpi-card .change.positive { color: #059669; }
+        .kpi-card .change.negative { color: #dc2626; }
+        @media (max-width: 1280px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .side-column { order: -1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="detail-container">
+        <header class="page-header">
+            <p class="breadcrumb"><a href="UI-Demo.html#distributors">&larr; Back to Distributor Performance</a></p>
+            <h1 class="page-title" id="distributorName">Distributor Performance: Loading...</h1>
+        </header>
+
+        <div class="main-grid">
+            <div class="main-column">
+                <!-- Historical Performance Charts -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Historical Performance (12 Months)</h3></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px;">
+                        <div>
+                            <h4 style="text-align: center; margin-bottom: 12px;">On-Time Delivery %</h4>
+                            <div class="chart-wrapper"><canvas id="otdChart"></canvas></div>
+                        </div>
+                        <div>
+                            <h4 style="text-align: center; margin-bottom: 12px;">Fulfillment Rate %</h4>
+                            <div class="chart-wrapper"><canvas id="fulfillmentChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Purchase Order History -->
+                <div class="data-table">
+                    <div class="table-header">
+                        <h3 class="table-title">Recent Purchase Order History</h3>
+                        <div class="table-filters">
+                            <input type="text" placeholder="Search PO..." class="filter-input" id="poSearch">
+                            <select class="filter-input" id="poStatusFilter">
+                                <option value="">All Status</option>
+                                <option value="On-Time">On-Time</option>
+                                <option value="Delayed">Delayed</option>
+                                <option value="Partial">Partial</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr><th>PO #</th><th>Date</th><th>Status</th><th>Quantity</th><th>Value</th></tr>
+                        </thead>
+                        <tbody id="poHistoryTable"></tbody>
+                    </table>
+                </div>
+
+                <!-- Order Accuracy Breakdown -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Order Accuracy Breakdown by Product</h3></div>
+                    <table>
+                        <thead>
+                            <tr><th>Product</th><th>Accuracy %</th><th>Total Orders</th><th>Errors</th></tr>
+                        </thead>
+                        <tbody id="orderAccuracyTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="side-column">
+                <!-- Distributor Information -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Distributor Information</h3></div>
+                    <div id="distributorInfo" style="padding: 24px;"></div>
+                </div>
+
+                <!-- Key Performance Indicators -->
+                <div class="data-table">
+                    <div class="table-header"><h3 class="table-title">Key Performance Indicators</h3></div>
+                    <div style="padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="kpi-card">
+                            <h4>Revenue</h4>
+                            <div class="value" id="kpiRevenue">-</div>
+                            <div class="change positive" id="kpiRevenueChange">↑ 5.2%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <h4>Fulfillment Rate</h4>
+                            <div class="value" id="kpiFulfillment">-</div>
+                            <div class="change positive" id="kpiFulfillmentChange">↑ 2.1%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <h4>Return %</h4>
+                            <div class="value" id="kpiReturnRate">-</div>
+                            <div class="change negative" id="kpiReturnRateChange">↓ 0.2%</div>
+                        </div>
+                        <div class="kpi-card">
+                            <h4>Total Orders</h4>
+                            <div class="value" id="kpiTotalOrders">-</div>
+                            <div class="change positive" id="kpiTotalOrdersChange">↑ 12</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data - In a real app, this would be fetched based on the distributorId
+        const mockDistributorDetails = {
+            "distro-north-america": {
+                name: "North America Distributors LLC",
+                address: "1000 Commerce Blvd, Dallas, TX 75201, USA",
+                contact: { name: "Michael Johnson", phone: "+1 214-555-0100", email: "m.johnson@nadistributors.com" },
+                terms: { incoterms: "FOB Dallas", payment: "Net 45", coverage: "Continental USA" },
+                historicalOtd: [95, 96, 97, 96, 97, 96, 97, 97, 96, 97, 97, 97],
+                historicalFulfillment: [96, 97, 97, 96, 98, 97, 97, 98, 97, 97, 98, 98],
+                fulfillmentRate: 97.5,
+                returnRate: 0.8,
+                totalOrders: 1247,
+                totalRevenue: { '3m': 1850000, '6m': 3600000, '12m': 7200000 },
+                poHistory: [
+                    { po: "PO-2021", date: "2024-02-28", status: "On-Time", qty: 500, value: 125000 },
+                    { po: "PO-2015", date: "2024-02-15", status: "On-Time", qty: 750, value: 187500 },
+                    { po: "PO-2008", date: "2024-02-01", status: "On-Time", qty: 600, value: 150000 },
+                    { po: "PO-1995", date: "2024-01-18", status: "Partial", qty: 580, value: 145000 },
+                    { po: "PO-1988", date: "2024-01-05", status: "On-Time", qty: 650, value: 162500 },
+                ],
+                orderAccuracyBreakdown: [
+                    { product: "Widget Assembly A", accuracy: 99.5, totalOrders: 450, errors: 2 },
+                    { product: "Widget Assembly B", accuracy: 99.0, totalOrders: 380, errors: 4 },
+                    { product: "Motor Unit X", accuracy: 98.8, totalOrders: 417, errors: 5 },
+                ]
+            },
+            "euro-distribution-group": {
+                name: "European Distribution Group",
+                address: "Industriestrasse 25, 70565 Stuttgart, Germany",
+                contact: { name: "Klaus Mueller", phone: "+49 711 234567", email: "k.mueller@eurodistro.de" },
+                terms: { incoterms: "DDP Stuttgart", payment: "Net 30", coverage: "EU + UK" },
+                historicalOtd: [93, 94, 94, 93, 95, 94, 94, 95, 94, 94, 94, 94],
+                historicalFulfillment: [94, 95, 95, 94, 96, 95, 95, 96, 95, 95, 96, 96],
+                fulfillmentRate: 95.8,
+                returnRate: 1.2,
+                totalOrders: 892,
+                totalRevenue: { '3m': 1420000, '6m': 2800000, '12m': 5600000 },
+                poHistory: [
+                    { po: "PO-2023", date: "2024-02-25", status: "On-Time", qty: 400, value: 100000 },
+                    { po: "PO-2018", date: "2024-02-12", status: "On-Time", qty: 350, value: 87500 },
+                    { po: "PO-2010", date: "2024-01-28", status: "Delayed", qty: 420, value: 105000 },
+                    { po: "PO-2002", date: "2024-01-15", status: "On-Time", qty: 380, value: 95000 },
+                    { po: "PO-1990", date: "2024-01-02", status: "Partial", qty: 365, value: 91250 },
+                ],
+                orderAccuracyBreakdown: [
+                    { product: "Widget Assembly A", accuracy: 98.8, totalOrders: 320, errors: 4 },
+                    { product: "Motor Unit X", accuracy: 98.2, totalOrders: 572, errors: 10 },
+                ]
+            },
+            "asia-pacific-distro": {
+                name: "Asia Pacific Distribution Network",
+                address: "50 Marina Bay Drive, Singapore 018956",
+                contact: { name: "Chen Wei", phone: "+65 6789 0123", email: "c.wei@apdistro.sg" },
+                terms: { incoterms: "CIF Singapore", payment: "Net 60", coverage: "APAC Region" },
+                historicalOtd: [90, 91, 92, 91, 92, 91, 92, 91, 92, 91, 91, 92],
+                historicalFulfillment: [92, 93, 93, 92, 94, 93, 93, 94, 93, 93, 93, 93],
+                fulfillmentRate: 93.2,
+                returnRate: 1.8,
+                totalOrders: 1156,
+                totalRevenue: { '3m': 1680000, '6m': 3250000, '12m': 6500000 },
+                poHistory: [
+                    { po: "PO-2025", date: "2024-02-29", status: "Delayed", qty: 550, value: 137500 },
+                    { po: "PO-2020", date: "2024-02-20", status: "On-Time", qty: 600, value: 150000 },
+                    { po: "PO-2012", date: "2024-02-05", status: "Partial", qty: 580, value: 145000 },
+                    { po: "PO-2005", date: "2024-01-22", status: "On-Time", qty: 620, value: 155000 },
+                    { po: "PO-1998", date: "2024-01-08", status: "Delayed", qty: 590, value: 147500 },
+                ],
+                orderAccuracyBreakdown: [
+                    { product: "Widget Assembly A", accuracy: 97.5, totalOrders: 425, errors: 11 },
+                    { product: "Widget Assembly B", accuracy: 98.1, totalOrders: 380, errors: 7 },
+                    { product: "Sensor Array Z", accuracy: 98.0, totalOrders: 351, errors: 7 },
+                ]
+            },
+            "global-logistics-partners": {
+                name: "Global Logistics Partners",
+                address: "Thames House, 1 Queen Street Place, London EC4R 1BE, UK",
+                contact: { name: "Sarah Thompson", phone: "+44 20 7946 0958", email: "s.thompson@glplogistics.co.uk" },
+                terms: { incoterms: "DDP London", payment: "Net 45", coverage: "Global" },
+                historicalOtd: [96, 97, 97, 96, 98, 97, 97, 98, 97, 97, 97, 97],
+                historicalFulfillment: [97, 98, 98, 97, 99, 98, 98, 99, 98, 98, 98, 98],
+                fulfillmentRate: 98.1,
+                returnRate: 0.5,
+                totalOrders: 2156,
+                totalRevenue: { '3m': 3200000, '6m': 6200000, '12m': 12400000 },
+                poHistory: [
+                    { po: "PO-2028", date: "2024-03-01", status: "On-Time", qty: 1200, value: 300000 },
+                    { po: "PO-2022", date: "2024-02-24", status: "On-Time", qty: 1150, value: 287500 },
+                    { po: "PO-2016", date: "2024-02-10", status: "On-Time", qty: 1100, value: 275000 },
+                    { po: "PO-2009", date: "2024-01-26", status: "On-Time", qty: 1250, value: 312500 },
+                    { po: "PO-2001", date: "2024-01-12", status: "Partial", qty: 1220, value: 305000 },
+                ],
+                orderAccuracyBreakdown: [
+                    { product: "Widget Assembly A", accuracy: 99.6, totalOrders: 756, errors: 3 },
+                    { product: "Widget Assembly B", accuracy: 99.5, totalOrders: 642, errors: 3 },
+                    { product: "Motor Unit X", accuracy: 99.4, totalOrders: 458, errors: 3 },
+                    { product: "Sensor Array Z", accuracy: 99.5, totalOrders: 300, errors: 2 },
+                ]
+            },
+            "regional-supply-chain": {
+                name: "Regional Supply Chain Solutions",
+                address: "450 Manufacturing Way, Chicago, IL 60606, USA",
+                contact: { name: "David Rodriguez", phone: "+1 312-555-0200", email: "d.rodriguez@rscsolutions.com" },
+                terms: { incoterms: "FOB Chicago", payment: "Net 30", coverage: "Midwest USA" },
+                historicalOtd: [88, 89, 90, 89, 90, 89, 90, 89, 90, 89, 89, 90],
+                historicalFulfillment: [90, 91, 92, 91, 92, 91, 92, 91, 92, 91, 91, 92],
+                fulfillmentRate: 91.5,
+                returnRate: 2.8,
+                totalOrders: 643,
+                totalRevenue: { '3m': 890000, '6m': 1750000, '12m': 3500000 },
+                poHistory: [
+                    { po: "PO-2019", date: "2024-02-18", status: "Delayed", qty: 280, value: 70000 },
+                    { po: "PO-2013", date: "2024-02-05", status: "Partial", qty: 265, value: 66250 },
+                    { po: "PO-2006", date: "2024-01-20", status: "On-Time", qty: 300, value: 75000 },
+                    { po: "PO-1999", date: "2024-01-07", status: "Delayed", qty: 290, value: 72500 },
+                    { po: "PO-1992", date: "2023-12-22", status: "Partial", qty: 275, value: 68750 },
+                ],
+                orderAccuracyBreakdown: [
+                    { product: "Widget Assembly B", accuracy: 96.0, totalOrders: 285, errors: 11 },
+                    { product: "Motor Unit X", accuracy: 96.4, totalOrders: 358, errors: 13 },
+                ]
+            },
+            "precision-distribution": {
+                name: "Precision Distribution Services",
+                address: "200 Tech Park Drive, Toronto, ON M5H 2N2, Canada",
+                contact: { name: "Jennifer Lee", phone: "+1 416-555-0300", email: "j.lee@precisiondist.ca" },
+                terms: { incoterms: "FOB Toronto", payment: "Net 45", coverage: "Canada" },
+                historicalOtd: [94, 95, 95, 94, 96, 95, 95, 96, 95, 95, 95, 96],
+                historicalFulfillment: [95, 96, 96, 95, 97, 96, 96, 97, 96, 96, 96, 97],
+                fulfillmentRate: 96.8,
+                returnRate: 1.1,
+                totalOrders: 756,
+                totalRevenue: { '3m': 1120000, '6m': 2200000, '12m': 4400000 },
+                poHistory: [
+                    { po: "PO-2024", date: "2024-02-26", status: "On-Time", qty: 320, value: 80000 },
+                    { po: "PO-2017", date: "2024-02-13", status: "On-Time", qty: 310, value: 77500 },
+                    { po: "PO-2011", date: "2024-01-30", status: "On-Time", qty: 340, value: 85000 },
+                    { po: "PO-2004", date: "2024-01-17", status: "Partial", qty: 315, value: 78750 },
+                    { po: "PO-1997", date: "2024-01-04", status: "On-Time", qty: 330, value: 82500 },
+                ],
+                orderAccuracyBreakdown: [
+                    { product: "Motor Unit X", accuracy: 98.8, totalOrders: 385, errors: 5 },
+                    { product: "Sensor Array Z", accuracy: 99.0, totalOrders: 371, errors: 4 },
+                ]
+            }
+        };
+
+        let otdChartInstance, fulfillmentChartInstance;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const distributorId = urlParams.get('id');
+            const distributor = mockDistributorDetails[distributorId];
+
+            if (!distributor) {
+                document.getElementById('distributorName').textContent = "Distributor Not Found";
+                return;
+            }
+
+            // Populate header
+            document.getElementById('distributorName').textContent = `Distributor Performance: ${distributor.name}`;
+
+            // Populate Distributor Info
+            const infoContainer = document.getElementById('distributorInfo');
+            infoContainer.innerHTML = `
+                <p><strong>HQ Address:</strong><br>${distributor.address}</p>
+                <hr style="margin: 16px 0;">
+                <p><strong>Primary Contact:</strong><br>${distributor.contact.name}</p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:${distributor.contact.email}">${distributor.contact.email}</a></p>
+                <p><i class="fas fa-phone"></i> ${distributor.contact.phone}</p>
+                <hr style="margin: 16px 0;">
+                <p><strong>Incoterms:</strong> ${distributor.terms.incoterms}</p>
+                <p><strong>Payment Terms:</strong> ${distributor.terms.payment}</p>
+                <p><strong>Coverage Area:</strong> ${distributor.terms.coverage}</p>
+            `;
+
+            // Populate KPIs - Only the 4 requested metrics
+            const totalRevenue = distributor.totalRevenue['6m'] || 0;
+            const formattedRevenue = totalRevenue > 1000000
+                ? `$${(totalRevenue / 1000000).toFixed(1)}M`
+                : `$${(totalRevenue / 1000).toFixed(0)}K`;
+            
+            document.getElementById('kpiRevenue').textContent = formattedRevenue;
+            document.getElementById('kpiFulfillment').textContent = `${distributor.fulfillmentRate}%`;
+            document.getElementById('kpiReturnRate').textContent = `${distributor.returnRate}%`;
+            document.getElementById('kpiTotalOrders').textContent = distributor.totalOrders.toLocaleString();
+            
+            // Render Charts
+            renderCharts(distributor);
+            
+            // Render Tables
+            renderPoHistory(distributor.poHistory);
+            renderOrderAccuracy(distributor.orderAccuracyBreakdown);
+
+            // Add event listeners for table filters
+            document.getElementById('poSearch').addEventListener('input', () => renderPoHistory(distributor.poHistory));
+            document.getElementById('poStatusFilter').addEventListener('change', () => renderPoHistory(distributor.poHistory));
+        });
+
+        function renderCharts(distributor) {
+            if (otdChartInstance) otdChartInstance.destroy();
+            if (fulfillmentChartInstance) fulfillmentChartInstance.destroy();
+
+            const months = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false, suggestedMin: 85, suggestedMax: 100 } },
+                plugins: { legend: { display: false } }
+            };
+
+            otdChartInstance = new Chart(document.getElementById('otdChart'), {
+                type: 'line',
+                data: { labels: months, datasets: [{ data: distributor.historicalOtd, borderColor: '#3b82f6', tension: 0.3 }] },
+                options: chartOptions
+            });
+
+            fulfillmentChartInstance = new Chart(document.getElementById('fulfillmentChart'), {
+                type: 'line',
+                data: { labels: months, datasets: [{ data: distributor.historicalFulfillment, borderColor: '#059669', tension: 0.3 }] },
+                options: chartOptions
+            });
+        }
+
+        function renderPoHistory(allPos) {
+            const tbody = document.getElementById('poHistoryTable');
+            const searchTerm = document.getElementById('poSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('poStatusFilter').value;
+            tbody.innerHTML = '';
+
+            const filteredPOs = allPos.filter(po => 
+                (po.po.toLowerCase().includes(searchTerm)) &&
+                (statusFilter === '' || po.status === statusFilter)
+            );
+
+            filteredPOs.forEach(po => {
+                let statusClass = '';
+                if (po.status === 'On-Time') statusClass = 'badge-success';
+                else if (po.status === 'Delayed') statusClass = 'badge-danger';
+                else if (po.status === 'Partial') statusClass = 'badge-warning';
+
+                const row = `<tr>
+                    <td><a href="#">${po.po}</a></td>
+                    <td>${po.date}</td>
+                    <td><span class="status-badge ${statusClass}">${po.status}</span></td>
+                    <td>${po.qty.toLocaleString()}</td>
+                    <td>$${po.value.toLocaleString()}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        function renderOrderAccuracy(products) {
+            const tbody = document.getElementById('orderAccuracyTable');
+            tbody.innerHTML = '';
+            products.forEach(product => {
+                const accuracyClass = product.accuracy < 97 ? 'text-danger' : '';
+                const row = `<tr>
+                    <td><strong>${product.product}</strong></td>
+                    <td class="${accuracyClass}">${product.accuracy}%</td>
+                    <td>${product.totalOrders}</td>
+                    <td>${product.errors}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+    </script>
+</body>
+</html>
+

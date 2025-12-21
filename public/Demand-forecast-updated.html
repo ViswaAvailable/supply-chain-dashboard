@@ -54,14 +54,21 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 1.25rem; font-weight: 700;
             color: var(--primary-dark);
-            border: 2px solid rgba(251, 191, 36, 0.3);
+            border: 2px solid rgba(251, 191, 36, 0.5);
             cursor: pointer;
             transition: all 0.2s;
             margin: auto auto 2rem auto;
             position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
         }
 
-        .profile-icon:hover { background-color: #f59e0b; border-color: #fbbf24; transform: scale(1.05); }
+        .profile-icon:hover { 
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); 
+            border-color: #fbbf24; 
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
 
         .app-container { display: flex; margin-top: 64px; min-height: calc(100vh - 64px); }
 
@@ -480,8 +487,20 @@
             border: 1px solid var(--border-color);
         }
 
-        .chart-header { margin-bottom: 1rem; }
-        .chart-header h3 { font-size: 1.125rem; font-weight: 600; color: var(--primary-dark); }
+        .chart-header { 
+            margin-bottom: 1rem; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            position: sticky;
+            top: 64px;
+            background-color: var(--bg-white);
+            z-index: 10;
+            padding: 0.5rem 0;
+        }
+        .chart-header h3 { font-size: 1.125rem; font-weight: 600; color: var(--primary-dark); margin: 0; }
         .chart-wrapper { position: relative; height: 350px; }
 
         .table-container {
@@ -535,6 +554,17 @@
         .confidence-medium { background-color: #fef3c7; color: #92400e; }
         .confidence-low { background-color: #fee2e2; color: #991b1b; }
 
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-blue { background-color: #dbeafe; color: #1e40af; }
+        .badge-gray { background-color: #f3f4f6; color: #4b5563; }
+
         .override-indicator {
             display: inline-flex;
             align-items: center;
@@ -564,7 +594,7 @@
         .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-dark); }
         .btn-outline:hover { background-color: var(--gray-light); }
 
-        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .action-bar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
         .action-bar-left { display: flex; gap: 0.75rem; align-items: center; }
         .action-bar-right { display: flex; gap: 0.75rem; }
 
@@ -595,6 +625,205 @@
             border-radius: 0.375rem;
             font-size: 0.875rem;
             min-width: 140px;
+        }
+
+        .variance-positive { color: #10b981 !important; }
+        .variance-negative { color: #ef4444 !important; }
+        .variance-neutral { color: #64748b !important; }
+
+        .grouping-builder-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 100%);
+            border-radius: 0.875rem;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .grouping-builder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .grouping-builder-header .filter-label {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #334155;
+            letter-spacing: -0.01em;
+        }
+
+        .grouping-pills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.875rem;
+            align-items: center;
+            min-height: 2.5rem;
+        }
+
+        .grouping-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.625rem 1rem;
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.625rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: -0.01em;
+        }
+
+        .grouping-pill:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            transform: translateY(-1px);
+        }
+
+        .grouping-pill-arrow {
+            color: #94a3b8;
+            font-weight: 700;
+            margin: 0 0.125rem;
+            font-size: 0.75rem;
+        }
+
+        .grouping-pill-remove {
+            cursor: pointer;
+            color: #64748b;
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            margin-left: 0.125rem;
+        }
+
+        .grouping-pill-remove:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .grouping-pill-add {
+            display: inline-flex;
+        }
+
+        .grouping-dimension-select {
+            padding: 0.625rem 1rem;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 0.625rem;
+            font-size: 0.875rem;
+            background: white;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            min-width: 160px;
+        }
+
+        .grouping-dimension-select:hover {
+            border-color: #94a3b8;
+            border-style: solid;
+            color: #475569;
+            background: #fafbfc;
+        }
+
+        .grouping-dimension-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            border-style: solid;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            color: #1e293b;
+        }
+
+        .btn-sm {
+            padding: 0.4375rem 0.875rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .tree-row {
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 3px solid transparent;
+        }
+
+        .tree-row:hover {
+            background-color: #f8fafc;
+            border-left-color: #cbd5e1;
+        }
+
+        .tree-row-parent {
+            font-weight: 600;
+            background-color: #fafbfc;
+            color: #1e293b;
+            letter-spacing: -0.01em;
+        }
+
+        .tree-row-parent.expanded {
+            background-color: #f4f6f8;
+            border-left-color: #94a3b8;
+        }
+
+        .tree-row-leaf {
+            font-weight: 400;
+            color: #475569;
+        }
+
+        .tree-indent {
+            display: inline-block;
+            width: 1.75rem;
+        }
+
+        .tree-toggle {
+            display: inline-block;
+            width: 1.125rem;
+            text-align: center;
+            color: #64748b;
+            font-weight: 600;
+            user-select: none;
+            font-size: 0.75rem;
+            transition: color 0.15s;
+        }
+
+        .tree-row:hover .tree-toggle {
+            color: #475569;
+        }
+
+        .tree-toggle.expanded::before {
+            content: '▼';
+        }
+
+        .tree-toggle.collapsed::before {
+            content: '▶';
+        }
+
+        .tree-row[data-level="0"] .tree-indent { width: 0; }
+        .tree-row[data-level="1"] .tree-indent { width: 1.75rem; }
+        .tree-row[data-level="2"] .tree-indent { width: 3.5rem; }
+        .tree-row[data-level="3"] .tree-indent { width: 5.25rem; }
+
+        #event-analysis-table tbody tr.tree-row td {
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        #event-analysis-table tbody tr.tree-row-parent td {
+            padding: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        #event-analysis-table thead th {
+            font-weight: 600;
+            font-size: 0.8125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            padding: 1rem;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         .category-badge {
@@ -631,6 +860,40 @@
             max-width: 400px;
             width: 90%;
             box-shadow: var(--shadow-md);
+        }
+
+        .cannibalization-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .cannibalization-row .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .cannibalization-row .form-group:last-child {
+            flex: 0 0 120px;
+        }
+
+        .cannibalization-row-remove {
+            padding: 0.5rem;
+            color: #dc2626;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+        }
+
+        .cannibalization-row-remove:hover {
+            background: #fee2e2;
         }
 
         .modal-header { margin-bottom: 1rem; }
@@ -683,6 +946,118 @@
             .kpi-grid { grid-template-columns: 1fr 1fr; }
             .filters-grid { grid-template-columns: 1fr; }
         }
+        /* Modern Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-dark);
+            user-select: none;
+            font-weight: 500;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            background-color: #e2e8f0;
+            border: 1px solid #cbd5e1;
+            border-radius: 22px;
+            margin-right: 10px;
+            transition: .3s;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--blue);
+            border-color: #2563eb;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(18px);
+        }
+        
+        .toggle-switch:hover .toggle-slider {
+            background-color: #cbd5e1;
+        }
+        
+        .toggle-switch input:checked:hover + .toggle-slider {
+            background-color: #2563eb;
+        }
+
+        /* Custom Chart Legend */
+        .chart-legend-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid transparent;
+        }
+
+        .legend-item:hover {
+            background-color: #f1f5f9;
+            color: var(--text-dark);
+        }
+
+        .legend-item.active {
+            color: var(--text-dark);
+            background-color: rgba(255, 255, 255, 0.5);
+            border-color: var(--border-color);
+        }
+        
+        .legend-item.hidden {
+            opacity: 0.4;
+            filter: grayscale(100%);
+        }
+
+        .legend-color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend-line-box {
+            width: 24px;
+            height: 3px;
+            border-radius: 2px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -708,6 +1083,14 @@
                             <line x1="9" y1="21" x2="9" y2="9"></line>
                         </svg>
                         Daily Forecast Detail
+                    </button></li>
+                    <li><button class="nav-btn" data-page="event-analysis">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Event Analysis
                     </button></li>
                 </ul>
             </div>
@@ -754,14 +1137,14 @@
                         <div class="kpi-change up"><span>▲</span><span>2.1%</span></div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">Avg Weekly Forecast</div>
-                        <div class="kpi-value" id="kpi-weekly-forecast">12,450</div>
-                        <div class="kpi-change up"><span>▲</span><span>5.3%</span></div>
+                        <div class="kpi-label">Forecasted Revenue (30d)</div>
+                        <div class="kpi-value" id="kpi-revenue">₹0</div>
+                        <div class="kpi-change up"><span id="kpi-revenue-ly-icon">▲</span><span id="kpi-revenue-ly">+0.0% vs LY</span></div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">Avg Weekly Actual</div>
-                        <div class="kpi-value" id="kpi-weekly-actual">11,890</div>
-                        <div class="kpi-change down"><span>▼</span><span>1.2%</span></div>
+                        <div class="kpi-label">Revenue vs LY-1</div>
+                        <div class="kpi-value" id="kpi-revenue-ly2">0.0%</div>
+                        <div class="kpi-change up"><span id="kpi-revenue-ly2-icon">▲</span><span>vs LY-1</span></div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Min Qty Overrides</div>
@@ -812,10 +1195,23 @@
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3>Demand Forecast Trend</h3>
+                        <div class="chart-controls" style="display: flex; gap: 20px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="show-ly" checked onchange="initializeChart()">
+                                <span class="toggle-slider"></span>
+                                Last Year
+                            </label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="show-ly1" onchange="initializeChart()">
+                                <span class="toggle-slider"></span>
+                                2 Years Ago
+                            </label>
+                        </div>
                     </div>
                     <div class="chart-wrapper">
                         <canvas id="demandChart"></canvas>
                     </div>
+                    <div id="custom-chart-legend" class="chart-legend-container"></div>
                 </div>
             </div>
 
@@ -963,6 +1359,13 @@
                         </div>
                     </div>
                     <div class="action-bar-right">
+                        <button class="btn btn-primary" onclick="openNewProductModal()">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add New Product
+                        </button>
                         <button class="btn btn-outline" onclick="openCategoryModal()">
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -987,6 +1390,7 @@
                                 <tr>
                                     <th data-column="sku">SKU Name <span class="sort-icon">↕</span></th>
                                     <th data-column="category">Category <span class="sort-icon">↕</span></th>
+                                    <th>Status</th>
                                     <th data-column="minQty">
                                         <span class="header-with-info">
                                             Minimum Quantity
@@ -1003,6 +1407,7 @@
                                         <span class="sort-icon">↕</span>
                                     </th>
                                     <th data-column="currentForecast">Current Avg Forecast <span class="sort-icon">↕</span></th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="sku-settings-body"></tbody>
@@ -1051,6 +1456,64 @@
                                 </tr>
                             </thead>
                             <tbody id="events-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Analysis Page -->
+            <div id="event-analysis" class="page">
+                <div class="page-header">
+                    <h2>Event Analysis</h2>
+                    <p>Compare performance across different events with YoY historical context.</p>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label class="filter-label">Select Event</label>
+                            <select class="filter-select" id="event-analysis-selector" onchange="renderEventAnalysis()">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grouping-builder-section">
+                    <div class="grouping-builder-header">
+                        <label class="filter-label">Group By</label>
+                        <button class="btn btn-outline btn-sm" onclick="clearGrouping()" id="clear-grouping-btn" style="display: none;">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                    <div class="grouping-pills-container" id="grouping-pills-container">
+                        <div class="grouping-pill-add">
+                            <select class="grouping-dimension-select" id="grouping-dimension-select" onchange="addGroupingDimension(this.value)">
+                                <option value="">Add dimension...</option>
+                                <option value="city">City</option>
+                                <option value="category">Category</option>
+                                <option value="format">Format</option>
+                                <option value="date">Date</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kpi-grid" id="event-analysis-kpis" style="margin-bottom: 1.5rem;">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="table-container">
+                    <div class="table-scroll">
+                        <table id="event-analysis-table">
+                            <thead id="event-analysis-thead">
+                                <!-- Populated by JS -->
+                            </thead>
+                            <tbody id="event-analysis-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -1158,6 +1621,88 @@
         </div>
     </div>
 
+    <!-- New Product Modal -->
+    <div class="modal-overlay" id="new-product-modal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="new-product-modal-title">Add New Product</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / span 2;">
+                        <label>Select SKU from ERP</label>
+                        <div class="searchable-select" id="new-product-sku-select-container">
+                            <input type="text" class="searchable-select-input" placeholder="Select a SKU from ERP..." data-value="">
+                            <span class="searchable-select-arrow">▼</span>
+                            <div class="searchable-select-dropdown"></div>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-gray); margin-top: 0.25rem;">
+                            SKU details (category, price) will be loaded from ERP database
+                        </p>
+                    </div>
+                    <div class="form-group">
+                        <label>Minimum Quantity</label>
+                        <input type="number" id="new-product-minqty" min="0" value="0">
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Reference SKU</label>
+                            <div class="searchable-select" id="new-product-reference-container">
+                                <input type="text" class="searchable-select-input" placeholder="Select a reference SKU..." data-value="">
+                                <span class="searchable-select-arrow">▼</span>
+                                <div class="searchable-select-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Similarity Factor</label>
+                            <input type="number" id="new-product-similarity" min="0.5" max="1.5" step="0.05" value="1.0" placeholder="1.0">
+                            <p style="font-size: 0.75rem; color: var(--text-gray); margin-top: 0.25rem;">
+                                0.5 = 50% of reference, 1.5 = 150% of reference
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="new-product-fields" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Active Period Start</label>
+                            <input type="date" id="new-product-start-date">
+                        </div>
+                        <div class="form-group">
+                            <label>Active Period End</label>
+                            <input type="date" id="new-product-end-date">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label style="font-weight: 600; margin-bottom: 0.75rem;">Cannibalization Impact</label>
+                        <p style="font-size: 0.8125rem; color: var(--text-gray); margin-bottom: 1rem;">
+                            Which existing products will this new product take sales from?
+                        </p>
+                        <div id="cannibalization-list">
+                            <!-- Dynamic rows added here -->
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="addCannibalizationRow()" style="margin-top: 0.75rem;">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Add Cannibalization Impact
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeNewProductModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNewProduct()">Save Product</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
@@ -1168,29 +1713,47 @@
         
         // Categories
         let categories = [
-            { id: 'biscuits', name: 'Biscuits' },
-            { id: 'snacks', name: 'Snacks' },
-            { id: 'beverages', name: 'Beverages' }
+            { id: 'milk-chocolate', name: 'Milk Chocolate' },
+            { id: 'dark-chocolate', name: 'Dark Chocolate' },
+            { id: 'gift-boxes', name: 'Gift Boxes' },
+            { id: 'premium', name: 'Premium Collection' },
+            { id: 'seasonal', name: 'Seasonal Specials' }
         ];
 
         // Outlets
         const outlets = [
-            { id: 'outlet-1', name: 'Downtown Bakery' },
-            { id: 'outlet-2', name: 'Mall Kiosk Central' },
-            { id: 'outlet-3', name: 'Airport Terminal A' },
-            { id: 'outlet-4', name: 'University Café' },
-            { id: 'outlet-5', name: 'Suburban Store' }
+            { id: 'blr-airport-t1', name: 'Bangalore Airport T1', city: 'Bangalore', format: 'Airport' },
+            { id: 'mum-phoenix-kiosk', name: 'Phoenix Mall Kiosk', city: 'Mumbai', format: 'Kiosk' },
+            { id: 'del-cp-cafe', name: 'Connaught Place Cafe', city: 'Delhi', format: 'Cafe' },
+            { id: 'blr-cloud-kitchen', name: 'Koramangala Cloud Kitchen', city: 'Bangalore', format: 'Cloud Kitchen' },
+            { id: 'hyd-gvk-kiosk', name: 'GVK One Kiosk', city: 'Hyderabad', format: 'Kiosk' }
         ];
 
         // SKUs with settings
         let skuData = [
-            { id: 'strawberry-cream-biscuit', name: 'Strawberry Cream Biscuit', categoryId: 'biscuits', minQuantity: 50, avgForecast: 120 },
-            { id: 'chocolate-cream-biscuit', name: 'Chocolate Cream Biscuit', categoryId: 'biscuits', minQuantity: 75, avgForecast: 180 },
-            { id: 'vanilla-wafer', name: 'Vanilla Wafer', categoryId: 'biscuits', minQuantity: 40, avgForecast: 95 },
-            { id: 'banana-chips', name: 'Banana Chips', categoryId: 'snacks', minQuantity: 30, avgForecast: 85 },
-            { id: 'potato-crisps', name: 'Potato Crisps', categoryId: 'snacks', minQuantity: 60, avgForecast: 140 },
-            { id: 'ginger-beer', name: 'Ginger Beer', categoryId: 'beverages', minQuantity: 25, avgForecast: 65 },
-            { id: 'lemon-soda', name: 'Lemon Soda', categoryId: 'beverages', minQuantity: 35, avgForecast: 55 }
+            { id: 'milk-chocolate-bar', name: 'Milk Chocolate Bar', categoryId: 'milk-chocolate', minQuantity: 50, avgForecast: 120, pricePerUnit: 85 },
+            { id: 'dark-chocolate-70', name: 'Dark Chocolate 70%', categoryId: 'dark-chocolate', minQuantity: 40, avgForecast: 95, pricePerUnit: 110 },
+            { id: 'truffle-box-12', name: 'Truffle Box (12 pcs)', categoryId: 'gift-boxes', minQuantity: 20, avgForecast: 45, pricePerUnit: 450 },
+            { id: 'hazelnut-praline', name: 'Hazelnut Praline', categoryId: 'premium', minQuantity: 15, avgForecast: 30, pricePerUnit: 150 },
+            { id: 'caramel-sea-salt', name: 'Caramel Sea Salt', categoryId: 'milk-chocolate', minQuantity: 30, avgForecast: 65, pricePerUnit: 95 },
+            { id: 'assorted-collection', name: 'Assorted Collection', categoryId: 'gift-boxes', minQuantity: 25, avgForecast: 55, pricePerUnit: 850 },
+            { id: 'limited-edition-ruby', name: 'Limited Edition Ruby', categoryId: 'seasonal', minQuantity: 10, avgForecast: 25, pricePerUnit: 180 },
+            { 
+                id: 'diwali-special-box', 
+                name: 'Diwali Special Gift Box', 
+                categoryId: 'gift-boxes', 
+                minQuantity: 0, 
+                avgForecast: 0, 
+                pricePerUnit: 1200,
+                isNewProduct: true,
+                referenceSku: 'assorted-collection',
+                similarityFactor: 1.2,
+                activePeriod: { start: '2025-10-15', end: '2025-11-15' },
+                cannibalizesFrom: [
+                    { skuId: 'assorted-collection', percentage: 15 },
+                    { skuId: 'truffle-box-12', percentage: 10 }
+                ]
+            }
         ];
 
         // ==================== EVENTS (DEMO) ====================
@@ -1206,56 +1769,61 @@
         }
 
         function defaultEvents() {
-            // Uses current year for a more realistic demo experience
             const year = new Date().getFullYear();
-            // Simple approximations for demo (real systems should compute holiday calendars accurately)
-            const valentines = `${year}-02-14`;
-            const mothersDay = `${year}-05-11`; // approx (2nd Sunday in May varies)
-            const fathersDay = `${year}-06-15`; // approx (3rd Sunday in June varies)
-
             return [
+                {
+                    id: 'evt-diwali',
+                    name: 'Diwali',
+                    type: 'holiday',
+                    startDate: `${year}-10-28`,
+                    endDate: `${year}-11-03`,
+                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
+                    mode: 'uplift',
+                    upliftPct: 45,
+                    enabled: true
+                },
+                {
+                    id: 'evt-raksha-bandhan',
+                    name: 'Raksha Bandhan',
+                    type: 'holiday',
+                    startDate: `${year}-08-09`,
+                    endDate: `${year}-08-12`,
+                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
+                    mode: 'uplift',
+                    upliftPct: 30,
+                    enabled: true
+                },
                 {
                     id: 'evt-valentines',
                     name: "Valentine's Day",
                     type: 'holiday',
-                    startDate: addDaysISO(valentines, -3),
-                    endDate: addDaysISO(valentines, 1),
+                    startDate: `${year}-02-10`,
+                    endDate: `${year}-02-15`,
+                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
+                    mode: 'uplift',
+                    upliftPct: 40,
+                    enabled: true
+                },
+                {
+                    id: 'evt-holi',
+                    name: 'Holi',
+                    type: 'holiday',
+                    startDate: `${year}-03-24`,
+                    endDate: `${year}-03-26`,
+                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
+                    mode: 'uplift',
+                    upliftPct: 25,
+                    enabled: true
+                },
+                {
+                    id: 'evt-chocolate-flash-sale',
+                    name: 'Chocolate Flash Sale',
+                    type: 'promotion',
+                    startDate: `${year}-12-15`,
+                    endDate: `${year}-12-27`,
                     scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
                     mode: 'uplift',
                     upliftPct: 35,
-                    enabled: true
-                },
-                {
-                    id: 'evt-mothers',
-                    name: "Mother's Day",
-                    type: 'holiday',
-                    startDate: addDaysISO(mothersDay, -4),
-                    endDate: addDaysISO(mothersDay, 1),
-                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
-                    mode: 'uplift',
-                    upliftPct: 20,
-                    enabled: true
-                },
-                {
-                    id: 'evt-fathers',
-                    name: "Father's Day",
-                    type: 'holiday',
-                    startDate: addDaysISO(fathersDay, -3),
-                    endDate: addDaysISO(fathersDay, 1),
-                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
-                    mode: 'uplift',
-                    upliftPct: 18,
-                    enabled: true
-                },
-                {
-                    id: 'evt-flash-sale',
-                    name: 'Chocolate Flash Sale',
-                    type: 'promo',
-                    startDate: addDaysISO(isoToday(), 10),
-                    endDate: addDaysISO(isoToday(), 12),
-                    scope: { outletId: 'all', categoryId: 'all', skuId: 'all' },
-                    mode: 'flag',
-                    upliftPct: 0,
                     enabled: true
                 }
             ];
@@ -1305,11 +1873,18 @@
             return 1 + (maxPct / 100);
         }
 
+        function formatRevenue(amount) {
+            return '₹' + Math.round(amount).toLocaleString('en-IN');
+        }
+
         // Generate daily forecast data
         function generateDailyForecasts() {
             const forecasts = [];
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const today = new Date();
+
+            // Store raw base values first to apply cannibalization later
+            const baseMap = new Map(); // key: `${dateStr}|${outlet.id}|${sku.id}`
 
             for (let d = 0; d < 30; d++) {
                 const date = new Date(today);
@@ -1319,14 +1894,32 @@
 
                 outlets.forEach(outlet => {
                     skuData.forEach(sku => {
+                        let avgForecast = sku.avgForecast;
+
+                        // Check if new product
+                        if (sku.isNewProduct) {
+                            // Check if within active period
+                            if (sku.activePeriod) {
+                                if (!isWithinRangeISO(dateStr, sku.activePeriod.start, sku.activePeriod.end)) {
+                                    return; // skip if outside active period
+                                }
+                            }
+                            
+                            // Use reference SKU pattern
+                            const refSku = skuData.find(s => s.id === sku.referenceSku);
+                            if (refSku) {
+                                avgForecast = refSku.avgForecast * (sku.similarityFactor || 1);
+                            }
+                        }
+
                         // Generate forecast with some variation
-                        const baseValue = sku.avgForecast * (0.7 + Math.random() * 0.6);
-                        const outletMultiplier = outlet.id === 'outlet-3' ? 1.3 : outlet.id === 'outlet-5' ? 0.8 : 1;
+                        const baseValue = avgForecast * (0.7 + Math.random() * 0.6);
+                        const outletMultiplier = (outlet.format === 'Airport') ? 1.3 : (outlet.format === 'Kiosk') ? 1.1 : 1;
                         const dayMultiplier = (dayName === 'Saturday' || dayName === 'Sunday') ? 1.2 : 1;
                         
                         let rawForecast = Math.round(baseValue * outletMultiplier * dayMultiplier);
 
-                        // Apply event uplift (demo behavior, used for "special days" spikes)
+                        // Apply event uplift
                         const upliftMultiplier = computeEventUpliftMultiplier({
                             outletId: outlet.id,
                             skuId: sku.id,
@@ -1334,19 +1927,46 @@
                             date: dateStr
                         });
                         rawForecast = Math.round(rawForecast * upliftMultiplier);
+                        
+                        baseMap.set(`${dateStr}|${outlet.id}|${sku.id}`, rawForecast);
+                    });
+                });
+            }
+
+            // Apply Cannibalization and Finalize
+            for (let d = 0; d < 30; d++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + d);
+                const dayName = days[date.getDay()];
+                const dateStr = date.toISOString().split('T')[0];
+
+                outlets.forEach(outlet => {
+                    skuData.forEach(sku => {
+                        let rawForecast = baseMap.get(`${dateStr}|${outlet.id}|${sku.id}`) || 0;
+
+                        // Check if this SKU is being cannibalized by ANY other SKU on this date/outlet
+                        skuData.forEach(otherSku => {
+                            if (otherSku.isNewProduct && otherSku.cannibalizesFrom) {
+                                // Check if otherSku is active on this date
+                                if (!isWithinRangeISO(dateStr, otherSku.activePeriod.start, otherSku.activePeriod.end)) return;
+
+                                const impact = otherSku.cannibalizesFrom.find(c => c.skuId === sku.id);
+                                if (impact) {
+                                    // affectedForecast = originalForecast * (1 - cannibalizationPct / 100);
+                                    rawForecast = Math.round(rawForecast * (1 - (impact.percentage / 100)));
+                                }
+                            }
+                        });
+
+                        if (rawForecast === 0 && !baseMap.has(`${dateStr}|${outlet.id}|${sku.id}`)) return;
 
                         const confidenceRange = Math.round(rawForecast * (0.1 + Math.random() * 0.15));
                         const minConf = Math.max(0, rawForecast - confidenceRange);
                         const maxConf = rawForecast + confidenceRange;
                         
-                        // Confidence rating based on range
-                        const confPercent = confidenceRange / rawForecast;
-                        let confidenceRating;
-                        if (confPercent < 0.12) confidenceRating = 'High';
-                        else if (confPercent < 0.18) confidenceRating = 'Medium';
-                        else confidenceRating = 'Low';
+                        const confPercent = confidenceRange / (rawForecast || 1);
+                        let confidenceRating = confPercent < 0.12 ? 'High' : confPercent < 0.18 ? 'Medium' : 'Low';
 
-                        // Apply minimum quantity override
                         const isOverridden = rawForecast < sku.minQuantity;
                         const finalForecast = Math.max(rawForecast, sku.minQuantity);
 
@@ -1360,6 +1980,7 @@
                             day: dayName,
                             rawForecast: rawForecast,
                             forecast: finalForecast,
+                            revenue: finalForecast * (sku.pricePerUnit || 0),
                             minConf: minConf,
                             maxConf: maxConf,
                             confidenceRating: confidenceRating,
@@ -1372,6 +1993,69 @@
         }
 
         let dailyForecasts = generateDailyForecasts();
+        let historicalLY = [];
+        let historicalLY2 = [];
+
+        function generateHistoricalForecasts(yearsAgo) {
+            const forecasts = [];
+            const today = new Date();
+            
+            for (let d = 0; d < 30; d++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + d);
+                const dateStr = date.toISOString().split('T')[0];
+                const historicalDate = new Date(date);
+                historicalDate.setFullYear(date.getFullYear() - yearsAgo);
+                const histDateStr = historicalDate.toISOString().split('T')[0];
+
+                outlets.forEach(outlet => {
+                    skuData.forEach(sku => {
+                        const growthFactor = 1 - (yearsAgo * 0.12); // ~12% growth YoY
+                        const baseValue = sku.avgForecast * growthFactor * (0.8 + Math.random() * 0.4);
+                        
+                        const outletMultiplier = (outlet.format === 'Airport') ? 1.3 : (outlet.format === 'Kiosk') ? 1.1 : 1;
+                        const day = historicalDate.getDay();
+                        const dayMultiplier = (day === 0 || day === 6) ? 1.2 : 1;
+                        
+                        let actualSales = Math.round(baseValue * outletMultiplier * dayMultiplier);
+
+                        // Use same events but check for historical date
+                        const histEvents = events.filter(evt => {
+                            if (!evt.enabled) return false;
+                            const histStart = evt.startDate.replace(today.getFullYear().toString(), (today.getFullYear() - yearsAgo).toString());
+                            const histEnd = evt.endDate.replace(today.getFullYear().toString(), (today.getFullYear() - yearsAgo).toString());
+                            if (!isWithinRangeISO(histDateStr, histStart, histEnd)) return false;
+
+                            const outletOk = evt.scope?.outletId === 'all' || evt.scope?.outletId === outlet.id;
+                            const categoryOk = evt.scope?.categoryId === 'all' || evt.scope?.categoryId === sku.categoryId;
+                            const skuOk = evt.scope?.skuId === 'all' || evt.scope?.skuId === sku.id;
+                            return outletOk && categoryOk && skuOk;
+                        });
+
+                        const maxPct = histEvents.length > 0 ? Math.max(...histEvents.map(e => e.upliftPct || 0)) : 0;
+                        actualSales = Math.round(actualSales * (1 + (maxPct / 100)));
+
+                        forecasts.push({
+                            outletId: outlet.id,
+                            skuId: sku.id,
+                            date: dateStr, // Keyed by current date for easier chart alignment
+                            actualSales: actualSales,
+                            revenue: actualSales * (sku.pricePerUnit || 0)
+                        });
+                    });
+                });
+            }
+            return forecasts;
+        }
+
+        function refreshAllData() {
+            dailyForecasts = generateDailyForecasts();
+            historicalLY = generateHistoricalForecasts(1);
+            historicalLY2 = generateHistoricalForecasts(2);
+        }
+
+        // Initialize historical data
+        refreshAllData();
 
         // ==================== NAVIGATION ====================
         
@@ -1387,6 +2071,7 @@
                     if (targetPage === 'daily-forecast') renderDailyForecastTable();
                     if (targetPage === 'sku-settings') renderSKUSettingsTable();
                     if (targetPage === 'event-manager') renderEventsTable();
+                    if (targetPage === 'event-analysis') renderEventAnalysis();
                 });
             });
         }
@@ -1744,20 +2429,34 @@
             const dateRange = document.getElementById('daily-date-filter').value;
             
             // Prepare data for Excel
-            const excelData = data.map(f => ({
-                'Outlet': f.outlet,
-                'SKU': f.sku,
-                'Category': categories.find(c => c.id === f.categoryId)?.name || f.categoryId,
-                'Date': f.date,
-                'Day': f.day,
-                'Forecasted Demand': f.forecast,
-                'Lower Bound': f.minConf,
-                'Upper Bound': f.maxConf,
-                'Confidence Rating': f.confidenceRating,
-                'Min Qty Override': f.isOverridden ? 'Yes' : 'No',
-                'Events': getEventsForForecastRow(f).map(e => e.name).join('; '),
-                'Event Uplift Applied': getEventsForForecastRow(f).some(e => e.mode === 'uplift' && (e.upliftPct || 0) > 0) ? 'Yes' : 'No'
-            }));
+            const excelData = data.map(f => {
+                const outletInfo = outlets.find(o => o.id === f.outletId);
+                
+                // Find YoY data for this specific row
+                const lyRow = historicalLY.find(h => h.date === f.date && h.outletId === f.outletId && h.skuId === f.skuId);
+                const ly2Row = historicalLY2.find(h => h.date === f.date && h.outletId === f.outletId && h.skuId === f.skuId);
+
+                return {
+                    'Outlet': f.outlet,
+                    'City': outletInfo?.city || '',
+                    'Format': outletInfo?.format || '',
+                    'SKU': f.sku,
+                    'Category': categories.find(c => c.id === f.categoryId)?.name || f.categoryId,
+                    'Date': f.date,
+                    'Day': f.day,
+                    'Forecasted Demand': f.forecast,
+                    'Revenue (Current)': Math.round(f.revenue),
+                    'Revenue (LY)': lyRow ? Math.round(lyRow.revenue) : 0,
+                    'Revenue (LY-1)': ly2Row ? Math.round(ly2Row.revenue) : 0,
+                    '% vs LY': lyRow && lyRow.revenue > 0 ? ((f.revenue - lyRow.revenue) / lyRow.revenue * 100).toFixed(1) + '%' : 'N/A',
+                    'Lower Bound': f.minConf,
+                    'Upper Bound': f.maxConf,
+                    'Confidence Rating': f.confidenceRating,
+                    'Min Qty Override': f.isOverridden ? 'Yes' : 'No',
+                    'Events': getEventsForForecastRow(f).map(e => e.name).join('; '),
+                    'Event Uplift Applied': getEventsForForecastRow(f).some(e => e.mode === 'uplift' && (e.upliftPct || 0) > 0) ? 'Yes' : 'No'
+                };
+            });
             
             // Create workbook and worksheet
             const wb = XLSX.utils.book_new();
@@ -1766,11 +2465,17 @@
             // Set column widths
             ws['!cols'] = [
                 { wch: 20 },  // Outlet
+                { wch: 15 },  // City
+                { wch: 15 },  // Format
                 { wch: 25 },  // SKU
                 { wch: 12 },  // Category
                 { wch: 12 },  // Date
                 { wch: 12 },  // Day
                 { wch: 18 },  // Forecasted Demand
+                { wch: 18 },  // Revenue (Current)
+                { wch: 15 },  // Revenue (LY)
+                { wch: 15 },  // Revenue (LY-1)
+                { wch: 12 },  // % vs LY
                 { wch: 12 },  // Lower Bound
                 { wch: 12 },  // Upper Bound
                 { wch: 18 },  // Confidence Rating
@@ -2076,6 +2781,10 @@
                     `<option value="${c.id}" ${c.id === sku.categoryId ? 'selected' : ''}>${c.name}</option>`
                 ).join('');
 
+                const statusBadge = sku.isNewProduct 
+                    ? `<span class="badge badge-blue" title="Reference: ${sku.referenceSku} (${sku.similarityFactor}x)">New Product</span>` 
+                    : `<span class="badge badge-gray">Active</span>`;
+
                 return `<tr data-sku-id="${sku.id}">
                     <td><strong>${sku.name}</strong></td>
                     <td>
@@ -2083,6 +2792,7 @@
                             ${categoryOptions}
                         </select>
                     </td>
+                    <td>${statusBadge}</td>
                     <td>
                         <div class="editable-cell">
                             <input type="number" class="editable-input" value="${sku.minQuantity}" 
@@ -2091,6 +2801,15 @@
                         </div>
                     </td>
                     <td>${sku.avgForecast} units</td>
+                    <td>
+                        <button class="btn btn-outline" onclick="openNewProductModal('${sku.id}')" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit
+                        </button>
+                    </td>
                 </tr>`;
             }).join('');
 
@@ -2227,6 +2946,276 @@
             updateCategoryOptions();
         }
 
+        // ==================== NEW PRODUCT MODAL ====================
+        
+        let editingSkuId = null;
+        let cannibalizationRowCount = 0;
+
+        window.openNewProductModal = function(skuId = null) {
+            editingSkuId = skuId;
+            const modal = document.getElementById('new-product-modal');
+            const title = document.getElementById('new-product-modal-title');
+            
+            // SKU options from ERP
+            const availableSkus = skuData.filter(s => !s.isNewProduct || s.id === skuId);
+            const erpSkuOptions = [
+                { value: '', label: 'Select a SKU from ERP...' },
+                ...availableSkus.map(s => ({ value: s.id, label: `${s.name} (${s.id})` }))
+            ];
+
+            // Reference SKU options
+            const referenceSkuOptions = [
+                { value: '', label: 'Select a reference SKU...' },
+                ...skuData.filter(s => !s.isNewProduct).map(s => ({ value: s.id, label: s.name }))
+            ];
+
+            // Initialize or update searchable selects
+            if (!searchableSelects['new-product-sku-select']) {
+                searchableSelects['new-product-sku-select'] = new SearchableSelect(
+                    document.getElementById('new-product-sku-select-container'),
+                    erpSkuOptions
+                );
+            } else {
+                searchableSelects['new-product-sku-select'].setOptions(erpSkuOptions);
+            }
+
+            if (!searchableSelects['new-product-reference']) {
+                searchableSelects['new-product-reference'] = new SearchableSelect(
+                    document.getElementById('new-product-reference-container'),
+                    referenceSkuOptions
+                );
+            } else {
+                searchableSelects['new-product-reference'].setOptions(referenceSkuOptions);
+            }
+
+            if (skuId) {
+                // Editing existing SKU
+                const sku = skuData.find(s => s.id === skuId);
+                if (!sku) return;
+                
+                title.textContent = 'Edit Product';
+                const isNewCheckbox = document.getElementById('new-product-isnew');
+                if (isNewCheckbox) isNewCheckbox.checked = sku.isNewProduct || false;
+                
+                searchableSelects['new-product-sku-select'].select(sku.id);
+                searchableSelects['new-product-reference'].select(sku.referenceSku || '');
+                
+                document.getElementById('new-product-minqty').value = sku.minQuantity || 0;
+                document.getElementById('new-product-similarity').value = sku.similarityFactor || 1.0;
+                
+                if (sku.isNewProduct) {
+                    document.getElementById('new-product-start-date').value = sku.activePeriod?.start || '';
+                    document.getElementById('new-product-end-date').value = sku.activePeriod?.end || '';
+                    
+                    // Populate cannibalization rows
+                    const cannibalizationList = document.getElementById('cannibalization-list');
+                    cannibalizationRowCount = 0;
+                    cannibalizationList.innerHTML = '';
+                    if (sku.cannibalizesFrom && sku.cannibalizesFrom.length > 0) {
+                        sku.cannibalizesFrom.forEach(cann => {
+                            addCannibalizationRow(cann.skuId, cann.percentage);
+                        });
+                    }
+                } else {
+                    clearNewProductFields();
+                }
+                toggleNewProductFields();
+            } else {
+                // New SKU
+                title.textContent = 'Add New Product';
+                searchableSelects['new-product-sku-select'].select('');
+                searchableSelects['new-product-reference'].select('');
+                document.getElementById('new-product-minqty').value = 0;
+                const isNewCheckbox = document.getElementById('new-product-isnew');
+                if (isNewCheckbox) isNewCheckbox.checked = false;
+                document.getElementById('new-product-similarity').value = 1.0;
+                clearNewProductFields();
+                toggleNewProductFields();
+            }
+            
+            modal.classList.add('active');
+        }
+
+        window.closeNewProductModal = function() {
+            document.getElementById('new-product-modal').classList.remove('active');
+            editingSkuId = null;
+            cannibalizationRowCount = 0;
+        }
+
+        window.toggleNewProductFields = function() {
+            const isNewCheckbox = document.getElementById('new-product-isnew');
+            const isNew = isNewCheckbox ? isNewCheckbox.checked : true;
+            const fieldsDiv = document.getElementById('new-product-fields');
+            // Similarity Factor is always visible, only Active Period and Cannibalization are toggled
+            fieldsDiv.style.display = isNew ? 'block' : 'none';
+        }
+
+        function clearNewProductFields() {
+            if (searchableSelects['new-product-reference']) {
+                searchableSelects['new-product-reference'].select('');
+            }
+            document.getElementById('new-product-similarity').value = 1.0;
+            document.getElementById('new-product-start-date').value = '';
+            document.getElementById('new-product-end-date').value = '';
+            document.getElementById('cannibalization-list').innerHTML = '';
+            cannibalizationRowCount = 0;
+        }
+
+        window.addCannibalizationRow = function(skuId = '', percentage = '') {
+            const list = document.getElementById('cannibalization-list');
+            const rowCount = cannibalizationRowCount++;
+            const rowId = `cann-row-${rowCount}`;
+            
+            const row = document.createElement('div');
+            row.className = 'cannibalization-row';
+            row.id = rowId;
+            
+            // Filter out new products and the current SKU being edited
+            const availableSkus = skuData.filter(s => !s.isNewProduct && s.id !== editingSkuId);
+            const skuOptions = [
+                { value: '', label: 'Select SKU...' },
+                ...availableSkus.map(s => ({ value: s.id, label: s.name }))
+            ];
+            
+            row.innerHTML = `
+                <div class="form-group">
+                    <label style="font-size: 0.8125rem;">SKU</label>
+                    <div class="searchable-select" id="cann-sku-select-container-${rowCount}">
+                        <input type="text" class="searchable-select-input" placeholder="Select SKU..." data-value="">
+                        <span class="searchable-select-arrow">▼</span>
+                        <div class="searchable-select-dropdown"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="font-size: 0.8125rem;">Impact %</label>
+                    <input type="number" class="cann-percentage-input" min="0" max="100" step="0.1" value="${percentage}" placeholder="15" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.375rem;">
+                </div>
+                <div class="cannibalization-row-remove" onclick="removeCannibalizationRow('${rowId}')" title="Remove">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 18px; height: 18px;">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </div>
+            `;
+            
+            list.appendChild(row);
+
+            // Initialize searchable select for this row
+            const selectId = `cann-sku-${rowCount}`;
+            searchableSelects[selectId] = new SearchableSelect(
+                document.getElementById(`cann-sku-select-container-${rowCount}`),
+                skuOptions
+            );
+            if (skuId) searchableSelects[selectId].select(skuId);
+        }
+
+        window.removeCannibalizationRow = function(rowId) {
+            document.getElementById(rowId).remove();
+        }
+
+        window.saveNewProduct = function() {
+            const selectedSkuId = searchableSelects['new-product-sku-select']?.getValue() || '';
+            const minQty = parseInt(document.getElementById('new-product-minqty').value) || 0;
+            const isNewCheckbox = document.getElementById('new-product-isnew');
+            const isNew = isNewCheckbox ? isNewCheckbox.checked : true;
+            const referenceSku = searchableSelects['new-product-reference']?.getValue() || '';
+            const similarityFactor = parseFloat(document.getElementById('new-product-similarity').value) || 1.0;
+
+            if (!selectedSkuId) {
+                alert('Please select a SKU from ERP');
+                return;
+            }
+
+            // Find the selected SKU from ERP to get its details
+            const erpSku = skuData.find(s => s.id === selectedSkuId);
+            if (!erpSku) {
+                alert('Selected SKU not found in ERP data');
+                return;
+            }
+
+            // Check if this SKU is already configured as a new product (only when creating new)
+            if (!editingSkuId && erpSku.isNewProduct) {
+                alert('This SKU is already configured as a new product. Please edit it instead.');
+                return;
+            }
+
+            const newSku = {
+                id: erpSku.id,
+                name: erpSku.name,
+                categoryId: erpSku.categoryId,
+                minQuantity: minQty,
+                avgForecast: 0, // Will be calculated based on reference if new product
+                pricePerUnit: erpSku.pricePerUnit // Get price from ERP
+            };
+
+            if (isNew) {
+                const startDate = document.getElementById('new-product-start-date').value;
+                const endDate = document.getElementById('new-product-end-date').value;
+
+                if (!referenceSku) {
+                    alert('Please select a reference SKU');
+                    return;
+                }
+                if (!startDate || !endDate) {
+                    alert('Please provide active period start and end dates');
+                    return;
+                }
+                if (endDate < startDate) {
+                    alert('End date must be on or after start date');
+                    return;
+                }
+
+                newSku.isNewProduct = true;
+                newSku.referenceSku = referenceSku;
+                newSku.similarityFactor = similarityFactor;
+                newSku.activePeriod = { start: startDate, end: endDate };
+
+                // Collect cannibalization data
+                const cannibalizationRows = document.querySelectorAll('.cannibalization-row');
+                const cannibalizesFrom = [];
+                cannibalizationRows.forEach(row => {
+                    const rowIdx = row.id.split('-').pop();
+                    const skuSelect = searchableSelects[`cann-sku-${rowIdx}`];
+                    const percentageInput = row.querySelector('.cann-percentage-input');
+                    const skuId = skuSelect ? skuSelect.getValue() : '';
+                    const percentage = parseFloat(percentageInput.value);
+                    
+                    if (skuId && percentage > 0) {
+                        cannibalizesFrom.push({ skuId, percentage });
+                    }
+                });
+
+                if (cannibalizesFrom.length > 0) {
+                    newSku.cannibalizesFrom = cannibalizesFrom;
+                }
+            }
+
+            if (editingSkuId) {
+                // Update existing SKU
+                const index = skuData.findIndex(s => s.id === editingSkuId);
+                if (index !== -1) {
+                    skuData[index] = newSku;
+                }
+            } else {
+                // Update the existing SKU entry (since we're selecting from ERP)
+                const index = skuData.findIndex(s => s.id === selectedSkuId);
+                if (index !== -1) {
+                    skuData[index] = newSku;
+                } else {
+                    // Fallback: add new entry if somehow not found
+                    skuData.push(newSku);
+                }
+            }
+
+            closeNewProductModal();
+            renderSKUSettingsTable();
+            refreshAllData();
+            initializeChart();
+            updateKPIs();
+            renderDailyForecastTable();
+            showToast(`Product "${newSku.name}" ${editingSkuId ? 'updated' : 'configured'}!`, 'success');
+        }
+
         // ==================== TOAST ====================
         
         function showToast(message, type = '') {
@@ -2294,6 +3283,453 @@
             }
         };
 
+        let groupingDimensions = [];
+
+        window.addGroupingDimension = function(dimension) {
+            if (!dimension || groupingDimensions.includes(dimension)) {
+                const select = document.getElementById('grouping-dimension-select');
+                if (select) select.value = '';
+                return;
+            }
+            groupingDimensions.push(dimension);
+            const select = document.getElementById('grouping-dimension-select');
+            if (select) select.value = '';
+            renderGroupingPills();
+            renderEventAnalysis();
+        };
+
+        window.removeGroupingDimension = function(index) {
+            groupingDimensions.splice(index, 1);
+            renderGroupingPills();
+            renderEventAnalysis();
+        };
+
+        window.clearGrouping = function() {
+            groupingDimensions = [];
+            renderGroupingPills();
+            renderEventAnalysis();
+        };
+
+        function renderGroupingPills() {
+            const container = document.getElementById('grouping-pills-container');
+            const clearBtn = document.getElementById('clear-grouping-btn');
+            
+            if (groupingDimensions.length === 0) {
+                clearBtn.style.display = 'none';
+                container.innerHTML = `
+                    <div class="grouping-pill-add">
+                        <select class="grouping-dimension-select" id="grouping-dimension-select" onchange="addGroupingDimension(this.value)">
+                            <option value="">Add dimension...</option>
+                            <option value="city">City</option>
+                            <option value="category">Category</option>
+                            <option value="format">Format</option>
+                            <option value="date">Date</option>
+                        </select>
+                    </div>
+                `;
+                return;
+            }
+
+            clearBtn.style.display = 'inline-flex';
+            
+            const dimensionLabels = {
+                city: 'City',
+                category: 'Category',
+                format: 'Format',
+                date: 'Date'
+            };
+
+            container.innerHTML = groupingDimensions.map((dim, idx) => `
+                <div class="grouping-pill">
+                    ${idx > 0 ? '<span class="grouping-pill-arrow">→</span>' : ''}
+                    <span>${dimensionLabels[dim]}</span>
+                    <span class="grouping-pill-remove" onclick="removeGroupingDimension(${idx})" title="Remove">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </span>
+                </div>
+            `).join('') + `
+                <div class="grouping-pill-add">
+                    <select class="grouping-dimension-select" id="grouping-dimension-select" onchange="addGroupingDimension(this.value)">
+                        <option value="">Add dimension...</option>
+                        ${['city', 'category', 'format', 'date'].filter(d => !groupingDimensions.includes(d)).map(d => 
+                            `<option value="${d}">${dimensionLabels[d]}</option>`
+                        ).join('')}
+                    </select>
+                </div>
+            `;
+        }
+
+        function getDimensionValue(f, dimension) {
+            if (dimension === 'date') return f.date;
+            if (dimension === 'city') return outlets.find(o => o.id === f.outletId)?.city || 'Unknown';
+            if (dimension === 'format') return outlets.find(o => o.id === f.outletId)?.format || 'Unknown';
+            if (dimension === 'category') {
+                const sku = skuData.find(s => s.id === f.skuId);
+                return categories.find(c => c.id === sku?.categoryId)?.name || 'Unknown';
+            }
+            return 'All';
+        }
+
+        function aggregateDataRecursive(data, lyData, ly2Data, dimensions, level = 0) {
+            if (dimensions.length === 0) {
+                const current = data.reduce((sum, f) => sum + (f.revenue || 0), 0);
+                const ly = lyData.reduce((sum, f) => sum + (f.revenue || 0), 0);
+                const ly2 = ly2Data.reduce((sum, f) => sum + (f.revenue || 0), 0);
+                return { current, ly, ly2, isLeaf: true, children: null };
+            }
+
+            const dimension = dimensions[0];
+            const remainingDimensions = dimensions.slice(1);
+            const grouped = new Map();
+
+            data.forEach(f => {
+                const key = getDimensionValue(f, dimension);
+                if (!grouped.has(key)) {
+                    grouped.set(key, { data: [], lyData: [], ly2Data: [] });
+                }
+                grouped.get(key).data.push(f);
+            });
+
+            lyData.forEach(f => {
+                const key = getDimensionValue(f, dimension);
+                if (grouped.has(key)) {
+                    grouped.get(key).lyData.push(f);
+                }
+            });
+
+            ly2Data.forEach(f => {
+                const key = getDimensionValue(f, dimension);
+                if (grouped.has(key)) {
+                    grouped.get(key).ly2Data.push(f);
+                }
+            });
+
+            const result = {};
+            grouped.forEach((group, key) => {
+                const childResult = aggregateDataRecursive(
+                    group.data,
+                    group.lyData,
+                    group.ly2Data,
+                    remainingDimensions,
+                    level + 1
+                );
+                
+                const current = childResult.isLeaf 
+                    ? childResult.current 
+                    : Object.values(childResult).reduce((sum, child) => sum + (child.current || 0), 0);
+                const ly = childResult.isLeaf
+                    ? childResult.ly
+                    : Object.values(childResult).reduce((sum, child) => sum + (child.ly || 0), 0);
+                const ly2 = childResult.isLeaf
+                    ? childResult.ly2
+                    : Object.values(childResult).reduce((sum, child) => sum + (child.ly2 || 0), 0);
+                
+                result[key] = {
+                    key,
+                    level,
+                    dimension,
+                    current,
+                    ly,
+                    ly2,
+                    children: childResult.isLeaf ? null : childResult,
+                    isLeaf: childResult.isLeaf
+                };
+            });
+
+            return result;
+        }
+
+        function renderDetailedEventRows(currentData, lyData, ly2Data) {
+            // Group by date, city, format
+            const grouped = new Map();
+            
+            currentData.forEach(f => {
+                const outlet = outlets.find(o => o.id === f.outletId);
+                const key = `${f.date}|${outlet?.city || 'Unknown'}|${outlet?.format || 'Unknown'}`;
+                if (!grouped.has(key)) {
+                    grouped.set(key, {
+                        date: f.date,
+                        city: outlet?.city || 'Unknown',
+                        format: outlet?.format || 'Unknown',
+                        current: 0,
+                        ly: 0,
+                        ly2: 0
+                    });
+                }
+                grouped.get(key).current += f.revenue || 0;
+            });
+            
+            lyData.forEach(f => {
+                const outlet = outlets.find(o => o.id === f.outletId);
+                const key = `${f.date}|${outlet?.city || 'Unknown'}|${outlet?.format || 'Unknown'}`;
+                if (grouped.has(key)) {
+                    grouped.get(key).ly += f.revenue || 0;
+                }
+            });
+            
+            ly2Data.forEach(f => {
+                const outlet = outlets.find(o => o.id === f.outletId);
+                const key = `${f.date}|${outlet?.city || 'Unknown'}|${outlet?.format || 'Unknown'}`;
+                if (grouped.has(key)) {
+                    grouped.get(key).ly2 += f.revenue || 0;
+                }
+            });
+            
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const rows = Array.from(grouped.values()).sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                if (a.city !== b.city) return a.city.localeCompare(b.city);
+                return a.format.localeCompare(b.format);
+            });
+            
+            let html = '';
+            rows.forEach(row => {
+                const date = new Date(row.date);
+                const dow = days[date.getDay()];
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const vLY = row.ly > 0 ? ((row.current - row.ly) / row.ly) * 100 : 0;
+                const vLY2 = row.ly2 > 0 ? ((row.current - row.ly2) / row.ly2) * 100 : 0;
+                
+                html += `
+                    <tr>
+                        <td>${dateStr}</td>
+                        <td>${dow}</td>
+                        <td>${row.city}</td>
+                        <td>${row.format}</td>
+                        <td style="text-align: right;">${formatRevenue(row.current)}</td>
+                        <td style="text-align: right;">${formatRevenue(row.ly)}</td>
+                        <td style="text-align: right;">${formatRevenue(row.ly2)}</td>
+                    </tr>
+                `;
+            });
+            
+            return html;
+        }
+
+        function renderTreeRows(node, level = 0, parentKey = '', autoExpand = false) {
+            if (!node || typeof node !== 'object') return '';
+            
+            if (node.isLeaf) {
+                const vLY = node.ly > 0 ? ((node.current - node.ly) / node.ly) * 100 : 0;
+                const vLY2 = node.ly2 > 0 ? ((node.current - node.ly2) / node.ly2) * 100 : 0;
+                return `
+                    <tr class="tree-row tree-row-leaf" data-level="${level}" data-key="${parentKey}">
+                        <td>
+                            ${'<span class="tree-indent"></span>'.repeat(level)}
+                            <span class="tree-toggle"></span>
+                            <strong>${parentKey || 'Total'}</strong>
+                        </td>
+                        <td style="text-align: right;">${formatRevenue(node.current)}</td>
+                        <td style="text-align: right;">${formatRevenue(node.ly)}</td>
+                        <td style="text-align: right;" class="${vLY >= 0 ? 'variance-positive' : 'variance-negative'}">${(vLY >= 0 ? '+' : '') + vLY.toFixed(1)}%</td>
+                        <td style="text-align: right;" class="${vLY2 >= 0 ? 'variance-positive' : 'variance-negative'}">${(vLY2 >= 0 ? '+' : '') + vLY2.toFixed(1)}%</td>
+                    </tr>
+                `;
+            }
+
+            let html = '';
+            Object.keys(node).sort().forEach(key => {
+                const child = node[key];
+                if (child && typeof child === 'object' && child.key !== undefined) {
+                    const vLY = child.ly > 0 ? ((child.current - child.ly) / child.ly) * 100 : 0;
+                    const vLY2 = child.ly2 > 0 ? ((child.current - child.ly2) / child.ly2) * 100 : 0;
+                    const rowKey = parentKey ? `${parentKey}::${key}` : key;
+                    const hasChildren = child.children && typeof child.children === 'object' && Object.keys(child.children).length > 0;
+                    const isExpanded = autoExpand || false;
+                    
+                    html += `
+                        <tr class="tree-row tree-row-parent ${isExpanded ? 'expanded' : 'collapsed'}" data-level="${level}" data-key="${rowKey}" data-expanded="${isExpanded}" ${hasChildren ? 'onclick="toggleTreeRow(this)"' : ''}>
+                            <td>
+                                ${'<span class="tree-indent"></span>'.repeat(level)}
+                                <span class="tree-toggle ${isExpanded ? 'expanded' : 'collapsed'}"></span>
+                                <strong>${key}</strong>
+                            </td>
+                            <td style="text-align: right;">${formatRevenue(child.current)}</td>
+                            <td style="text-align: right;">${formatRevenue(child.ly)}</td>
+                            <td style="text-align: right;" class="${vLY >= 0 ? 'variance-positive' : 'variance-negative'}">${(vLY >= 0 ? '+' : '') + vLY.toFixed(1)}%</td>
+                            <td style="text-align: right;" class="${vLY2 >= 0 ? 'variance-positive' : 'variance-negative'}">${(vLY2 >= 0 ? '+' : '') + vLY2.toFixed(1)}%</td>
+                        </tr>
+                    `;
+                    
+                    if (hasChildren && isExpanded) {
+                        html += renderTreeRows(child.children, level + 1, rowKey, false);
+                    }
+                }
+            });
+            return html;
+        }
+
+        window.toggleTreeRow = function(row) {
+            const expanded = row.dataset.expanded === 'true';
+            const rowKey = row.dataset.key;
+            const level = parseInt(row.dataset.level);
+            
+            if (expanded) {
+                row.classList.remove('expanded');
+                row.classList.add('collapsed');
+                row.dataset.expanded = 'false';
+                row.querySelector('.tree-toggle').classList.remove('expanded');
+                row.querySelector('.tree-toggle').classList.add('collapsed');
+                
+                const tbody = row.parentElement;
+                let nextRow = row.nextElementSibling;
+                while (nextRow) {
+                    const nextLevel = parseInt(nextRow.dataset.level);
+                    const nextKey = nextRow.dataset.key;
+                    if (nextLevel <= level) break;
+                    if (nextKey && nextKey.startsWith(rowKey + '::')) {
+                        const toRemove = nextRow;
+                        nextRow = nextRow.nextElementSibling;
+                        toRemove.remove();
+                    } else {
+                        nextRow = nextRow.nextElementSibling;
+                    }
+                }
+            } else {
+                row.classList.remove('collapsed');
+                row.classList.add('expanded');
+                row.dataset.expanded = 'true';
+                row.querySelector('.tree-toggle').classList.remove('collapsed');
+                row.querySelector('.tree-toggle').classList.add('expanded');
+                
+                const rowKeyParts = rowKey.split('::');
+                const node = findNodeInTree(eventAnalysisTree, rowKeyParts);
+                
+                if (node && node.children && typeof node.children === 'object') {
+                    const childrenHtml = renderTreeRows(node.children, level + 1, rowKey, false);
+                    const tempDiv = document.createElement('tbody');
+                    tempDiv.innerHTML = childrenHtml;
+                    const fragment = document.createDocumentFragment();
+                    while (tempDiv.firstChild) {
+                        fragment.appendChild(tempDiv.firstChild);
+                    }
+                    row.parentNode.insertBefore(fragment, row.nextSibling);
+                }
+            }
+        };
+
+        function findNodeInTree(tree, keyParts) {
+            let current = tree;
+            for (const part of keyParts) {
+                if (current && current[part]) {
+                    current = current[part];
+                } else {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        let eventAnalysisTree = null;
+
+        function renderEventAnalysis() {
+            const eventSelector = document.getElementById('event-analysis-selector');
+            if (eventSelector.options.length === 0) {
+                events.forEach(evt => {
+                    const opt = document.createElement('option');
+                    opt.value = evt.id;
+                    opt.textContent = evt.name;
+                    eventSelector.appendChild(opt);
+                });
+                
+                // Set default to Chocolate Flash Sale or next upcoming event
+                const now = new Date().toISOString().split('T')[0];
+                const upcomingEvent = events.find(e => e.enabled && e.endDate >= now) || 
+                                     events.find(e => e.id === 'evt-chocolate-flash-sale') ||
+                                     events[0];
+                if (upcomingEvent) {
+                    eventSelector.value = upcomingEvent.id;
+                }
+            }
+
+            const eventId = eventSelector.value;
+            const event = events.find(e => e.id === eventId);
+            if (!event) return;
+
+            // Filter data within event range
+            const currentData = dailyForecasts.filter(f => isWithinRangeISO(f.date, event.startDate, event.endDate));
+            const lyData = historicalLY.filter(f => isWithinRangeISO(f.date, event.startDate, event.endDate));
+            const ly2Data = historicalLY2.filter(f => isWithinRangeISO(f.date, event.startDate, event.endDate));
+
+            // Render KPIs
+            const totalCurrent = currentData.reduce((sum, f) => sum + (f.revenue || 0), 0);
+            const totalLY = lyData.reduce((sum, f) => sum + (f.revenue || 0), 0);
+            const totalLY2 = ly2Data.reduce((sum, f) => sum + (f.revenue || 0), 0);
+
+            const varLY = totalLY > 0 ? ((totalCurrent - totalLY) / totalLY) * 100 : 0;
+            const varLY2 = totalLY2 > 0 ? ((totalCurrent - totalLY2) / totalLY2) * 100 : 0;
+
+            document.getElementById('event-analysis-kpis').innerHTML = `
+                <div class="kpi-card">
+                    <div class="kpi-label">Event Revenue</div>
+                    <div class="kpi-value">${formatRevenue(totalCurrent)}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">vs Last Year</div>
+                    <div class="kpi-value ${varLY >= 0 ? 'variance-positive' : 'variance-negative'}">${(varLY >= 0 ? '+' : '') + varLY.toFixed(1)}%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">vs 2 Years Ago</div>
+                    <div class="kpi-value ${varLY2 >= 0 ? 'variance-positive' : 'variance-negative'}">${(varLY2 >= 0 ? '+' : '') + varLY2.toFixed(1)}%</div>
+                </div>
+            `;
+
+            // Build tree structure
+            if (groupingDimensions.length === 0) {
+                // When no grouping, show detailed breakdown by Date, City, Format
+                eventAnalysisTree = aggregateDataRecursive(currentData, lyData, ly2Data, ['date', 'city', 'format']);
+            } else {
+                eventAnalysisTree = aggregateDataRecursive(currentData, lyData, ly2Data, groupingDimensions);
+            }
+
+            // Render Table Header
+            const thead = document.getElementById('event-analysis-thead');
+            const dimensionLabels = {
+                city: 'City',
+                category: 'Category',
+                format: 'Format',
+                date: 'Date'
+            };
+            
+            if (groupingDimensions.length === 0) {
+                // Show detailed columns: Date, DoW, City, Format, Revenue (Current), Revenue vs LY, Revenue vs LY-1
+                thead.innerHTML = `
+                    <tr>
+                        <th style="min-width: 100px;">Date</th>
+                        <th style="min-width: 80px;">DoW</th>
+                        <th style="min-width: 100px;">City</th>
+                        <th style="min-width: 120px;">Format</th>
+                        <th style="text-align: right;">Revenue (Current)</th>
+                        <th style="text-align: right;">Revenue vs LY</th>
+                        <th style="text-align: right;">Revenue vs LY-1</th>
+                    </tr>
+                `;
+            } else {
+                const headerLabels = groupingDimensions.map(d => dimensionLabels[d]).join(' → ');
+                thead.innerHTML = `
+                    <tr>
+                        <th style="min-width: 200px;">${headerLabels}</th>
+                        <th style="text-align: right;">Forecasted Revenue</th>
+                        <th style="text-align: right;">Revenue vLY</th>
+                        <th style="text-align: right;">Trend vLY</th>
+                        <th style="text-align: right;">Trend vLY-1</th>
+                    </tr>
+                `;
+            }
+
+            // Render Table Body
+            const tbody = document.getElementById('event-analysis-tbody');
+            if (groupingDimensions.length === 0) {
+                // Render detailed rows with Date, DoW, City, Format
+                tbody.innerHTML = renderDetailedEventRows(currentData, lyData, ly2Data);
+            } else {
+                tbody.innerHTML = renderTreeRows(eventAnalysisTree);
+            }
+        }
+
         function initializeChart() {
             const ctx = document.getElementById('demandChart');
             if (!ctx) return;
@@ -2302,6 +3738,9 @@
             const categoryFilter = getFilterValue('category-filter');
             const skuFilter = getFilterValue('product-filter');
             const outletFilter = getFilterValue('outlet-filter');
+            
+            const showLY = document.getElementById('show-ly')?.checked;
+            const showLY1 = document.getElementById('show-ly1')?.checked;
 
             // Aggregate data by date
             const dateMap = new Map();
@@ -2311,12 +3750,35 @@
                 if (outletFilter !== 'all' && f.outletId !== outletFilter) return;
 
                 if (!dateMap.has(f.date)) {
-                    dateMap.set(f.date, { forecast: 0, minConf: 0, maxConf: 0 });
+                    dateMap.set(f.date, { forecast: 0, minConf: 0, maxConf: 0, actualLY: 0, actualLY1: 0 });
                 }
                 const d = dateMap.get(f.date);
                 d.forecast += f.forecast;
                 d.minConf += f.minConf;
                 d.maxConf += f.maxConf;
+            });
+
+            // Aggregate historical data
+            historicalLY.forEach(f => {
+                const sku = skuData.find(s => s.id === f.skuId);
+                if (categoryFilter !== 'all' && sku?.categoryId !== categoryFilter) return;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return;
+                
+                if (dateMap.has(f.date)) {
+                    dateMap.get(f.date).actualLY += f.actualSales;
+                }
+            });
+
+            historicalLY2.forEach(f => {
+                const sku = skuData.find(s => s.id === f.skuId);
+                if (categoryFilter !== 'all' && sku?.categoryId !== categoryFilter) return;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return;
+                
+                if (dateMap.has(f.date)) {
+                    dateMap.get(f.date).actualLY1 += f.actualSales;
+                }
             });
 
             const sortedDates = Array.from(dateMap.keys()).sort().slice(0, days);
@@ -2328,6 +3790,8 @@
             const forecastData = sortedDates.map(d => dateMap.get(d).forecast);
             const minConfData = sortedDates.map(d => dateMap.get(d).minConf);
             const maxConfData = sortedDates.map(d => dateMap.get(d).maxConf);
+            const actualLYData = sortedDates.map(d => dateMap.get(d).actualLY);
+            const actualLY1Data = sortedDates.map(d => dateMap.get(d).actualLY1);
 
             if (demandChart) demandChart.destroy();
 
@@ -2340,30 +3804,30 @@
                         {
                             label: 'Confidence Range',
                             data: maxConfData,
-                            borderColor: 'rgba(203, 213, 225, 0.8)',
-                            backgroundColor: 'rgba(203, 213, 225, 0.2)',
+                            borderColor: 'transparent', // Hide border for area
+                            backgroundColor: 'rgba(203, 213, 225, 0.4)',
                             fill: '+1',
                             tension: 0.4,
                             pointRadius: 0,
-                            borderWidth: 1,
+                            borderWidth: 0,
                             order: 3
                         },
                         {
                             label: 'Lower Confidence',
                             data: minConfData,
-                            borderColor: 'rgba(203, 213, 225, 0.8)',
-                            backgroundColor: 'rgba(203, 213, 225, 0.2)',
+                            borderColor: 'transparent',
+                            backgroundColor: 'transparent',
                             fill: false,
                             tension: 0.4,
                             pointRadius: 0,
-                            borderWidth: 1,
+                            borderWidth: 0,
                             order: 4
                         },
                         {
                             label: 'Forecasted Demand',
                             data: forecastData,
                             borderColor: '#1f2937',
-                            backgroundColor: 'transparent',
+                            backgroundColor: '#1f2937',
                             tension: 0.4,
                             borderWidth: 3,
                             pointRadius: 4,
@@ -2371,41 +3835,125 @@
                             pointBorderColor: '#ffffff',
                             pointBorderWidth: 2,
                             order: 1
+                        },
+                        {
+                            label: 'Actual (Last Year)',
+                            data: actualLYData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: '#3b82f6',
+                            borderDash: [5, 5],
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            hidden: !showLY,
+                            order: 2
+                        },
+                        {
+                            label: 'Actual (2 Years Ago)',
+                            data: actualLY1Data,
+                            borderColor: '#94a3b8',
+                            backgroundColor: '#94a3b8',
+                            borderDash: [2, 2],
+                            tension: 0.4,
+                            borderWidth: 2,
+                            pointRadius: 2,
+                            hidden: !showLY1,
+                            order: 5
                         }
                     ]
                 },
-                plugins: [eventBandsPlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: {
-                            position: 'top',
-                            labels: {
-                                filter: item => item.text !== 'Lower Confidence',
-                                usePointStyle: true
-                            }
+                            display: false // Disable default legend
                         },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#4b5563',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 10,
+                            boxPadding: 4,
+                            usePointStyle: true,
                             callbacks: {
-                                label: ctx => ctx.dataset.label === 'Lower Confidence' ? null : 
-                                    `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+                                label: ctx => {
+                                    if (ctx.dataset.label === 'Lower Confidence' || ctx.dataset.label === 'Confidence Range') return null;
+                                    return `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`;
+                                }
                             }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: v => v.toLocaleString() },
-                            grid: { color: 'rgba(0, 0, 0, 0.1)' }
+                            ticks: { callback: v => v.toLocaleString(), font: { size: 11 } },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false }
                         },
-                        x: { grid: { color: 'rgba(0, 0, 0, 0.1)' } }
+                        x: { 
+                            grid: { display: false, drawBorder: false },
+                            ticks: { font: { size: 11 } }
+                        }
                     }
                 }
             });
+            
+            generateCustomLegend(demandChart);
+        }
+
+        function generateCustomLegend(chart) {
+            const container = document.getElementById('custom-chart-legend');
+            container.innerHTML = '';
+            
+            const items = chart.data.datasets.map((dataset, index) => {
+                if (dataset.label === 'Lower Confidence') return null; // Skip helper dataset
+                
+                // For Confidence Range, we want to show it but maybe not toggle it? 
+                // Or merge with Forecast? Let's keep it separate for clarity.
+                
+                const isHidden = !chart.isDatasetVisible(index);
+                const color = dataset.borderColor !== 'transparent' ? dataset.borderColor : dataset.backgroundColor;
+                const isDashed = dataset.borderDash && dataset.borderDash.length > 0;
+                
+                const item = document.createElement('div');
+                item.className = `legend-item ${isHidden ? 'hidden' : ''}`;
+                item.onclick = () => {
+                    chart.setDatasetVisibility(index, !chart.isDatasetVisible(index));
+                    chart.update();
+                    generateCustomLegend(chart); // Re-render to update styling
+                    
+                    // Sync toggles if applicable
+                    if (dataset.label === 'Actual (Last Year)') {
+                        document.getElementById('show-ly').checked = !isHidden;
+                    }
+                    if (dataset.label === 'Actual (2 Years Ago)') {
+                        document.getElementById('show-ly1').checked = !isHidden;
+                    }
+                };
+                
+                let symbolHtml = '';
+                if (dataset.label === 'Confidence Range') {
+                    symbolHtml = `<span class="legend-color-box" style="background-color: ${dataset.backgroundColor}; width: 16px; height: 10px; border: 1px solid #cbd5e1;"></span>`;
+                } else if (isDashed) {
+                    symbolHtml = `<span class="legend-line-box" style="background: repeating-linear-gradient(90deg, ${color}, ${color} 5px, transparent 5px, transparent 10px);"></span>`;
+                } else {
+                    symbolHtml = `<span class="legend-line-box" style="background-color: ${color}; height: 3px;"></span>`;
+                }
+                
+                item.innerHTML = `
+                    ${symbolHtml}
+                    <span>${dataset.label}</span>
+                `;
+                
+                return item;
+            }).filter(Boolean);
+            
+            items.forEach(item => container.appendChild(item));
         }
 
         function setupChartFilters() {
@@ -2414,6 +3962,8 @@
                 initializeChart();
                 updateKPIs();
             });
+            document.getElementById('show-ly')?.addEventListener('change', () => initializeChart());
+            document.getElementById('show-ly1')?.addEventListener('change', () => initializeChart());
         }
 
         // ==================== KPIs ====================
@@ -2430,15 +3980,48 @@
                 return true;
             });
 
-            const totalForecast = filtered.reduce((sum, f) => sum + f.forecast, 0);
-            const avgWeekly = Math.round(totalForecast / 4);
+            const totalRevenue = filtered.reduce((sum, f) => sum + (f.revenue || 0), 0);
+            
+            // Calculate historical revenue for comparison
+            let filteredLY = historicalLY.filter(f => {
+                const sku = skuData.find(s => s.id === f.skuId);
+                if (categoryFilter !== 'all' && sku?.categoryId !== categoryFilter) return false;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return false;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return false;
+                return true;
+            });
+            const revenueLY = filteredLY.reduce((sum, f) => sum + (f.revenue || 0), 0);
+
+            let filteredLY2 = historicalLY2.filter(f => {
+                const sku = skuData.find(s => s.id === f.skuId);
+                if (categoryFilter !== 'all' && sku?.categoryId !== categoryFilter) return false;
+                if (skuFilter !== 'all' && f.skuId !== skuFilter) return false;
+                if (outletFilter !== 'all' && f.outletId !== outletFilter) return false;
+                return true;
+            });
+            const revenueLY2 = filteredLY2.reduce((sum, f) => sum + (f.revenue || 0), 0);
+
             const overrides = filtered.filter(f => f.isOverridden).length;
             const accuracy = 94.2 + (Math.random() * 2 - 1);
+            
+            const varLY = ((totalRevenue - revenueLY) / revenueLY) * 100;
+            const varLY2 = ((totalRevenue - revenueLY2) / revenueLY2) * 100;
 
             document.getElementById('kpi-accuracy').textContent = accuracy.toFixed(1) + '%';
-            document.getElementById('kpi-weekly-forecast').textContent = avgWeekly.toLocaleString();
-            document.getElementById('kpi-weekly-actual').textContent = Math.round(avgWeekly * 0.96).toLocaleString();
+            document.getElementById('kpi-revenue').textContent = formatRevenue(totalRevenue);
             document.getElementById('kpi-overrides').textContent = overrides;
+
+            const lyEl = document.getElementById('kpi-revenue-ly');
+            const lyIcon = document.getElementById('kpi-revenue-ly-icon');
+            lyEl.textContent = (varLY >= 0 ? '+' : '') + varLY.toFixed(1) + '% vs LY';
+            lyIcon.textContent = varLY >= 0 ? '▲' : '▼';
+            lyEl.parentElement.className = `kpi-change ${varLY >= 0 ? 'up' : 'down'}`;
+
+            const ly2El = document.getElementById('kpi-revenue-ly2');
+            const ly2Icon = document.getElementById('kpi-revenue-ly2-icon');
+            ly2El.textContent = (varLY2 >= 0 ? '+' : '') + varLY2.toFixed(1) + '%';
+            ly2Icon.textContent = varLY2 >= 0 ? '▲' : '▼';
+            ly2Icon.parentElement.className = `kpi-change ${varLY2 >= 0 ? 'up' : 'down'}`;
         }
 
         // ==================== SEARCH ====================
@@ -2525,6 +4108,7 @@
             initializeChart();
             updateKPIs();
             renderEventsTable();
+            renderGroupingPills();
         });
     </script>
 </body>
