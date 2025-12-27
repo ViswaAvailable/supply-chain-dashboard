@@ -17,14 +17,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             height={48}
             className="object-contain"
           />
-          <h1 className="text-5xl font-bold">Lemondots.</h1>
+          <h1 className="text-5xl font-bold">Lemondots AI</h1>
         </div>
         <div className="max-w-2xl">
           <p className="text-4xl font-semibold mb-8 text-slate-300">
-            Uptime up. Dead stock down.
+            Say Goodbye to Guesswork!
           </p>
           <p className="text-2xl text-slate-400">
-            Know When, What, How much and with Whom to Order
+            Login to India's Most Accurate Demand Forecast for your Company
           </p>
         </div>
       </div>

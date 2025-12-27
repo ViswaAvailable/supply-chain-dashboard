@@ -1,17 +1,26 @@
 // src/app/layout.tsx
 
 import './globals.css';
-import { Inter } from 'next/font/google';
+import { Inter, Space_Grotesk } from 'next/font/google';
 
-// 1. Import your providers
+// Import providers
 import SupabaseProvider from '@/components/SupabaseProvider';
-import { AuthProvider } from '@/lib/supabase/useAuth'; // Note the .tsx extension may not be needed in the import path
+import { AuthProvider } from '@/lib/supabase/useAuth';
+import { QueryProvider } from '@/components/QueryProvider';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+});
 
 export const metadata = {
-  title: 'Your App Title',
-  description: 'Your App Description',
+  title: 'LemonDots AI - Demand Planning Platform',
+  description: 'ML-powered demand forecasting for food manufacturing companies',
 };
 
 export default function RootLayout({
@@ -20,13 +29,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className={inter.className}>
-        {/* 2. Wrap your children with the providers */}
-        {/* SupabaseProvider must be on the outside because AuthProvider uses it */}
         <SupabaseProvider>
           <AuthProvider>
-            {children}
+            <QueryProvider>
+              {children}
+            </QueryProvider>
           </AuthProvider>
         </SupabaseProvider>
       </body>
