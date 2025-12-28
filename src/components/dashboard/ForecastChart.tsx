@@ -288,6 +288,10 @@ export function ForecastChart({
               return '';
             }
             
+            if (value === null || value === undefined) {
+              return `${label}: 0 units`;
+            }
+            
             return `${label}: ${value.toLocaleString('en-IN')} units`;
           },
           afterBody: (items) => {
