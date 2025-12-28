@@ -31,7 +31,7 @@ import { Search, Save, Plus, Trash2, RefreshCw, Settings, FolderPlus, ShieldAler
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/supabase/useAuth';
 import { useSupabase } from '@/components/SupabaseProvider';
-import type { SKU, Category } from '@/lib/types';
+import type { SKU } from '@/lib/types';
 
 interface SKUEdit {
   min_quantity?: number;
@@ -39,11 +39,17 @@ interface SKUEdit {
 }
 
 export default function SKUSettingsPage() {
+  // ============================================
+  // ALL HOOKS MUST BE CALLED AT THE TOP
+  // Before any conditional returns
+  // ============================================
+  
   const router = useRouter();
   const { user } = useAuth();
   const supabase = useSupabase();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   
+  // State hooks
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [pendingChanges, setPendingChanges] = useState<Map<string, SKUEdit>>(new Map());
@@ -51,16 +57,53 @@ export default function SKUSettingsPage() {
   const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
+  // Data fetching hooks
   const { data: skus = [], isLoading, refetch } = useSKUs();
   const { data: categories = [] } = useCategories();
 
-  // All hooks must be called before any conditional returns
+  // Mutation hooks
   const updateSKU = useUpdateSKU();
   const bulkUpdateSKUs = useBulkUpdateSKUs();
   const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
 
-  // Check admin access
+  // Memoized values - MUST be called on every render
+  const regularSKUs = useMemo(() => {
+    return skus.filter(s => !s.is_new_product);
+  }, [skus]);
+
+  const filteredSKUs = useMemo(() => {
+    return regularSKUs.filter(sku => {
+      if (categoryFilter === 'uncategorized') {
+        if (sku.category_id !== null && sku.category_id !== undefined) return false;
+      } else if (categoryFilter !== 'all') {
+        if (sku.category_id !== categoryFilter) return false;
+      }
+      
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = sku.name.toLowerCase().includes(query);
+        const matchesCategory = sku.category?.name.toLowerCase().includes(query);
+        
+        if (!matchesName && !matchesCategory) return false;
+      }
+      
+      return true;
+    });
+  }, [regularSKUs, categoryFilter, searchQuery]);
+
+  const stats = useMemo(() => {
+    const withMinQty = regularSKUs.filter(s => s.min_quantity > 0).length;
+    const withCategory = regularSKUs.filter(s => s.category_id).length;
+    const totalValue = regularSKUs.reduce((sum, s) => sum + (s.avg_forecast * s.price_per_unit), 0);
+    
+    return { withMinQty, withCategory, totalValue };
+  }, [regularSKUs]);
+
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = pendingChanges.size > 0;
+
+  // Effect hooks
   useEffect(() => {
     async function checkAdminAccess() {
       if (!user) return;
@@ -82,6 +125,74 @@ export default function SKUSettingsPage() {
     
     checkAdminAccess();
   }, [user, supabase, router]);
+
+  // ============================================
+  // HELPER FUNCTIONS (not hooks, safe anywhere)
+  // ============================================
+
+  const getCurrentValue = (sku: SKU, field: keyof SKUEdit) => {
+    const pending = pendingChanges.get(sku.id);
+    if (pending && pending[field] !== undefined) {
+      return pending[field];
+    }
+    return sku[field];
+  };
+
+  const handleFieldChange = (skuId: string, field: keyof SKUEdit, value: number | string) => {
+    const newChanges = new Map(pendingChanges);
+    const existing = newChanges.get(skuId) || {};
+    newChanges.set(skuId, { ...existing, [field]: value });
+    setPendingChanges(newChanges);
+  };
+
+  const handleSaveAll = async () => {
+    if (pendingChanges.size === 0) return;
+
+    const updates = Array.from(pendingChanges.entries()).map(([id, data]) => ({
+      id,
+      data,
+    }));
+
+    try {
+      await bulkUpdateSKUs.mutateAsync(updates);
+      setPendingChanges(new Map());
+      toast.success(`${updates.length} SKU(s) updated successfully`);
+    } catch (error) {
+      toast.error('Failed to save changes. Please try again.');
+      console.error(error);
+    }
+  };
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Please enter a category name');
+      return;
+    }
+
+    try {
+      await createCategory.mutateAsync(newCategoryName.trim());
+      setNewCategoryName('');
+      setIsCategoryModalOpen(false);
+      toast.success('Category created successfully');
+    } catch (error) {
+      toast.error('Failed to create category. Please try again.');
+      console.error(error);
+    }
+  };
+
+  const handleDeleteCategory = async (id: string) => {
+    try {
+      await deleteCategory.mutateAsync(id);
+      toast.success('Category deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete category. Please try again.');
+      console.error(error);
+    }
+  };
+
+  // ============================================
+  // CONDITIONAL RETURNS (after all hooks)
+  // ============================================
 
   // Show loading while checking access
   if (isAdmin === null) {
@@ -112,112 +223,6 @@ export default function SKUSettingsPage() {
     );
   }
 
-  // Filter out new products (those are handled separately)
-  const regularSKUs = useMemo(() => {
-    return skus.filter(s => !s.is_new_product);
-  }, [skus]);
-
-  // Apply filters
-  const filteredSKUs = useMemo(() => {
-    return regularSKUs.filter(sku => {
-      // Category filter
-      if (categoryFilter === 'uncategorized') {
-        // Show only SKUs without a category
-        if (sku.category_id !== null && sku.category_id !== undefined) return false;
-      } else if (categoryFilter !== 'all') {
-        if (sku.category_id !== categoryFilter) return false;
-      }
-      
-      // Search query
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesName = sku.name.toLowerCase().includes(query);
-        const matchesCategory = sku.category?.name.toLowerCase().includes(query);
-        
-        if (!matchesName && !matchesCategory) return false;
-      }
-      
-      return true;
-    });
-  }, [regularSKUs, categoryFilter, searchQuery]);
-
-  // Get current value (pending change or original)
-  const getCurrentValue = (sku: SKU, field: keyof SKUEdit) => {
-    const pending = pendingChanges.get(sku.id);
-    if (pending && pending[field] !== undefined) {
-      return pending[field];
-    }
-    return sku[field];
-  };
-
-  // Handle field change
-  const handleFieldChange = (skuId: string, field: keyof SKUEdit, value: number | string) => {
-    const newChanges = new Map(pendingChanges);
-    const existing = newChanges.get(skuId) || {};
-    newChanges.set(skuId, { ...existing, [field]: value });
-    setPendingChanges(newChanges);
-  };
-
-  // Check if there are unsaved changes
-  const hasUnsavedChanges = pendingChanges.size > 0;
-
-  // Save all changes
-  const handleSaveAll = async () => {
-    if (pendingChanges.size === 0) return;
-
-    const updates = Array.from(pendingChanges.entries()).map(([id, data]) => ({
-      id,
-      data,
-    }));
-
-    try {
-      await bulkUpdateSKUs.mutateAsync(updates);
-      setPendingChanges(new Map());
-      toast.success(`${updates.length} SKU(s) updated successfully`);
-    } catch (error) {
-      toast.error('Failed to save changes. Please try again.');
-      console.error(error);
-    }
-  };
-
-  // Create new category
-  const handleCreateCategory = async () => {
-    if (!newCategoryName.trim()) {
-      toast.error('Please enter a category name');
-      return;
-    }
-
-    try {
-      await createCategory.mutateAsync(newCategoryName.trim());
-      setNewCategoryName('');
-      setIsCategoryModalOpen(false);
-      toast.success('Category created successfully');
-    } catch (error) {
-      toast.error('Failed to create category. Please try again.');
-      console.error(error);
-    }
-  };
-
-  // Delete category
-  const handleDeleteCategory = async (id: string) => {
-    try {
-      await deleteCategory.mutateAsync(id);
-      toast.success('Category deleted successfully');
-    } catch (error) {
-      toast.error('Failed to delete category. Please try again.');
-      console.error(error);
-    }
-  };
-
-  // Summary stats
-  const stats = useMemo(() => {
-    const withMinQty = regularSKUs.filter(s => s.min_quantity > 0).length;
-    const withCategory = regularSKUs.filter(s => s.category_id).length;
-    const totalValue = regularSKUs.reduce((sum, s) => sum + (s.avg_forecast * s.price_per_unit), 0);
-    
-    return { withMinQty, withCategory, totalValue };
-  }, [regularSKUs]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -228,6 +233,10 @@ export default function SKUSettingsPage() {
       </div>
     );
   }
+
+  // ============================================
+  // MAIN RENDER
+  // ============================================
 
   return (
     <div className="space-y-6">
@@ -557,4 +566,3 @@ export default function SKUSettingsPage() {
     </div>
   );
 }
-
