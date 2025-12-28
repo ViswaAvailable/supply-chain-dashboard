@@ -24,10 +24,22 @@ import { useAuth } from '@/lib/supabase/useAuth';
 import { useState, useEffect } from 'react';
 import { useSupabase } from '@/components/SupabaseProvider';
 
+// LemonDots theme colors
+const theme = {
+  sidebar: '#1e293b',
+  sidebarForeground: '#ffffff',
+  sidebarForeground70: 'rgba(255, 255, 255, 0.7)',
+  sidebarForeground60: 'rgba(255, 255, 255, 0.6)',
+  sidebarAccent: '#334155',
+  sidebarAccent50: 'rgba(51, 65, 85, 0.5)',
+  sidebarPrimary: '#fbbf24',
+  sidebarBorder: '#334155',
+};
+
 interface NavItem {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 }
 
 const forecastingItems: NavItem[] = [
@@ -80,12 +92,21 @@ export function Sidebar() {
   const isAdmin = userRole === 'admin';
 
   return (
-    <aside className="fixed left-0 top-16 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
+    <aside 
+      className="fixed left-0 top-16 bottom-0 w-64 flex flex-col"
+      style={{ 
+        backgroundColor: theme.sidebar, 
+        borderRight: `1px solid ${theme.sidebarBorder}` 
+      }}
+    >
       {/* Navigation Sections */}
       <nav className="flex-1 overflow-y-auto py-4">
         {/* Forecasting Section */}
         <div className="mb-6">
-          <h3 className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
+          <h3 
+            className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider"
+            style={{ color: theme.sidebarForeground60 }}
+          >
             Forecasting
           </h3>
           <ul className="space-y-1 px-2">
@@ -97,14 +118,17 @@ export function Sidebar() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground border-r-2 border-sidebar-primary'
-                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                    )}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                    style={{
+                      backgroundColor: isActive ? theme.sidebarAccent : 'transparent',
+                      color: isActive ? theme.sidebarForeground : theme.sidebarForeground70,
+                      borderRight: isActive ? `2px solid ${theme.sidebarPrimary}` : 'none',
+                    }}
                   >
-                    <Icon className={cn('h-4 w-4', isActive && 'text-sidebar-primary')} />
+                    <Icon 
+                      className="h-4 w-4" 
+                      style={{ color: isActive ? theme.sidebarPrimary : 'inherit' }}
+                    />
                     {item.label}
                   </Link>
                 </li>
@@ -116,7 +140,10 @@ export function Sidebar() {
         {/* Configuration Section - Only visible to admins */}
         {isAdmin && (
           <div className="mb-6">
-            <h3 className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
+            <h3 
+              className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider"
+              style={{ color: theme.sidebarForeground60 }}
+            >
               Configuration
             </h3>
             <ul className="space-y-1 px-2">
@@ -128,14 +155,17 @@ export function Sidebar() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                        isActive
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground border-r-2 border-sidebar-primary'
-                          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                      )}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                      style={{
+                        backgroundColor: isActive ? theme.sidebarAccent : 'transparent',
+                        color: isActive ? theme.sidebarForeground : theme.sidebarForeground70,
+                        borderRight: isActive ? `2px solid ${theme.sidebarPrimary}` : 'none',
+                      }}
                     >
-                      <Icon className={cn('h-4 w-4', isActive && 'text-sidebar-primary')} />
+                      <Icon 
+                        className="h-4 w-4" 
+                        style={{ color: isActive ? theme.sidebarPrimary : 'inherit' }}
+                      />
                       {item.label}
                     </Link>
                   </li>
@@ -147,19 +177,36 @@ export function Sidebar() {
       </nav>
 
       {/* Profile Section */}
-      <div className="p-4 border-t border-sidebar-border">
+      <div 
+        className="p-4"
+        style={{ borderTop: `1px solid ${theme.sidebarBorder}` }}
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sidebar-primary to-amber-600 flex items-center justify-center text-sidebar-primary-foreground font-bold text-sm shadow-md">
+            <button 
+              className="w-full flex items-center gap-3 p-2 rounded-lg transition-colors"
+              style={{ backgroundColor: 'transparent' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = theme.sidebarAccent50}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-md"
+                style={{ 
+                  background: `linear-gradient(to bottom right, ${theme.sidebarPrimary}, #d97706)`,
+                  color: theme.sidebar
+                }}
+              >
                 {userInitials || <User className="h-5 w-5" />}
               </div>
               <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">
+                <p 
+                  className="text-sm font-medium truncate"
+                  style={{ color: theme.sidebarForeground }}
+                >
                   {userName || 'User'}
                 </p>
               </div>
-              <ChevronDown className="h-4 w-4 text-sidebar-foreground/60" />
+              <ChevronDown className="h-4 w-4" style={{ color: theme.sidebarForeground60 }} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
@@ -183,4 +230,3 @@ export function Sidebar() {
     </aside>
   );
 }
-
