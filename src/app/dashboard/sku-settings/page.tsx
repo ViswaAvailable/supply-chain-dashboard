@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,8 +27,10 @@ import {
 import { useSKUs, useCategories } from '@/lib/hooks/useForecastData';
 import { useUpdateSKU, useBulkUpdateSKUs, useCreateCategory, useDeleteCategory } from '@/lib/hooks/useSKUMutations';
 import { getCategoryColor, formatINR } from '@/lib/forecast-utils';
-import { Search, Save, Plus, Trash2, RefreshCw, Settings, FolderPlus } from 'lucide-react';
+import { Search, Save, Plus, Trash2, RefreshCw, Settings, FolderPlus, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/supabase/useAuth';
+import { useSupabase } from '@/components/SupabaseProvider';
 import type { SKU, Category } from '@/lib/types';
 
 interface SKUEdit {
@@ -36,6 +39,11 @@ interface SKUEdit {
 }
 
 export default function SKUSettingsPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const supabase = useSupabase();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [pendingChanges, setPendingChanges] = useState<Map<string, SKUEdit>>(new Map());
@@ -45,6 +53,58 @@ export default function SKUSettingsPage() {
 
   const { data: skus = [], isLoading, refetch } = useSKUs();
   const { data: categories = [] } = useCategories();
+
+  // Check admin access
+  useEffect(() => {
+    async function checkAdminAccess() {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.role === 'admin') {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+        toast.error('Access denied. Admin privileges required.');
+        router.push('/dashboard');
+      }
+    }
+    
+    checkAdminAccess();
+  }, [user, supabase, router]);
+
+  // Show loading while checking access
+  if (isAdmin === null) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">Checking access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center">
+            <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+            <p className="text-muted-foreground">
+              You need admin privileges to access SKU Settings.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const updateSKU = useUpdateSKU();
   const bulkUpdateSKUs = useBulkUpdateSKUs();

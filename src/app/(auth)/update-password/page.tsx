@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSupabase } from "@/components/SupabaseProvider"; // CHANGE 1: Import the context hook
+import { useSupabase } from "@/components/SupabaseProvider";
 import { useAuth } from "@/lib/supabase/useAuth";
+import { Lock, AlertCircle, CheckCircle2, Shield } from "lucide-react";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
-  const supabase = useSupabase(); // CHANGE 2: Get the client from context
+  const supabase = useSupabase();
   const { user, loading: authLoading } = useAuth();
 
   const [password, setPassword] = useState("");
@@ -30,9 +31,6 @@ export default function UpdatePasswordPage() {
     setError(null);
     setSuccess(null);
 
-    // This logic works perfectly with the new client instance.
-    // The client from our context will automatically handle the session
-    // from the password reset link in the URL.
     const { error } = await supabase.auth.updateUser({ password });
 
     setLoading(false);
@@ -42,64 +40,117 @@ export default function UpdatePasswordPage() {
       setSuccess("Your password has been updated successfully!");
       setTimeout(() => {
         router.push("/login");
-      }, 2000); // Redirect to login after 2 seconds
+      }, 2000);
     }
   };
 
   if (authLoading) {
-    return <div className="flex h-screen items-center justify-center">Verifying session...</div>;
+    return (
+      <div className="w-full flex flex-col items-center justify-center py-12">
+        <div className="w-10 h-10 border-4 border-[#fbbf24] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-[#64748b]">Verifying your session...</p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6 text-center">Set a New Password</h1>
+    <div className="w-full">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="w-12 h-12 rounded-full bg-[#fbbf24]/10 flex items-center justify-center mb-4">
+          <Shield className="h-6 w-6 text-[#fbbf24]" />
+        </div>
+        <h1 className="text-2xl font-bold text-[#1e293b] mb-2">
+          Set a new password
+        </h1>
+        <p className="text-[#64748b]">
+          Create a strong password for your account
+        </p>
+      </div>
 
+      {/* Error message */}
       {error && (
-        <div className="mb-4 text-red-600 text-center font-medium">{error}</div>
-      )}
-      {success && (
-        <div className="mb-4 text-green-600 text-center font-medium">{success}</div>
+        <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-red-800">Password update failed</p>
+            <p className="text-sm text-red-600 mt-0.5">{error}</p>
+          </div>
+        </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium mb-1"
-          >
-            New Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+      {/* Success message */}
+      {success && (
+        <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 flex items-start gap-3">
+          <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-green-800">Password updated!</p>
+            <p className="text-sm text-green-600 mt-0.5">{success}</p>
+          </div>
         </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* New Password field */}
         <div>
-          <label
-            htmlFor="confirm-password"
-            className="block text-sm font-medium mb-1"
-          >
-            Confirm New Password
+          <label htmlFor="password" className="block text-sm font-medium text-[#1e293b] mb-2">
+            New password
           </label>
-          <input
-            id="confirm-password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-[#94a3b8]" />
+            </div>
+            <input 
+              id="password" 
+              type="password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+              placeholder="Enter new password"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-lg text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent transition-all"
+            />
+          </div>
         </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+
+        {/* Confirm Password field */}
+        <div>
+          <label htmlFor="confirm-password" className="block text-sm font-medium text-[#1e293b] mb-2">
+            Confirm new password
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-[#94a3b8]" />
+            </div>
+            <input 
+              id="confirm-password" 
+              type="password" 
+              value={confirmPassword} 
+              onChange={(e) => setConfirmPassword(e.target.value)} 
+              required 
+              placeholder="Confirm new password"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-lg text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent transition-all"
+            />
+          </div>
+          <p className="mt-2 text-xs text-[#94a3b8]">
+            Must be at least 8 characters
+          </p>
+        </div>
+
+        {/* Submit button */}
+        <button 
+          type="submit" 
           disabled={loading || !!success}
+          className="w-full bg-[#1e293b] text-white py-3 px-4 rounded-lg font-semibold hover:bg-[#334155] focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          {loading ? "Updating..." : "Update Password"}
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Updating password...</span>
+            </>
+          ) : (
+            <span>Update password</span>
+          )}
         </button>
       </form>
     </div>

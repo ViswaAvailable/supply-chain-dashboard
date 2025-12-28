@@ -11,11 +11,12 @@
 3. [Database Schema](#database-schema)
 4. [Data Flow](#data-flow)
 5. [Application Structure](#application-structure)
-6. [Core Business Logic](#core-business-logic)
-7. [React Query Data Fetching](#react-query-data-fetching)
-8. [Supabase Integration](#supabase-integration)
-9. [Key Features Implementation](#key-features-implementation)
-10. [Environment Setup](#environment-setup)
+6. [Role-Based Access Control](#role-based-access-control)
+7. [Core Business Logic](#core-business-logic)
+8. [React Query Data Fetching](#react-query-data-fetching)
+9. [Supabase Integration](#supabase-integration)
+10. [Key Features Implementation](#key-features-implementation)
+11. [Environment Setup](#environment-setup)
 
 ---
 
@@ -139,12 +140,17 @@ Root entity for multi-tenancy. All other tables reference this.
 ```sql
 id              UUID PRIMARY KEY (references auth.users)
 org_id          UUID REFERENCES organizations(id)
+org_name        TEXT
 email           TEXT
 name            TEXT
-role            TEXT ('admin' | 'user')
+role            TEXT ('admin' | 'viewer')
 created_at      TIMESTAMP
 ```
 Links Supabase Auth users to organizations.
+
+**Role Values:**
+- `admin`: Full access to all features including configuration and user management
+- `viewer`: Read-only access to forecasting pages (no configuration access)
 
 #### `outlets`
 ```sql
@@ -355,9 +361,10 @@ src/
 │   │   ├── layout.tsx             # Dashboard layout (with sidebar)
 │   │   ├── page.tsx               # Demand Forecast (default)
 │   │   ├── daily/page.tsx         # Daily Forecast Detail
-│   │   ├── events/page.tsx        # Event Manager
+│   │   ├── events/page.tsx        # Event Manager (admin only)
 │   │   ├── event-analysis/page.tsx # Event Analysis
-│   │   └── sku-settings/page.tsx  # SKU Settings
+│   │   ├── profile/page.tsx       # Profile & Team Management
+│   │   └── sku-settings/page.tsx  # SKU Settings (admin only)
 │   │
 │   ├── api/                       # API routes (server-side)
 │   │   ├── admin-invite/route.ts  # Invite new users
@@ -401,6 +408,154 @@ src/
 │
 └── styles/
     └── (included in globals.css)
+```
+
+---
+
+## Role-Based Access Control
+
+### User Roles
+
+The application supports two user roles:
+
+| Role | Description |
+|------|-------------|
+| `admin` | Full access to all features, including configuration and user management |
+| `viewer` | Read-only access to forecasting pages only |
+
+### Access Matrix
+
+| Page | Admin | Viewer |
+|------|-------|--------|
+| Demand Forecast | ✅ | ✅ |
+| Daily Forecast Detail | ✅ | ✅ |
+| Event Analysis | ✅ | ✅ |
+| SKU Settings | ✅ | ❌ |
+| Event Manager | ✅ | ❌ |
+| Profile Settings | ✅ (with team management) | ✅ (view only) |
+
+### Implementation
+
+#### Sidebar Visibility
+
+**File:** `src/components/dashboard/Sidebar.tsx`
+
+The Configuration section (SKU Settings, Event Manager) is conditionally rendered based on user role:
+
+```typescript
+const [userRole, setUserRole] = useState<string | null>(null);
+
+useEffect(() => {
+  async function fetchUserProfile() {
+    const { data } = await supabase
+      .from('users')
+      .select('name, email, role')
+      .eq('id', user.id)
+      .single();
+    
+    if (data) {
+      setUserRole(data.role);
+    }
+  }
+  fetchUserProfile();
+}, [user, supabase]);
+
+const isAdmin = userRole === 'admin';
+
+// In render:
+{isAdmin && (
+  <div className="mb-6">
+    <h3>Configuration</h3>
+    {/* SKU Settings and Event Manager links */}
+  </div>
+)}
+```
+
+#### Route Protection
+
+Admin-only pages (`events/page.tsx`, `sku-settings/page.tsx`) include route protection:
+
+```typescript
+// Check admin access on mount
+useEffect(() => {
+  async function checkAdminAccess() {
+    const { data } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    
+    if (data?.role === 'admin') {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+      toast.error('Access denied. Admin privileges required.');
+      router.push('/dashboard');
+    }
+  }
+  checkAdminAccess();
+}, [user, supabase, router]);
+
+// Show access denied if not admin
+if (!isAdmin) {
+  return <AccessDeniedCard />;
+}
+```
+
+### Profile & Team Management
+
+**File:** `src/app/dashboard/profile/page.tsx`
+
+**All Users Can:**
+- View their profile information (name, email, organization, role)
+- Sign out
+
+**Admin Users Can Additionally:**
+- View all team members in their organization
+- Invite new users via email
+- Set role (admin or viewer) for new users
+- Remove users from the organization
+
+### User Invitation Flow
+
+```
+┌─────────────┐     ┌─────────────────┐     ┌─────────────────────┐
+│   Admin     │────▶│  Profile Page   │────▶│  POST /api/         │
+│   clicks    │     │  Invite Modal   │     │  admin-invite       │
+│   "Invite"  │     │                 │     │                     │
+└─────────────┘     └─────────────────┘     └──────────┬──────────┘
+                                                       │
+                                                       ▼
+                                            ┌─────────────────────┐
+                                            │  Supabase Auth      │
+                                            │  inviteUserByEmail  │
+                                            │  (sends email)      │
+                                            └──────────┬──────────┘
+                                                       │
+                                                       ▼
+                                            ┌─────────────────────┐
+                                            │  New user clicks    │
+                                            │  email link →       │
+                                            │  sets password      │
+                                            └─────────────────────┘
+```
+
+### User Deletion Flow
+
+```
+┌─────────────┐     ┌─────────────────┐     ┌─────────────────────┐
+│   Admin     │────▶│  Confirm email  │────▶│  DELETE /api/       │
+│   clicks    │     │  (type to       │     │  admin-delete-user  │
+│   "Remove"  │     │   confirm)      │     │                     │
+└─────────────┘     └─────────────────┘     └──────────┬──────────┘
+                                                       │
+                                                       ▼
+                                            ┌─────────────────────┐
+                                            │  1. Delete from     │
+                                            │     public.users    │
+                                            │  2. Delete from     │
+                                            │     auth.users      │
+                                            └─────────────────────┘
 ```
 
 ---
@@ -690,6 +845,30 @@ const { error } = await supabase
 - Assign categories to SKUs
 - Create/delete categories
 - Category deletion auto-uncategorizes SKUs
+- **Admin-only access** with route protection
+
+### 6. Profile & Team Management
+
+**File:** `src/app/dashboard/profile/page.tsx`
+
+**Features:**
+- Display user profile information
+- Role badge (Admin with crown icon, Viewer with eye icon)
+- **Admin-only:** Team members table
+- **Admin-only:** Invite new users modal
+- **Admin-only:** Remove users with email confirmation
+- Refresh team list
+
+**API Routes:**
+- `POST /api/admin-invite` - Send invitation email
+- `DELETE /api/admin-delete-user` - Remove user from organization
+
+**Security:**
+- JWT token validation
+- Admin role verification (both JWT and database)
+- Organization isolation (can only manage users in same org)
+- Self-deletion prevention
+- Email confirmation required for deletion
 
 ---
 
@@ -808,6 +987,47 @@ interface HistoricalSale {
   sale_date: string;
   actual_sales: number;
   revenue: number | null;
+}
+```
+
+---
+
+## Common Patterns & Gotchas
+
+### AlertDialog with Complex Content
+
+Shadcn's `AlertDialogDescription` renders as a `<p>` element. When you need complex content (multiple paragraphs, form inputs), use `asChild` to avoid HTML nesting errors:
+
+```tsx
+// ❌ Wrong - causes hydration errors
+<AlertDialogDescription>
+  <p>First paragraph</p>
+  <div>Some content</div>
+</AlertDialogDescription>
+
+// ✅ Correct - use asChild
+<AlertDialogDescription asChild>
+  <div className="space-y-3">
+    <p>First paragraph</p>
+    <div>Some content</div>
+  </div>
+</AlertDialogDescription>
+```
+
+### Chart.js Tooltip Null Checks
+
+When using Chart.js tooltips with TypeScript, always add null checks for parsed values:
+
+```typescript
+// ❌ Wrong - TypeScript error on build
+label: (context) => {
+  return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
+}
+
+// ✅ Correct - handle null case
+label: (context) => {
+  const value = context.parsed.y;
+  return `${context.dataset.label}: ${value !== null ? value.toLocaleString() : '0'}`;
 }
 ```
 
