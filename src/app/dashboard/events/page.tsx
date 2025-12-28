@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,8 +28,10 @@ import {
 import { useEvents, useOutlets, useCategories, useSKUs } from '@/lib/hooks/useForecastData';
 import { useCreateEvent, useUpdateEvent, useDeleteEvent, useToggleEventEnabled } from '@/lib/hooks/useEventMutations';
 import { formatDateRange, getEventTypeColor } from '@/lib/forecast-utils';
-import { Plus, Pencil, Trash2, Calendar, RefreshCw, AlertCircle, BarChart3, Info } from 'lucide-react';
+import { Plus, Pencil, Trash2, Calendar, RefreshCw, AlertCircle, BarChart3, Info, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/supabase/useAuth';
+import { useSupabase } from '@/components/SupabaseProvider';
 import type { Event, EventFormData, EventType, EventMode, ComparisonMethod } from '@/lib/types';
 
 const defaultFormData: EventFormData = {
@@ -49,6 +52,11 @@ const defaultFormData: EventFormData = {
 };
 
 export default function EventManagerPage() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const supabase = useSupabase();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState<EventFormData>(defaultFormData);
@@ -63,6 +71,58 @@ export default function EventManagerPage() {
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
   const toggleEnabled = useToggleEventEnabled();
+
+  // Check admin access
+  useEffect(() => {
+    async function checkAdminAccess() {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.role === 'admin') {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+        toast.error('Access denied. Admin privileges required.');
+        router.push('/dashboard');
+      }
+    }
+    
+    checkAdminAccess();
+  }, [user, supabase, router]);
+
+  // Show loading while checking access
+  if (isAdmin === null) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground">Checking access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if not admin
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center">
+            <ShieldAlert className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+            <p className="text-muted-foreground">
+              You need admin privileges to access Event Manager.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Open modal for new event
   const handleNewEvent = () => {

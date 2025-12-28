@@ -47,6 +47,7 @@ export function Sidebar() {
   const supabase = useSupabase();
   const [userInitials, setUserInitials] = useState('');
   const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUserProfile() {
@@ -54,13 +55,14 @@ export function Sidebar() {
       
       const { data } = await supabase
         .from('users')
-        .select('name, email')
+        .select('name, email, role')
         .eq('id', user.id)
         .single();
 
       if (data) {
         const displayName = data.name || data.email || user.email || '';
         setUserName(displayName);
+        setUserRole(data.role);
         
         // Generate initials
         const parts = displayName.split(/[@\s.]+/).filter(Boolean);
@@ -74,6 +76,8 @@ export function Sidebar() {
 
     fetchUserProfile();
   }, [user, supabase]);
+
+  const isAdmin = userRole === 'admin';
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
@@ -109,35 +113,37 @@ export function Sidebar() {
           </ul>
         </div>
 
-        {/* Configuration Section */}
-        <div className="mb-6">
-          <h3 className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
-            Configuration
-          </h3>
-          <ul className="space-y-1 px-2">
-            {configItems.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground border-r-2 border-sidebar-primary'
-                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                    )}
-                  >
-                    <Icon className={cn('h-4 w-4', isActive && 'text-sidebar-primary')} />
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        {/* Configuration Section - Only visible to admins */}
+        {isAdmin && (
+          <div className="mb-6">
+            <h3 className="px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
+              Configuration
+            </h3>
+            <ul className="space-y-1 px-2">
+              {configItems.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground border-r-2 border-sidebar-primary'
+                          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      )}
+                    >
+                      <Icon className={cn('h-4 w-4', isActive && 'text-sidebar-primary')} />
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </nav>
 
       {/* Profile Section */}
