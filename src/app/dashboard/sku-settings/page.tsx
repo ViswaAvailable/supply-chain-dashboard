@@ -54,6 +54,12 @@ export default function SKUSettingsPage() {
   const { data: skus = [], isLoading, refetch } = useSKUs();
   const { data: categories = [] } = useCategories();
 
+  // All hooks must be called before any conditional returns
+  const updateSKU = useUpdateSKU();
+  const bulkUpdateSKUs = useBulkUpdateSKUs();
+  const createCategory = useCreateCategory();
+  const deleteCategory = useDeleteCategory();
+
   // Check admin access
   useEffect(() => {
     async function checkAdminAccess() {
@@ -105,11 +111,6 @@ export default function SKUSettingsPage() {
       </div>
     );
   }
-
-  const updateSKU = useUpdateSKU();
-  const bulkUpdateSKUs = useBulkUpdateSKUs();
-  const createCategory = useCreateCategory();
-  const deleteCategory = useDeleteCategory();
 
   // Filter out new products (those are handled separately)
   const regularSKUs = useMemo(() => {
