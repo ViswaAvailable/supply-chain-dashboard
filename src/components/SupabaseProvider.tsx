@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client'; // Your modern client helper
 
@@ -13,8 +13,8 @@ const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined
 
 // Define the provider component
 export default function SupabaseProvider({ children }: { children: React.ReactNode }) {
-  // Create the Supabase client instance once
-  const supabase = createClient();
+  // Memoize the Supabase client instance to prevent re-creation on every render
+  const supabase = useMemo(() => createClient(), []);
 
   return (
     <SupabaseContext.Provider value={{ supabase }}>

@@ -49,3 +49,4 @@ export function KPICard({ label, value, change, className }: KPICardProps) {
   );
 }
 
+

@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local development tools (DO NOT COMMIT)
+# These contain secrets, API tokens, and local IDE configurations
+.mcp.json
+.claude/
+.cursor/
+.agents/

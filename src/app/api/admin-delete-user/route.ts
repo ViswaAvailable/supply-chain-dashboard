@@ -31,6 +31,7 @@ import { headers } from 'next/headers';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { logger, extractRequestContext, createErrorResponse } from '@/lib/logger';
 import { z } from 'zod';
+import { apiRateLimit, checkRateLimit } from '@/lib/rate-limit';
 
 // Validation schema for delete user request
 const deleteUserSchema = z.object({
@@ -125,6 +126,34 @@ export async function DELETE(req: Request) {
       }, { status: 403 });
     }
 
+    // Rate limiting: 100 requests per minute per user
+    const { success: rateLimitSuccess, limit, remaining, reset } = await checkRateLimit(
+      user.id,
+      apiRateLimit
+    );
+
+    if (!rateLimitSuccess) {
+      logger.security('Rate limit exceeded for user deletion', {
+        ...authContext,
+        severity: 'MEDIUM',
+        limit,
+        remaining,
+      });
+
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit?.toString() || '',
+            'X-RateLimit-Remaining': remaining?.toString() || '',
+            'X-RateLimit-Reset': reset?.toString() || '',
+            'Retry-After': reset ? Math.ceil((reset - Date.now()) / 1000).toString() : '60',
+          },
+        }
+      );
+    }
+
     // Get admin's organization info
     const { data: adminProfile, error: profileError } = await supabaseAdmin
       .from('users')
@@ -137,7 +166,7 @@ export async function DELETE(req: Request) {
         ...authContext,
         action: 'ADMIN_PROFILE_FETCH_ERROR'
       }, profileError || undefined);
-      
+
       const errorResponse = createErrorResponse(
         'Profile verification failed',
         500,
