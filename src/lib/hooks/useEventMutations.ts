@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSupabase } from '@/components/SupabaseProvider';
 import { useAuth } from '@/lib/supabase/useAuth';
 import type { Event, EventFormData } from '@/lib/types';
+import { eventSchema } from '@/lib/validation/schemas';
 
 export function useCreateEvent() {
   const supabase = useSupabase();
@@ -12,6 +13,12 @@ export function useCreateEvent() {
 
   return useMutation({
     mutationFn: async (data: EventFormData) => {
+      // Validate input data
+      const validationResult = eventSchema.safeParse(data);
+      if (!validationResult.success) {
+        throw new Error(`Validation failed: ${JSON.stringify(validationResult.error.format())}`);
+      }
+
       // Get user's organization
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -25,15 +32,15 @@ export function useCreateEvent() {
 
       const eventData = {
         organization_id: userData.org_id,
-        name: data.name,
-        type: data.type,
-        start_date: data.start_date,
-        end_date: data.end_date,
-        scope_outlet_id: data.scope_outlet_id === 'all' ? null : data.scope_outlet_id,
-        scope_category_id: data.scope_category_id === 'all' ? null : data.scope_category_id,
-        scope_sku_id: data.scope_sku_id === 'all' ? null : data.scope_sku_id,
-        mode: data.mode,
-        uplift_pct: data.mode === 'uplift' ? data.uplift_pct : 0,
+        name: validationResult.data.name,
+        type: validationResult.data.type,
+        start_date: validationResult.data.start_date,
+        end_date: validationResult.data.end_date,
+        scope_outlet_id: validationResult.data.scope_outlet_id === 'all' ? null : validationResult.data.scope_outlet_id,
+        scope_category_id: validationResult.data.scope_category_id === 'all' ? null : validationResult.data.scope_category_id,
+        scope_sku_id: validationResult.data.scope_sku_id === 'all' ? null : validationResult.data.scope_sku_id,
+        mode: validationResult.data.mode,
+        uplift_pct: validationResult.data.mode === 'uplift' ? validationResult.data.uplift_pct : 0,
         enabled: true,
       };
 
@@ -55,12 +62,15 @@ export function useCreateEvent() {
 
 export function useUpdateEvent() {
   const supabase = useSupabase();
+  const { orgId } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<EventFormData> }) => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const updateData: Record<string, unknown> = {};
-      
+
       if (data.name !== undefined) updateData.name = data.name;
       if (data.type !== undefined) updateData.type = data.type;
       if (data.start_date !== undefined) updateData.start_date = data.start_date;
@@ -88,6 +98,7 @@ export function useUpdateEvent() {
         .from('events')
         .update(updateData)
         .eq('id', id)
+        .eq('organization_id', orgId)
         .select()
         .single();
 
@@ -103,14 +114,18 @@ export function useUpdateEvent() {
 
 export function useDeleteEvent() {
   const supabase = useSupabase();
+  const { orgId } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { error } = await supabase
         .from('events')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('organization_id', orgId);
 
       if (error) throw error;
     },
@@ -123,14 +138,18 @@ export function useDeleteEvent() {
 
 export function useToggleEventEnabled() {
   const supabase = useSupabase();
+  const { orgId } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { data: result, error } = await supabase
         .from('events')
         .update({ enabled, updated_at: new Date().toISOString() })
         .eq('id', id)
+        .eq('organization_id', orgId)
         .select()
         .single();
 
@@ -143,4 +162,5 @@ export function useToggleEventEnabled() {
     },
   });
 }
+
 

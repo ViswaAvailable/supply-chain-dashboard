@@ -17,20 +17,23 @@ import type {
 // ===========================================
 export function useOutlets() {
   const supabase = useSupabase();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
 
   return useQuery({
-    queryKey: ['outlets', user?.id],
+    queryKey: ['outlets', user?.id, orgId],
     queryFn: async () => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { data, error } = await supabase
         .from('outlets')
         .select('*')
+        .eq('organization_id', orgId)
         .order('city', { ascending: true });
 
       if (error) throw error;
       return data as Outlet[];
     },
-    enabled: !!user,
+    enabled: !!user && !!orgId,
   });
 }
 
@@ -39,20 +42,23 @@ export function useOutlets() {
 // ===========================================
 export function useCategories() {
   const supabase = useSupabase();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
 
   return useQuery({
-    queryKey: ['categories', user?.id],
+    queryKey: ['categories', user?.id, orgId],
     queryFn: async () => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { data, error } = await supabase
         .from('categories')
         .select('*')
+        .eq('organization_id', orgId)
         .order('name', { ascending: true });
 
       if (error) throw error;
       return data as Category[];
     },
-    enabled: !!user,
+    enabled: !!user && !!orgId,
   });
 }
 
@@ -61,23 +67,26 @@ export function useCategories() {
 // ===========================================
 export function useSKUs() {
   const supabase = useSupabase();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
 
   return useQuery({
-    queryKey: ['skus', user?.id],
+    queryKey: ['skus', user?.id, orgId],
     queryFn: async () => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { data, error } = await supabase
         .from('skus')
         .select(`
           *,
           category:categories(*)
         `)
+        .eq('organization_id', orgId)
         .order('name', { ascending: true });
 
       if (error) throw error;
       return data as (SKU & { category: Category | null })[];
     },
-    enabled: !!user,
+    enabled: !!user && !!orgId,
   });
 }
 
@@ -86,11 +95,13 @@ export function useSKUs() {
 // ===========================================
 export function useEvents() {
   const supabase = useSupabase();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
 
   return useQuery({
-    queryKey: ['events', user?.id],
+    queryKey: ['events', user?.id, orgId],
     queryFn: async () => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { data, error } = await supabase
         .from('events')
         .select(`
@@ -99,12 +110,13 @@ export function useEvents() {
           scope_category:categories(*),
           scope_sku:skus(*)
         `)
+        .eq('organization_id', orgId)
         .order('start_date', { ascending: true });
 
       if (error) throw error;
       return data as Event[];
     },
-    enabled: !!user,
+    enabled: !!user && !!orgId,
   });
 }
 
@@ -113,7 +125,7 @@ export function useEvents() {
 // ===========================================
 export function useForecasts(days: number = 30) {
   const supabase = useSupabase();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
 
   const today = new Date().toISOString().split('T')[0];
   const endDate = new Date();
@@ -121,8 +133,10 @@ export function useForecasts(days: number = 30) {
   const endDateStr = endDate.toISOString().split('T')[0];
 
   return useQuery({
-    queryKey: ['forecasts', user?.id, days],
+    queryKey: ['forecasts', user?.id, orgId, days],
     queryFn: async () => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       const { data, error } = await supabase
         .from('forecasts')
         .select(`
@@ -130,6 +144,7 @@ export function useForecasts(days: number = 30) {
           outlet:outlets(*),
           sku:skus(*, category:categories(*))
         `)
+        .eq('organization_id', orgId)
         .gte('forecast_date', today)
         .lte('forecast_date', endDateStr)
         .order('forecast_date', { ascending: true });
@@ -137,7 +152,7 @@ export function useForecasts(days: number = 30) {
       if (error) throw error;
       return data as (Forecast & { outlet: Outlet; sku: SKU & { category: Category | null } })[];
     },
-    enabled: !!user,
+    enabled: !!user && !!orgId,
   });
 }
 
@@ -146,7 +161,7 @@ export function useForecasts(days: number = 30) {
 // ===========================================
 export function useHistoricalSales(days: number = 30) {
   const supabase = useSupabase();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
 
   // Get dates for last year and 2 years ago
   const today = new Date();
@@ -166,8 +181,10 @@ export function useHistoricalSales(days: number = 30) {
   ly2End.setFullYear(ly2End.getFullYear() - 2);
 
   return useQuery({
-    queryKey: ['historical_sales', user?.id, days],
+    queryKey: ['historical_sales', user?.id, orgId, days],
     queryFn: async () => {
+      if (!orgId) throw new Error('Organization ID not found');
+
       // Fetch last year data
       const { data: lyData, error: lyError } = await supabase
         .from('historical_sales')
@@ -176,6 +193,7 @@ export function useHistoricalSales(days: number = 30) {
           outlet:outlets(*),
           sku:skus(*)
         `)
+        .eq('organization_id', orgId)
         .gte('sale_date', lyStart.toISOString().split('T')[0])
         .lte('sale_date', lyEnd.toISOString().split('T')[0])
         .order('sale_date', { ascending: true });
@@ -190,6 +208,7 @@ export function useHistoricalSales(days: number = 30) {
           outlet:outlets(*),
           sku:skus(*)
         `)
+        .eq('organization_id', orgId)
         .gte('sale_date', ly2Start.toISOString().split('T')[0])
         .lte('sale_date', ly2End.toISOString().split('T')[0])
         .order('sale_date', { ascending: true });
@@ -201,7 +220,7 @@ export function useHistoricalSales(days: number = 30) {
         twoYearsAgo: ly2Data as HistoricalSale[],
       };
     },
-    enabled: !!user,
+    enabled: !!user && !!orgId,
   });
 }
 
@@ -252,4 +271,5 @@ export function useDashboardData(days: number = 30) {
     },
   };
 }
+
 

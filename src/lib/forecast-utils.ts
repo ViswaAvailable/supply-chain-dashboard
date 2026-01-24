@@ -258,3 +258,4 @@ export function getCategoryColor(categoryName: string): { bg: string; text: stri
   return colors[categoryName] || { bg: 'bg-gray-100', text: 'text-gray-800' };
 }
 
+

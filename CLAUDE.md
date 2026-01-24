@@ -71,8 +71,39 @@ You're building a demand forecasting product for food manufacturing companies. T
 4. **Industry standard** approaches
 
 ### Documentation
-- Technical decisions go in `TECHNICAL.md` (for future developers, not for the founder)
-- Keep this file updated as decisions are made
+
+Keep these files updated as the project evolves:
+
+| File | Purpose | Audience |
+|------|---------|----------|
+| `CLAUDE.md` | Project guide, communication rules, priorities | All collaborators |
+| `TECHNICAL.md` | Web app architecture, database schema, code patterns | Developers |
+| `ML_FORECASTING_PLAN.md` | ML pipeline design, model approach, feature engineering | ML engineers |
+| `FUTURE_FEATURES.md` | Planned features with execution plans | All collaborators |
+
+#### `TECHNICAL.md`
+How the web application works - database schema, data flow, React Query hooks, Supabase integration, and key features implementation.
+
+#### `ML_FORECASTING_PLAN.md`
+The machine learning strategy for demand forecasting:
+- **Architecture**: ETL (18:00) → Supabase → ML Model (21:00) → Forecasts
+- **Model selection**: Test multiple models during customer onboarding, pick best performer
+- **Feature engineering**: Calendar, lag, SKU, outlet, and event features
+- **Event integration**: "Flag" mode trains the model, "Uplift" mode is post-processing
+- **Retraining**: Weekly to incorporate new sales patterns
+
+#### `FUTURE_FEATURES.md`
+Features planned for later development, each with:
+- Description and use cases
+- Step-by-step execution plan
+- Dependencies and estimated effort
+
+Current planned features:
+1. Manual Forecast Trigger (UI button to refresh forecasts)
+2. Add New Product (reference SKU approach)
+3. Cloud Deployment of ML Pipeline
+4. Forecast Accuracy Tracking (replace hardcoded KPI, then full dashboard)
+5. Automated Alerts & Notifications
 
 ---
 
@@ -280,7 +311,25 @@ The engineer has access to specialized tools that help ensure accuracy and consi
 3. Prefer solutions that match the project's actual schema and auth configuration
 4. Never guess table or column names when MCP tools can list them
 
+### Chrome Extension (/chrome)
+
+**When to Use:**
+- Testing the web app in a real browser to verify features work correctly
+- Checking visual appearance, layout, and responsiveness
+- Verifying user interactions (clicks, form submissions, navigation)
+- Capturing screenshots to document progress or issues
+- Any situation where you need to see what the user would see
+
+**Rules:**
+1. Use `/chrome` proactively when testing new features or fixes
+2. Verify the app works as expected before reporting progress to the founder
+3. Use it to catch visual issues that code review alone might miss
+
 ### Context7 MCP Tool
+
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
 
 **When to Use:**
 - Fixing bugs or errors in application code
