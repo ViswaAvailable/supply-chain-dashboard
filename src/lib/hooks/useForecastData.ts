@@ -185,39 +185,38 @@ export function useHistoricalSales(days: number = 30) {
     queryFn: async () => {
       if (!orgId) throw new Error('Organization ID not found');
 
-      // Fetch last year data
-      const { data: lyData, error: lyError } = await supabase
-        .from('historical_sales')
-        .select(`
-          *,
-          outlet:outlets(*),
-          sku:skus(*)
-        `)
-        .eq('organization_id', orgId)
-        .gte('sale_date', lyStart.toISOString().split('T')[0])
-        .lte('sale_date', lyEnd.toISOString().split('T')[0])
-        .order('sale_date', { ascending: true });
+      // Fetch both years in parallel for faster loading
+      const [lyResult, ly2Result] = await Promise.all([
+        supabase
+          .from('historical_sales')
+          .select(`
+            *,
+            outlet:outlets(*),
+            sku:skus(*)
+          `)
+          .eq('organization_id', orgId)
+          .gte('sale_date', lyStart.toISOString().split('T')[0])
+          .lte('sale_date', lyEnd.toISOString().split('T')[0])
+          .order('sale_date', { ascending: true }),
+        supabase
+          .from('historical_sales')
+          .select(`
+            *,
+            outlet:outlets(*),
+            sku:skus(*)
+          `)
+          .eq('organization_id', orgId)
+          .gte('sale_date', ly2Start.toISOString().split('T')[0])
+          .lte('sale_date', ly2End.toISOString().split('T')[0])
+          .order('sale_date', { ascending: true }),
+      ]);
 
-      if (lyError) throw lyError;
-
-      // Fetch 2 years ago data
-      const { data: ly2Data, error: ly2Error } = await supabase
-        .from('historical_sales')
-        .select(`
-          *,
-          outlet:outlets(*),
-          sku:skus(*)
-        `)
-        .eq('organization_id', orgId)
-        .gte('sale_date', ly2Start.toISOString().split('T')[0])
-        .lte('sale_date', ly2End.toISOString().split('T')[0])
-        .order('sale_date', { ascending: true });
-
-      if (ly2Error) throw ly2Error;
+      if (lyResult.error) throw lyResult.error;
+      if (ly2Result.error) throw ly2Result.error;
 
       return {
-        lastYear: lyData as HistoricalSale[],
-        twoYearsAgo: ly2Data as HistoricalSale[],
+        lastYear: lyResult.data as HistoricalSale[],
+        twoYearsAgo: ly2Result.data as HistoricalSale[],
       };
     },
     enabled: !!user && !!orgId,
