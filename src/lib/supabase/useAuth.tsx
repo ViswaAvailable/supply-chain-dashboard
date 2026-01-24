@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useContext, createContext } from 'react';
+import { useState, useEffect, useContext, createContext, useCallback } from 'react';
 import { useSupabase } from '@/components/SupabaseProvider';
 import type { User } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
@@ -21,40 +21,64 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [orgId, setOrgId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Memoized function to fetch org_id
+  const fetchOrgId = useCallback(async (userId: string) => {
+    try {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('org_id')
+        .eq('id', userId)
+        .single();
+      return userData?.org_id ?? null;
+    } catch {
+      return null;
+    }
+  }, [supabase]);
+
   useEffect(() => {
+    let isMounted = true;
+
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      // Fetch org_id from users table
-      if (session?.user) {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('org_id')
-          .eq('id', session.user.id)
-          .single();
-        setOrgId(userData?.org_id ?? null);
-      } else {
-        setOrgId(null);
+        if (!isMounted) return;
+
+        setUser(session?.user ?? null);
+
+        // Only fetch org_id if user is authenticated
+        if (session?.user) {
+          const orgIdResult = await fetchOrgId(session.user.id);
+          if (isMounted) {
+            setOrgId(orgIdResult);
+          }
+        } else {
+          setOrgId(null);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     };
 
+    // Start session check immediately
     getSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+
         setUser(session?.user ?? null);
 
         // Fetch org_id when auth state changes
         if (session?.user) {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('org_id')
-            .eq('id', session.user.id)
-            .single();
-          setOrgId(userData?.org_id ?? null);
+          const orgIdResult = await fetchOrgId(session.user.id);
+          if (isMounted) {
+            setOrgId(orgIdResult);
+          }
         } else {
           setOrgId(null);
         }
@@ -64,9 +88,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     return () => {
+      isMounted = false;
       authListener.subscription.unsubscribe();
     };
-  }, [supabase, supabase.auth]);
+  }, [supabase, supabase.auth, fetchOrgId]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
