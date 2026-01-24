@@ -294,6 +294,14 @@ Proactively notify users about important forecast-related events via email or in
 
 **Status**: Planned (after Phase 1 & 2 complete)
 
+**Current Security Status** (as of Phase 1 & 2 completion):
+- ✅ RLS enabled on all 9 tables with organization isolation
+- ✅ Server-side auth via Next.js middleware for `/dashboard/*`
+- ✅ Input validation with Zod schemas on all mutations
+- ✅ Ownership checks (organization_id) on all queries and mutations
+- ✅ Rate limiting infrastructure ready (requires Upstash Redis setup)
+- ⚠️ Rate limiting inactive until Upstash configured
+
 **Description**:
 Medium priority security enhancements to further harden the application for enterprise deployment.
 
@@ -305,6 +313,8 @@ Medium priority security enhancements to further harden the application for ente
 5. **Comprehensive audit logging** - Track all data mutations with audit trail
 6. **Error message sanitization** - Remove information leakage from error responses
 7. **Security headers** - Add CSP, X-Frame-Options, HSTS, etc.
+8. **CSRF protection** - Add cross-site request forgery tokens for state-changing operations
+9. **Login rate limiting** - Add rate limiting to login flow (requires Upstash Redis setup)
 
 **Execution Plan**:
 
@@ -317,6 +327,9 @@ Medium priority security enhancements to further harden the application for ente
 | 5 | Create audit_log table and triggers for events/SKUs/categories | 6 hours |
 | 6 | Sanitize error messages in admin-invite API | 2 hours |
 | 7 | Add security headers in next.config.ts | 1 hour |
+| 8 | Set up Upstash Redis for rate limiting (free tier) | 30 min |
+| 9 | Add rate limiting to login flow | 2 hours |
+| 10 | Implement CSRF protection with edge-csrf | 2 hours |
 
 **Security Headers to Add**:
 ```typescript
@@ -336,8 +349,9 @@ Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'un
 **Dependencies**:
 - Phase 1 and Phase 2 complete
 - Testing environment for verification
+- Upstash account (free tier available)
 
-**Estimated Effort**: 2.5 days
+**Estimated Effort**: 3 days
 
 ---
 
