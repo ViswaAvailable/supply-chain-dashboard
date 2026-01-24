@@ -2,7 +2,8 @@
 
 import { useAuth } from '@/lib/supabase/useAuth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useSupabase } from '@/components/SupabaseProvider';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -11,19 +12,47 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // useAuth already fetches orgId - no need for separate check
-  const { user, orgId, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const supabase = useSupabase();
+  const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
-    // Only redirect if auth is done loading and there's no user
     if (!authLoading && !user) {
       router.push('/login');
+      return;
     }
-  }, [user, authLoading, router]);
 
-  // Show loading state only during initial auth check
-  if (authLoading) {
+    async function checkAccess() {
+      if (!user) return;
+
+      try {
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('org_id')
+          .eq('id', user.id)
+          .single();
+
+        if (error || !userData?.org_id) {
+          setHasAccess(false);
+        } else {
+          setHasAccess(true);
+        }
+      } catch {
+        setHasAccess(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (user) {
+      checkAccess();
+    }
+  }, [user, authLoading, router, supabase]);
+
+  // Show loading state
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
@@ -44,8 +73,8 @@ export default function DashboardLayout({
     return null;
   }
 
-  // User doesn't have organization access (orgId fetched by useAuth in background)
-  if (!orgId) {
+  // User doesn't have organization access
+  if (!hasAccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-mesh p-4">
         <div className="bg-card rounded-2xl shadow-xl p-8 max-w-md text-center animate-scale-in border border-border">

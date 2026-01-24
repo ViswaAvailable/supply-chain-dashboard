@@ -40,9 +40,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const getSession = async () => {
       try {
-        // Add timeout to prevent infinite loading (reduced from 5s to 3s)
+        // Add timeout to prevent infinite loading
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Session check timeout')), 3000)
+          setTimeout(() => reject(new Error('Session check timeout')), 5000)
         );
 
         const sessionPromise = supabase.auth.getSession();
@@ -52,18 +52,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(session?.user ?? null);
 
-        // Fetch org_id if user is authenticated - wait for it since dashboard needs it
+        // Only fetch org_id if user is authenticated - don't block on this
         if (session?.user) {
-          const orgIdResult = await fetchOrgId(session.user.id);
-          if (isMounted) {
-            setOrgId(orgIdResult);
-            setLoading(false);
-          }
+          // Fetch org_id in background, don't block loading
+          fetchOrgId(session.user.id).then(orgIdResult => {
+            if (isMounted) {
+              setOrgId(orgIdResult);
+            }
+          }).catch(() => {
+            // Silently fail - user can still use the app
+            console.warn('Could not fetch org_id');
+          });
         } else {
           setOrgId(null);
-          if (isMounted) {
-            setLoading(false);
-          }
         }
       } catch (error) {
         console.error('Error getting session:', error);
@@ -71,6 +72,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (isMounted) {
           setUser(null);
           setOrgId(null);
+        }
+      } finally {
+        if (isMounted) {
           setLoading(false);
         }
       }
@@ -85,17 +89,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         setUser(session?.user ?? null);
 
-        // Fetch org_id when auth state changes
+        // Fetch org_id when auth state changes - don't block
         if (session?.user) {
-          const orgIdResult = await fetchOrgId(session.user.id);
-          if (isMounted) {
-            setOrgId(orgIdResult);
-            setLoading(false);
-          }
+          fetchOrgId(session.user.id).then(orgIdResult => {
+            if (isMounted) {
+              setOrgId(orgIdResult);
+            }
+          }).catch(() => {
+            console.warn('Could not fetch org_id on auth change');
+          });
         } else {
           setOrgId(null);
-          setLoading(false);
         }
+
+        setLoading(false);
       }
     );
 
