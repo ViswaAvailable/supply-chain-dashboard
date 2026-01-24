@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { z } from 'zod';
+import { invitationRateLimit, checkRateLimit } from '@/lib/rate-limit';
 
 // CORRECTED ZOD SCHEMA: Using a single 'message' property as the error dictates.
 const inviteSchema = z.object({
@@ -37,6 +38,27 @@ export async function POST(req: Request) {
 
     if (user.app_metadata.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden: You must be an admin to invite users.' }, { status: 403 });
+    }
+
+    // Rate limiting: 10 invitations per hour per admin
+    const { success, limit, remaining, reset } = await checkRateLimit(
+      user.id,
+      invitationRateLimit
+    );
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many invitation requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit?.toString() || '',
+            'X-RateLimit-Remaining': remaining?.toString() || '',
+            'X-RateLimit-Reset': reset?.toString() || '',
+            'Retry-After': reset ? Math.ceil((reset - Date.now()) / 1000).toString() : '3600',
+          },
+        }
+      );
     }
 
     const { data: adminProfile, error: profileError } = await supabaseAdmin

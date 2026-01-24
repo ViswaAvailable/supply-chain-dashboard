@@ -290,6 +290,113 @@ Proactively notify users about important forecast-related events via email or in
 
 ---
 
+## 6. Security Enhancement - Phase 3 (Medium Priority)
+
+**Status**: Planned (after Phase 1 & 2 complete)
+
+**Description**:
+Medium priority security enhancements to further harden the application for enterprise deployment.
+
+**Improvements Included**:
+1. **Server-side forecast calculations** - Move forecast adjustments from client to Postgres functions
+2. **Password security configuration** - Enable leaked password protection, reduce OTP expiry
+3. **Foreign key indexes** - Add 10 missing indexes for performance and DoS prevention
+4. **RLS policy consolidation** - Combine duplicate policies for better query performance
+5. **Comprehensive audit logging** - Track all data mutations with audit trail
+6. **Error message sanitization** - Remove information leakage from error responses
+7. **Security headers** - Add CSP, X-Frame-Options, HSTS, etc.
+
+**Execution Plan**:
+
+| Step | Task | Effort |
+|------|------|--------|
+| 1 | Create Postgres function for forecast calculations | 6 hours |
+| 2 | Update Supabase Auth settings (OTP, leaked passwords) | 30 min |
+| 3 | Add 10 foreign key indexes | 1 hour |
+| 4 | Combine duplicate RLS policies (users, cannibalization tables) | 2 hours |
+| 5 | Create audit_log table and triggers for events/SKUs/categories | 6 hours |
+| 6 | Sanitize error messages in admin-invite API | 2 hours |
+| 7 | Add security headers in next.config.ts | 1 hour |
+
+**Security Headers to Add**:
+```typescript
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'
+```
+
+**Database Changes**:
+- Create `audit_log` table with triggers on events, skus, categories tables
+- Create `calculate_final_forecast()` Postgres function
+- Add indexes: idx_cannibalization_source, idx_forecasts_outlet, etc. (10 total)
+- Drop unused index: idx_forecasts_lookup
+
+**Dependencies**:
+- Phase 1 and Phase 2 complete
+- Testing environment for verification
+
+**Estimated Effort**: 2.5 days
+
+---
+
+## 7. Security Enhancement - Phase 4 (Low Priority)
+
+**Status**: Planned (nice-to-have improvements)
+
+**Description**:
+Final polish and security best practices for production readiness.
+
+**Improvements Included**:
+1. **Drop unused indexes** - Clean up idx_forecasts_lookup
+2. **Password complexity requirements** - Enforce 12+ chars, uppercase, numbers, symbols
+3. **Request ID tracking** - Generate unique IDs for all API requests for log correlation
+4. **Penetration testing** - Professional security audit
+
+**Execution Plan**:
+
+| Step | Task | Effort |
+|------|------|--------|
+| 1 | Drop unused index from forecasts table | 15 min |
+| 2 | Add password complexity validation to onboard page | 1 hour |
+| 3 | Add request ID middleware for all API routes | 1 hour |
+| 4 | Conduct penetration testing and security review | 1 day |
+
+**Password Complexity Schema**:
+```typescript
+z.string()
+  .min(12)
+  .regex(/[A-Z]/, "Must contain uppercase")
+  .regex(/[a-z]/, "Must contain lowercase")
+  .regex(/[0-9]/, "Must contain number")
+  .regex(/[^A-Za-z0-9]/, "Must contain special character")
+```
+
+**Request ID Implementation**:
+- Add UUID generation in middleware.ts
+- Include X-Request-ID header in all responses
+- Log request IDs in all API operations
+- Correlate logs across services
+
+**Security Review Checklist**:
+- [ ] Multi-tenant isolation verified
+- [ ] Authentication bypass attempts blocked
+- [ ] Rate limiting tested
+- [ ] Input validation comprehensive
+- [ ] SQL injection attempts fail
+- [ ] XSS attempts sanitized
+- [ ] CSRF protection working
+- [ ] Security headers present
+
+**Dependencies**:
+- All previous phases complete
+- Production-like test environment
+
+**Estimated Effort**: 1.5 days
+
+---
+
 ## Backlog (Ideas for Later)
 
 These are not yet planned but may be valuable:
