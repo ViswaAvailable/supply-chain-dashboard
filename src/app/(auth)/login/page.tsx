@@ -19,13 +19,16 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+
     if (error) {
+      setLoading(false);
       setError(error.message);
     } else {
-      router.push("/dashboard");
+      // Keep loading state true while navigating - page will unmount
       router.refresh();
+      router.push("/dashboard");
     }
   };
 
