@@ -4,7 +4,6 @@ import { useAuth } from '@/lib/supabase/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSupabase } from '@/components/SupabaseProvider';
-import { Header } from '@/components/dashboard/Header';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -36,7 +35,6 @@ export default function DashboardLayout({
           .single();
 
         if (error || !userData?.org_id) {
-          // User doesn't have an organization yet
           setHasAccess(false);
         } else {
           setHasAccess(true);
@@ -56,10 +54,15 @@ export default function DashboardLayout({
   // Show loading state
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--charcoal-900)] flex items-center justify-center shadow-xl">
+              <div className="w-8 h-8 border-3 border-[var(--lemon-500)] border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div className="absolute -inset-2 bg-[var(--lemon-500)]/10 rounded-3xl blur-xl animate-pulse-subtle" />
+          </div>
+          <p className="text-muted-foreground text-sm font-medium">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -73,14 +76,19 @@ export default function DashboardLayout({
   // User doesn't have organization access
   if (!hasAccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="bg-card rounded-xl shadow-lg p-8 max-w-md text-center">
-          <h1 className="text-2xl font-bold mb-4 text-foreground">
-            Waiting for Admin Approval
+      <div className="min-h-screen flex items-center justify-center bg-gradient-mesh p-4">
+        <div className="bg-card rounded-2xl shadow-xl p-8 max-w-md text-center animate-scale-in border border-border">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--lemon-100)] flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-[var(--lemon-600)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold mb-3 text-foreground">
+            Waiting for Access
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground leading-relaxed">
             Your account has been created but is not yet linked to an organization.
-            Please wait for your organization admin to assign you or contact support.
+            Please wait for your admin to assign you access.
           </p>
         </div>
       </div>
@@ -88,17 +96,21 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-gradient-mesh">
+      {/* Top Accent Line */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[var(--lemon-500)] via-[var(--lemon-400)] to-[var(--lemon-500)] z-[60]" />
+
+      {/* Floating Sidebar */}
       <Sidebar />
-      <main className="ml-64 pt-16 min-h-screen">
-        <div className="p-6">
+
+      {/* Main Content Area */}
+      <main className="ml-[calc(256px+32px)] min-h-screen pt-6 pr-6 pb-6">
+        <div className="animate-slide-up">
           {children}
         </div>
       </main>
+
       <Toaster position="bottom-right" richColors />
     </div>
   );
 }
-
-
