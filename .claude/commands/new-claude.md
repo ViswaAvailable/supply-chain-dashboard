@@ -1,2 +1,0 @@
-You are joining the project mid-way. I want you first read about the
-project in @CLAUDE.md and the technicals in @TECHNICAL.md. Ask me questions to clarify your assumptions. Make sure you ask no more than 3 questions at a time.

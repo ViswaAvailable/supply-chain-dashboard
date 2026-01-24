@@ -171,6 +171,19 @@ Apply these automatically without discussion:
 - Keep branches focused on a single feature or fix
 - Merge to main only after changes are tested and verified
 
+### Files to NEVER Commit (Local Development Only)
+These files are for local development tools and may contain secrets or API tokens:
+- `.mcp.json` - MCP server configuration (contains API tokens)
+- `.claude/` - Claude Code local settings, commands, and skills
+- `.cursor/` - Cursor IDE configuration
+- `.agents/` - Local agent configurations
+
+These are already in `.gitignore`. If you accidentally stage them, run:
+```bash
+git rm --cached .mcp.json
+git rm --cached -r .claude/ .cursor/ .agents/
+```
+
 ---
 
 ## Section 6: Quality Assurance
