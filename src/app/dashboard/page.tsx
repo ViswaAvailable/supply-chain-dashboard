@@ -4,12 +4,11 @@ import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { KPICard } from '@/components/dashboard/KPICard';
+import { SimpleKPICard } from '@/components/dashboard/KPICard';
 import { ForecastChart, EventLegend } from '@/components/dashboard/ForecastChart';
 import { useDashboardData } from '@/lib/hooks/useForecastData';
 import { formatINR, formatPercentage, calculatePercentageChange } from '@/lib/forecast-utils';
-import { RefreshCw, Search, X } from 'lucide-react';
+import { RefreshCw, Search, X, TrendingUp, BarChart3, Calendar, Package, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -32,17 +31,17 @@ export default function DemandForecastPage() {
   const [skuFilter, setSkuFilter] = useState<string>('all');
   const [skuSearchOpen, setSkuSearchOpen] = useState(false);
 
-  const { 
-    outlets, 
-    categories, 
-    skus, 
-    events, 
-    forecasts, 
-    historicalLY, 
+  const {
+    outlets,
+    categories,
+    skus,
+    events,
+    forecasts,
+    historicalLY,
     historicalLY2,
-    isLoading, 
+    isLoading,
     error,
-    refetch 
+    refetch
   } = useDashboardData(dateRange);
 
   // Filter forecasts based on selections
@@ -85,29 +84,22 @@ export default function DemandForecastPage() {
 
   // Calculate KPIs
   const kpis = useMemo(() => {
-    // Total forecasted revenue
     const forecastedRevenue = filteredForecasts.reduce((sum, f) => {
       const sku = skus.find(s => s.id === f.sku_id);
       return sum + (f.forecast_value * (sku?.price_per_unit || 0));
     }, 0);
 
-    // Last year revenue
     const lyRevenue = filteredLY.reduce((sum, h) => sum + (h.revenue || 0), 0);
-    
-    // 2 years ago revenue
     const ly2Revenue = filteredLY2.reduce((sum, h) => sum + (h.revenue || 0), 0);
 
-    // Revenue changes
     const revenueVsLY = calculatePercentageChange(forecastedRevenue, lyRevenue);
     const revenueVsLY2 = calculatePercentageChange(forecastedRevenue, ly2Revenue);
 
-    // Count min quantity overrides
     const minQtyOverrides = filteredForecasts.filter(f => {
       const sku = skus.find(s => s.id === f.sku_id);
       return sku && f.forecast_value <= sku.min_quantity && sku.min_quantity > 0;
     }).length;
 
-    // Forecast accuracy (simulated - in production this would compare to actuals)
     const forecastAccuracy = 92.4;
 
     return {
@@ -126,9 +118,9 @@ export default function DemandForecastPage() {
     endDate.setDate(endDate.getDate() + dateRange);
     const endDateStr = endDate.toISOString().split('T')[0];
 
-    return events.filter(e => 
-      e.enabled && 
-      e.start_date <= endDateStr && 
+    return events.filter(e =>
+      e.enabled &&
+      e.start_date <= endDateStr &&
       e.end_date >= today
     ).length;
   }, [events, dateRange]);
@@ -136,9 +128,14 @@ export default function DemandForecastPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-accent border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground">Loading forecast data...</p>
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--charcoal-900)] flex items-center justify-center shadow-xl">
+              <div className="w-8 h-8 border-3 border-[var(--lemon-500)] border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div className="absolute -inset-2 bg-[var(--lemon-500)]/10 rounded-3xl blur-xl animate-pulse-subtle" />
+          </div>
+          <p className="text-muted-foreground text-sm font-medium">Loading forecast data...</p>
         </div>
       </div>
     );
@@ -147,8 +144,11 @@ export default function DemandForecastPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-center">
-          <p className="text-destructive mb-4">Failed to load forecast data</p>
+        <div className="text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+            <X className="w-8 h-8 text-destructive" />
+          </div>
+          <p className="text-destructive font-medium mb-4">Failed to load forecast data</p>
           <Button onClick={() => refetch()} variant="outline">
             <RefreshCw className="h-4 w-4 mr-2" />
             Try Again
@@ -161,50 +161,56 @@ export default function DemandForecastPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between opacity-0 animate-slide-up">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Demand Forecast</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold text-foreground tracking-tight font-[family-name:var(--font-display)]">
+            Demand Forecast
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1.5">
             ML-powered demand predictions with event-aware intelligence
           </p>
         </div>
-        <Button onClick={() => refetch()} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
+        <Button onClick={() => refetch()} variant="outline" size="sm" className="gap-2">
+          <RefreshCw className="h-4 w-4" />
           Refresh
         </Button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
+      {/* KPI Cards - Horizontal Strip */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 opacity-0 animate-slide-up stagger-1">
+        <SimpleKPICard
           label="Forecast Accuracy"
           value={`${kpis.forecastAccuracy}%`}
+          icon={Target}
           change={{
             value: '+2.1%',
             type: 'up',
             label: 'vs last month',
           }}
         />
-        <KPICard
+        <SimpleKPICard
           label="Forecasted Revenue"
           value={formatINR(kpis.forecastedRevenue)}
+          icon={TrendingUp}
           change={{
             value: formatPercentage(kpis.revenueVsLY),
             type: kpis.revenueVsLY >= 0 ? 'up' : 'down',
             label: 'vs LY',
           }}
         />
-        <KPICard
+        <SimpleKPICard
           label="Active Events"
           value={activeEventsCount.toString()}
+          icon={Calendar}
           change={activeEventsCount > 0 ? {
             value: 'Affecting forecasts',
             type: 'neutral',
           } : undefined}
         />
-        <KPICard
+        <SimpleKPICard
           label="Min Qty Overrides"
           value={kpis.minQtyOverrides.toString()}
+          icon={Package}
           change={kpis.minQtyOverrides > 0 ? {
             value: 'Applied',
             type: 'warning',
@@ -212,14 +218,14 @@ export default function DemandForecastPage() {
         />
       </div>
 
-      {/* Filters */}
-      <Card>
+      {/* Filters & Chart */}
+      <Card className="opacity-0 animate-slide-up stagger-2">
         <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-semibold">Forecast Overview</CardTitle>
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <CardTitle className="text-xl font-semibold">Forecast Overview</CardTitle>
+            <div className="flex flex-wrap items-center gap-3">
               <Select value={dateRange.toString()} onValueChange={(v) => setDateRange(parseInt(v))}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[130px]">
                   <SelectValue placeholder="Date Range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -232,7 +238,7 @@ export default function DemandForecastPage() {
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -246,7 +252,7 @@ export default function DemandForecastPage() {
               </Select>
 
               <Select value={outletFilter} onValueChange={setOutletFilter}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="All Outlets" />
                 </SelectTrigger>
                 <SelectContent>
@@ -266,11 +272,13 @@ export default function DemandForecastPage() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={skuSearchOpen}
-                    className="w-[200px] justify-between"
+                    className="w-[180px] justify-between"
                   >
-                    {skuFilter !== 'all'
-                      ? skus.find((s) => s.id === skuFilter)?.name
-                      : 'All SKUs'}
+                    <span className="truncate">
+                      {skuFilter !== 'all'
+                        ? skus.find((s) => s.id === skuFilter)?.name
+                        : 'All SKUs'}
+                    </span>
                     <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -308,24 +316,39 @@ export default function DemandForecastPage() {
               </Popover>
             </div>
           </div>
-          
+
           {/* Active filter badges */}
           {(categoryFilter !== 'all' || outletFilter !== 'all' || skuFilter !== 'all') && (
-            <div className="flex items-center gap-2 mt-3">
-              <span className="text-sm text-muted-foreground">Filters:</span>
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border/50">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Filters:</span>
               {categoryFilter !== 'all' && (
-                <Badge variant="secondary" className="cursor-pointer" onClick={() => setCategoryFilter('all')}>
-                  {categories.find(c => c.id === categoryFilter)?.name} ×
+                <Badge
+                  variant="accent"
+                  className="cursor-pointer gap-1.5 hover:bg-[var(--lemon-200)]"
+                  onClick={() => setCategoryFilter('all')}
+                >
+                  {categories.find(c => c.id === categoryFilter)?.name}
+                  <X className="h-3 w-3" />
                 </Badge>
               )}
               {outletFilter !== 'all' && (
-                <Badge variant="secondary" className="cursor-pointer" onClick={() => setOutletFilter('all')}>
-                  {outlets.find(o => o.id === outletFilter)?.name} ×
+                <Badge
+                  variant="accent"
+                  className="cursor-pointer gap-1.5 hover:bg-[var(--lemon-200)]"
+                  onClick={() => setOutletFilter('all')}
+                >
+                  {outlets.find(o => o.id === outletFilter)?.name}
+                  <X className="h-3 w-3" />
                 </Badge>
               )}
               {skuFilter !== 'all' && (
-                <Badge variant="secondary" className="cursor-pointer" onClick={() => setSkuFilter('all')}>
-                  {skus.find(s => s.id === skuFilter)?.name} ×
+                <Badge
+                  variant="accent"
+                  className="cursor-pointer gap-1.5 hover:bg-[var(--lemon-200)]"
+                  onClick={() => setSkuFilter('all')}
+                >
+                  {skus.find(s => s.id === skuFilter)?.name}
+                  <X className="h-3 w-3" />
                 </Badge>
               )}
             </div>
@@ -341,47 +364,74 @@ export default function DemandForecastPage() {
             skus={skus}
             dateRange={dateRange}
           />
-          
-          {/* Event Legend - only shows events active in the date range */}
+
+          {/* Event Legend */}
           <EventLegend events={events} dateRange={dateRange} />
         </CardContent>
       </Card>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 opacity-0 animate-slide-up stagger-3">
         <Card>
-          <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Total Units Forecasted</h3>
-            <p className="text-2xl font-bold">
-              {filteredForecasts.reduce((sum, f) => sum + f.forecast_value, 0).toLocaleString('en-IN')}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Across {new Set(filteredForecasts.map(f => f.sku_id)).size} products
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                  Total Units Forecasted
+                </p>
+                <p className="text-3xl font-bold font-mono tabular-nums">
+                  {filteredForecasts.reduce((sum, f) => sum + f.forecast_value, 0).toLocaleString('en-IN')}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Across {new Set(filteredForecasts.map(f => f.sku_id)).size} products
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-[var(--charcoal-100)] flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-[var(--charcoal-600)]" />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">vs Last Year</h3>
-            <p className={`text-2xl font-bold ${kpis.revenueVsLY >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatPercentage(kpis.revenueVsLY)}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Revenue growth trend
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                  vs Last Year
+                </p>
+                <p className={`text-3xl font-bold font-mono tabular-nums ${kpis.revenueVsLY >= 0 ? 'text-[var(--success)]' : 'text-destructive'}`}>
+                  {formatPercentage(kpis.revenueVsLY)}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Revenue growth trend
+                </p>
+              </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${kpis.revenueVsLY >= 0 ? 'bg-[var(--success)]/10' : 'bg-destructive/10'}`}>
+                <TrendingUp className={`h-5 w-5 ${kpis.revenueVsLY >= 0 ? 'text-[var(--success)]' : 'text-destructive'}`} />
+              </div>
+            </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-5">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">vs 2 Years Ago</h3>
-            <p className={`text-2xl font-bold ${kpis.revenueVsLY2 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatPercentage(kpis.revenueVsLY2)}
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Long-term growth
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                  vs 2 Years Ago
+                </p>
+                <p className={`text-3xl font-bold font-mono tabular-nums ${kpis.revenueVsLY2 >= 0 ? 'text-[var(--success)]' : 'text-destructive'}`}>
+                  {formatPercentage(kpis.revenueVsLY2)}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Long-term growth
+                </p>
+              </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${kpis.revenueVsLY2 >= 0 ? 'bg-[var(--success)]/10' : 'bg-destructive/10'}`}>
+                <TrendingUp className={`h-5 w-5 ${kpis.revenueVsLY2 >= 0 ? 'text-[var(--success)]' : 'text-destructive'}`} />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
