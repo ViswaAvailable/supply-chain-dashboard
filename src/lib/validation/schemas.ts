@@ -53,7 +53,16 @@ export const skuUpdateSchema = z.object({
     .min(0, 'Minimum quantity cannot be negative')
     .max(1000000, 'Minimum quantity cannot exceed 1,000,000')
     .optional(),
-  category_id: z.string().uuid('Invalid category ID').nullable().optional(),
+  category_id: z.string()
+    .optional()
+    .nullable()
+    .refine((val) => {
+      // Allow empty string, null, undefined, or valid UUID
+      if (val === '' || val === null || val === undefined) return true;
+      // Check UUID format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(val);
+    }, 'Invalid category ID'),
   name: z.string()
     .min(1, 'SKU name is required')
     .max(200, 'SKU name must be 200 characters or less')

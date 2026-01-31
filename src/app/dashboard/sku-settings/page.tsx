@@ -45,7 +45,7 @@ export default function SKUSettingsPage() {
   // ============================================
   
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, orgId } = useAuth();
   const supabase = useSupabase();
   
   // State hooks
@@ -194,8 +194,8 @@ export default function SKUSettingsPage() {
   // CONDITIONAL RETURNS (after all hooks)
   // ============================================
 
-  // Show loading while checking access
-  if (isAdmin === null) {
+  // Show loading while checking access or waiting for organization context
+  if (isAdmin === null || !orgId) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
