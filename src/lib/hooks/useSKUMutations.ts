@@ -56,15 +56,10 @@ export function useBulkUpdateSKUs() {
   return useMutation({
     mutationFn: async (updates: Array<{ id: string; data: Partial<SKU> }>) => {
       if (!orgId) throw new Error('Organization ID not found');
-
-      // Validate bulk update data
-      const validationResult = bulkSKUUpdateSchema.safeParse(updates);
-      if (!validationResult.success) {
-        throw new Error(`Validation failed: ${JSON.stringify(validationResult.error.format())}`);
-      }
+      if (!updates.length) throw new Error('No updates provided');
 
       const results = await Promise.all(
-        validationResult.data.map(async ({ id, data }) => {
+        updates.map(async ({ id, data }) => {
           const updateData: Record<string, unknown> = {};
 
           if (data.min_quantity !== undefined) updateData.min_quantity = data.min_quantity;
