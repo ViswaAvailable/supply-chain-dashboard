@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Session } from "@supabase/supabase-js";
+import { usePasswordValidation } from "@/lib/hooks/usePasswordValidation";
+import { PasswordRequirements } from "@/components/ui/password-requirements";
+import { passwordWithConfirmSchema, validateSchemaClient } from "@/lib/validation/schemas";
 
 export default function OnboardPage() {
   const supabase = createClientComponentClient();
@@ -59,23 +62,21 @@ export default function OnboardPage() {
   }, [supabase]);
 
 
+  const { results } = usePasswordValidation(password);
+
   const handleOnboard = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
     setMessage(null);
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      setIsSubmitting(false);
+    const validation = validateSchemaClient(passwordWithConfirmSchema, { password, confirmPassword });
+    if (!validation.success) {
+      const msg = validation.errors.password?.[0] ?? validation.errors.confirmPassword?.[0] ?? 'Password does not meet requirements';
+      setError(msg);
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
-      setIsSubmitting(false);
-      return;
-    }
+    setIsSubmitting(true);
 
     const { error } = await supabase.auth.updateUser({
       password: password,
@@ -132,6 +133,7 @@ export default function OnboardPage() {
             required
             style={{ width: "100%", padding: "8px" }}
           />
+          <PasswordRequirements password={password} results={results} />
         </div>
         <div style={{ marginBottom: "15px" }}>
           <label htmlFor="confirmPassword">Confirm Password</label>

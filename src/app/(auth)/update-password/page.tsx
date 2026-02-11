@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useSupabase } from "@/components/SupabaseProvider";
 import { useAuth } from "@/lib/supabase/useAuth";
 import { Lock, AlertCircle, CheckCircle2, Shield } from "lucide-react";
+import { usePasswordValidation } from "@/lib/hooks/usePasswordValidation";
+import { PasswordRequirements } from "@/components/ui/password-requirements";
+import { passwordWithConfirmSchema, validateSchemaClient } from "@/lib/validation/schemas";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
@@ -17,19 +20,25 @@ export default function UpdatePasswordPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { results } = usePasswordValidation(password);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    setError(null);
+    setSuccess(null);
+
+    const validation = validateSchemaClient(passwordWithConfirmSchema, { password, confirmPassword });
+    if (!validation.success) {
+      const msg = validation.errors.password?.[0] ?? validation.errors.confirmPassword?.[0] ?? 'Password does not meet requirements';
+      setError(msg);
       return;
     }
+
     if (!user) {
       setError("No session found. Please log in again.");
       return;
     }
     setLoading(true);
-    setError(null);
-    setSuccess(null);
 
     const { error } = await supabase.auth.updateUser({ password });
 
@@ -111,6 +120,7 @@ export default function UpdatePasswordPage() {
               className="w-full pl-10 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-lg text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent transition-all"
             />
           </div>
+          <PasswordRequirements password={password} results={results} />
         </div>
 
         {/* Confirm Password field */}
@@ -132,9 +142,6 @@ export default function UpdatePasswordPage() {
               className="w-full pl-10 pr-4 py-3 bg-white border border-[#e2e8f0] rounded-lg text-[#1e293b] placeholder:text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-[#fbbf24] focus:border-transparent transition-all"
             />
           </div>
-          <p className="mt-2 text-xs text-[#94a3b8]">
-            Must be at least 8 characters
-          </p>
         </div>
 
         {/* Submit button */}
