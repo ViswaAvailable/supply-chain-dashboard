@@ -4,6 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSupabase } from "@/components/SupabaseProvider";
 import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
+import { usePasswordValidation } from "@/lib/hooks/usePasswordValidation";
+import { PasswordRequirements } from "@/components/ui/password-requirements";
+import { passwordSchema, validateSchemaClient } from "@/lib/validation/schemas";
 
 export default function SignupPage() {
   const supabase = useSupabase();
@@ -14,10 +17,19 @@ export default function SignupPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const { results } = usePasswordValidation(password);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    const validation = validateSchemaClient(passwordSchema, { password });
+    if (!validation.success) {
+      setError(validation.errors.password?.[0] ?? 'Password does not meet requirements');
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase.auth.signUp({ email, password });
@@ -108,9 +120,7 @@ export default function SignupPage() {
               autoComplete="new-password"
             />
           </div>
-          <p className="mt-2 text-xs text-[#94a3b8]">
-            Must be at least 8 characters
-          </p>
+          <PasswordRequirements password={password} results={results} />
         </div>
 
         {/* Submit button */}

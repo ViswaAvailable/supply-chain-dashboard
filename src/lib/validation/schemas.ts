@@ -135,3 +135,48 @@ export function validateSchemaClient<T>(
 
   return { success: true, data: result.data };
 }
+
+/**
+ * Password validation rules
+ * Used by PasswordRequirements UI and Zod schemas
+ */
+export const PASSWORD_RULES = [
+  { key: 'minLength', label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
+  { key: 'uppercase', label: 'At least 1 uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
+  { key: 'lowercase', label: 'At least 1 lowercase letter', test: (pw: string) => /[a-z]/.test(pw) },
+  { key: 'number', label: 'At least 1 number', test: (pw: string) => /[0-9]/.test(pw) },
+  { key: 'special', label: 'At least 1 special character', test: (pw: string) => /[!@#$%^&*()_+\-=\[\]{}|;:',.<>?/]/.test(pw) },
+  { key: 'noRepeat', label: 'No more than 3 consecutive identical characters', test: (pw: string) => !/(.)\1{3,}/.test(pw) },
+] as const;
+
+/**
+ * Password schema — single password field
+ * Used by the sign-up page
+ */
+export const passwordSchema = z.object({
+  password: z.string().superRefine((pw, ctx) => {
+    for (const rule of PASSWORD_RULES) {
+      if (!rule.test(pw)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: rule.label });
+      }
+    }
+  }),
+});
+
+/**
+ * Password with confirmation schema
+ * Used by update-password and onboard pages
+ */
+export const passwordWithConfirmSchema = z.object({
+  password: z.string().superRefine((pw, ctx) => {
+    for (const rule of PASSWORD_RULES) {
+      if (!rule.test(pw)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: rule.label });
+      }
+    }
+  }),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
