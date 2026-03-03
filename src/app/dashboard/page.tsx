@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { getNextTrivia, type Trivia } from '@/lib/supply-chain-trivia';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +8,7 @@ import { SimpleKPICard } from '@/components/dashboard/KPICard';
 import { ForecastChart, EventLegend } from '@/components/dashboard/ForecastChart';
 import { useDashboardData } from '@/lib/hooks/useForecastData';
 import { formatINR, formatPercentage, calculatePercentageChange } from '@/lib/forecast-utils';
+import { TriviaLoader } from '@/components/dashboard/TriviaLoader';
 import { RefreshCw, Search, X, TrendingUp, BarChart3, Calendar, Package, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +27,6 @@ import {
 
 export default function DemandForecastPage() {
   const [dateRange, setDateRange] = useState<number>(30);
-  const [trivia] = useState<Trivia>(() => getNextTrivia());
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [outletFilter, setOutletFilter] = useState<string>('all');
   const [skuFilter, setSkuFilter] = useState<string>('all');
@@ -128,34 +127,7 @@ export default function DemandForecastPage() {
   }, [events, dateRange]);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-6 animate-fade-in max-w-sm w-full px-6">
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-2xl bg-[var(--charcoal-900)] flex items-center justify-center shadow-xl">
-                <div className="w-8 h-8 border-3 border-[var(--lemon-500)] border-t-transparent rounded-full animate-spin" />
-              </div>
-              <div className="absolute -inset-2 bg-[var(--lemon-500)]/10 rounded-3xl blur-xl animate-pulse-subtle" />
-            </div>
-            <p className="text-muted-foreground text-sm font-medium">Loading forecast data...</p>
-          </div>
-          <div className="w-full rounded-2xl overflow-hidden border border-[var(--lemon-500)]/20 bg-[var(--charcoal-900)]/70 backdrop-blur-sm">
-            <div className="h-[3px] bg-gradient-to-r from-[var(--lemon-500)]/0 via-[var(--lemon-500)] to-[var(--lemon-500)]/0" />
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-[var(--charcoal-500)] uppercase tracking-[0.15em]">Did you know?</span>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--lemon-500)]/10 border border-[var(--lemon-500)]/20">
-                  <span className="text-xs leading-none">{trivia.emoji}</span>
-                  <span className="text-[10px] font-semibold text-[var(--lemon-500)] uppercase tracking-wider">{trivia.category}</span>
-                </div>
-              </div>
-              <p className="text-foreground/80 text-sm leading-relaxed">{trivia.fact}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <TriviaLoader variant="inline" message="Loading forecast data..." />;
   }
 
   if (error) {
