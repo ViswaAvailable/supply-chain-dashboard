@@ -48,7 +48,7 @@ export default function UpdatePasswordPage() {
     } else {
       setSuccess("Your password has been updated successfully!");
       setTimeout(() => {
-        router.push("/login");
+        router.push("/dashboard");
       }, 2000);
     }
   };
