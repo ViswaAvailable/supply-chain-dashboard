@@ -353,6 +353,26 @@
   }
 }
 
+@keyframes bounce-sequence {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
 @keyframes line-draw {
   from {
     stroke-dashoffset: 1000;
@@ -432,6 +452,14 @@
 
   .animate-float {
     animation: float 6s infinite var(--ease-smooth);
+  }
+
+  .animate-bounce-sequence {
+    animation: bounce-sequence 1.4s infinite var(--ease-smooth);
+  }
+
+  .animate-progress-indeterminate {
+    animation: progress-indeterminate 1.5s infinite var(--ease-smooth);
   }
 
   .animate-gradient {
