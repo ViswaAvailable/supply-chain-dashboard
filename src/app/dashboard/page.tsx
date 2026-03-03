@@ -140,12 +140,18 @@ export default function DemandForecastPage() {
             </div>
             <p className="text-muted-foreground text-sm font-medium">Loading forecast data...</p>
           </div>
-          <div className="w-full bg-[var(--charcoal-900)]/60 border border-[var(--lemon-500)]/20 rounded-2xl p-5 backdrop-blur-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-base leading-none">{trivia.emoji}</span>
-              <span className="text-xs font-semibold text-[var(--lemon-500)] uppercase tracking-wider">{trivia.category}</span>
+          <div className="w-full rounded-2xl overflow-hidden border border-[var(--lemon-500)]/20 bg-[var(--charcoal-900)]/70 backdrop-blur-sm">
+            <div className="h-[3px] bg-gradient-to-r from-[var(--lemon-500)]/0 via-[var(--lemon-500)] to-[var(--lemon-500)]/0" />
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-bold text-[var(--charcoal-500)] uppercase tracking-[0.15em]">Did you know?</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--lemon-500)]/10 border border-[var(--lemon-500)]/20">
+                  <span className="text-xs leading-none">{trivia.emoji}</span>
+                  <span className="text-[10px] font-semibold text-[var(--lemon-500)] uppercase tracking-wider">{trivia.category}</span>
+                </div>
+              </div>
+              <p className="text-foreground/80 text-sm leading-relaxed">{trivia.fact}</p>
             </div>
-            <p className="text-foreground/80 text-sm leading-relaxed">{trivia.fact}</p>
           </div>
         </div>
       </div>
