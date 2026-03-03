@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Redirect based on verification type
-  if (type === 'recovery') {
+  if (type === 'recovery' || type === 'invite') {
     return NextResponse.redirect(`${baseUrl}/update-password`)
   }
 
