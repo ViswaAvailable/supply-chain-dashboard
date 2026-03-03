@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { getNextTrivia, type Trivia } from '@/lib/supply-chain-trivia';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ import {
 
 export default function DemandForecastPage() {
   const [dateRange, setDateRange] = useState<number>(30);
+  const [trivia] = useState<Trivia>(() => getNextTrivia());
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [outletFilter, setOutletFilter] = useState<string>('all');
   const [skuFilter, setSkuFilter] = useState<string>('all');
@@ -128,14 +130,23 @@ export default function DemandForecastPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-[var(--charcoal-900)] flex items-center justify-center shadow-xl">
-              <div className="w-8 h-8 border-3 border-[var(--lemon-500)] border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center gap-6 animate-fade-in max-w-sm w-full px-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--charcoal-900)] flex items-center justify-center shadow-xl">
+                <div className="w-8 h-8 border-3 border-[var(--lemon-500)] border-t-transparent rounded-full animate-spin" />
+              </div>
+              <div className="absolute -inset-2 bg-[var(--lemon-500)]/10 rounded-3xl blur-xl animate-pulse-subtle" />
             </div>
-            <div className="absolute -inset-2 bg-[var(--lemon-500)]/10 rounded-3xl blur-xl animate-pulse-subtle" />
+            <p className="text-muted-foreground text-sm font-medium">Loading forecast data...</p>
           </div>
-          <p className="text-muted-foreground text-sm font-medium">Loading forecast data...</p>
+          <div className="w-full bg-[var(--charcoal-900)]/60 border border-[var(--lemon-500)]/20 rounded-2xl p-5 backdrop-blur-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-base leading-none">{trivia.emoji}</span>
+              <span className="text-xs font-semibold text-[var(--lemon-500)] uppercase tracking-wider">{trivia.category}</span>
+            </div>
+            <p className="text-foreground/80 text-sm leading-relaxed">{trivia.fact}</p>
+          </div>
         </div>
       </div>
     );
