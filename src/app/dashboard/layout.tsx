@@ -71,13 +71,13 @@ export default function DashboardLayout({
             <div className="h-[3px] bg-gradient-to-r from-[var(--lemon-500)]/0 via-[var(--lemon-500)] to-[var(--lemon-500)]/0" />
             <div className="p-5">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-[var(--charcoal-500)] uppercase tracking-[0.15em]">Did you know?</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.15em]">Did you know?</span>
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--lemon-500)]/10 border border-[var(--lemon-500)]/20">
                   <span className="text-xs leading-none">{trivia.emoji}</span>
                   <span className="text-[10px] font-semibold text-[var(--lemon-500)] uppercase tracking-wider">{trivia.category}</span>
                 </div>
               </div>
-              <p className="text-foreground/80 text-sm leading-relaxed">{trivia.fact}</p>
+              <p className="text-white/80 text-sm leading-relaxed">{trivia.fact}</p>
             </div>
           </div>
         </div>
